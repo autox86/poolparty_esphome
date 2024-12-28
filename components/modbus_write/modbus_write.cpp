@@ -1,20 +1,26 @@
-// modbus_write.h
+// modbus_write.cpp
 
-#ifndef MODBUS_WRITE_H
-#define MODBUS_WRITE_H
+#include "modbus_write.h"
+#include "modbus_controller.h"
+#include "esphome/log.h"
 
-#include "esphome.h"
+namespace esphome {
+namespace modbus_write {
 
-class ModbusWriteComponent : public Component, public UARTDevice {
-public:
-  ModbusWriteComponent(UARTComponent *parent) : UARTDevice(parent) {}
+static const char *TAG = "modbus_write";
 
-  // Function to write a value to a Modbus register
-  void write_register(uint8_t slave_id, uint16_t reg_address, uint16_t value);
+void ModbusWrite::setup() {
+  ESP_LOGCONFIG(TAG, "Setting up Modbus write to register %d with value %d", reg_address_, value_);
+}
 
-private:
-  // CRC16 Calculation
-  uint16_t calculate_crc16(uint8_t *data, uint16_t length);
-};
+void ModbusWrite::write_register() {
+  ESP_LOGD(TAG, "Writing value %d to register %d on Modbus slave %d", value_, reg_address_, slave_id_);
+  if (modbus_controller_ != nullptr) {
+    modbus_controller_->write_register(slave_id_, reg_address_, value_);
+  } else {
+    ESP_LOGE(TAG, "Modbus controller not initialized!");
+  }
+}
 
-#endif // MODBUS_WRITE_H
+}  // namespace modbus_write
+}  // namespace esphome
