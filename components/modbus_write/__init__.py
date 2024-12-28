@@ -3,6 +3,10 @@ from esphome import esphomeyaml
 from esphome.core import Component
 from esphome.components import uart
 
+#manually
+import esphome.codegen as cg
+import esphome.config_validation as cv
+
 # Import your component-specific classes or functions
 # (Make sure this matches the actual code you have for Modbus)
 from esphome.components.modbus import ModbusRTU
