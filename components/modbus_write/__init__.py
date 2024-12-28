@@ -1,35 +1,28 @@
 # __init__.py for modbus_write component
-from esphome import esphomeyaml
-from esphome.core import Component
-from esphome.components import uart
 
-#manually
-#import esphome.codegen as cg
-#import esphome.config_validation as cv
+import esphome.codegen as cg
+import esphome.config_validation as cv
+from esphome.components import modbus
+from esphome.const import CONF_ID, CONF_REGISTER, CONF_VALUE
 
-# Import your component-specific classes or functions
-# (Make sure this matches the actual code you have for Modbus)
-from esphome.components.modbus import ModbusRTU
+# Define the unique component ID
+CONF_MODBUS_WRITE = "modbus_write"
 
-# Define the setup of your component
-def setup_modbus_write_component(config):
-    """
-    Configure and set up the modbus_write component.
-    """
-    # Ensure that UART and Modbus are set up
-    uart_config = uart.UARTComponent(config.get('uart'), config)
-    modbus_component = ModbusRTU(config)
-    return modbus_component
+# Create the configuration schema
+modbus_write_schema = cv.Schema({
+    cv.Required(CONF_ID): cv.declare_id(modbus.ModbusController),
+    cv.Required(CONF_REGISTER): cv.uint16_t,  # register address should be 16-bit
+    cv.Required(CONF_VALUE): cv.uint16_t,  # value to write
+}).extend(cv.COMPONENT_SCHEMA)
 
-# Validate configuration for your modbus_write component
-def validate_modbus_write_config(config):
-    """
-    Validate the configuration for modbus_write.
-    """
-    if not config.get('uart'):
-        raise esphomeyaml.InvalidConfigurationError('UART configuration is required for Modbus write.')
+# Register the component and validate it
+def setup_modbus_write(config):
+    modbus_write = cg.new_component(config)
+    modbus_write.id = config[CONF_ID]
+    modbus_write.register = config[CONF_REGISTER]
+    modbus_write.value = config[CONF_VALUE]
+    return modbus_write
 
-    return config
-
-# Register the component with ESPHome
-esphomeyaml.register_component('modbus_write', setup_modbus_write_component, validate_modbus_write_config)
+# Define the component for ESPHome
+def validate_modbus_write(config):
+    return modbus_write_schema(config)
