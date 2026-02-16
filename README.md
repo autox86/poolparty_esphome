@@ -4,6 +4,8 @@ Dieses Projekt ist der Versuch, eine vollautomatische Poolsteuerung auf Basis vo
 
 Der Controller ist so „codiert“, dass er **völlig autark** und unabhängig von einer Hausautomation (z.B. Home Assistant) funktioniert.
 
+---
+
 📑 ### Detaillierte Informationen
 
 Detaillierte Informationen sind unter folgenden Links zu finden:
