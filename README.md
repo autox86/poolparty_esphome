@@ -8,12 +8,12 @@ Der Controller ist so „codiert“, dass er **völlig autark** und unabhängig 
 
 Detaillierte Informationen sind unter folgenden Links zu finden:
 
-* **Hardware (BOM und Bilder)**
+* **[Die Hardware](https://github.com/autox86/poolparty_esphome/blob/main/hardware/readme.md)**
   * Beschaltungsplan
   * DIY Aufbau
 
 
-* **Die Software**
+* **[Die Software](https://github.com/autox86/poolparty_esphome/blob/main/software/readme.md)**
   * Ablaufplan
   * Sensoren
   * Sicherheitsfunktionen
@@ -21,7 +21,7 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
   * Webserver UI
 
 
-* **Handbücher der Komponenten**
+* **[Handbücher der Komponenten](https://github.com/autox86/poolparty_esphome/blob/main/manuals/readme.md)**
 
 ---
 
