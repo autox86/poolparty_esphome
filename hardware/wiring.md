@@ -1,5 +1,5 @@
 # Der Aufbau
-Frei nach dem Familienmotto: "Nicht schön, aber selten!"
+Frei nach dem Familienmotto: **"Nicht schön, aber selten!"**
 
 Auch wenn das optische Kabelmanagement vielleicht noch Spielraum für Perfektion lässt, wurde bei der technischen Umsetzung höchste Sorgfalt auf Sicherheit und Funktionalität gelegt. Das Ziel war ein stabiler, ordentlicher Aufbau, der im Alltag hält, was er verspricht.
 
