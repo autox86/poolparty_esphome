@@ -11,6 +11,7 @@ Der Controller ist so „codiert“, dass er **völlig autark** und unabhängig 
 Detaillierte Informationen sind unter folgenden Links zu finden:
 
 * **[Die Hardware](https://github.com/autox86/poolparty_esphome/blob/main/hardware/readme.md)**
+  * [BOM (Bill of Material)](https://github.com/autox86/poolparty_esphome/blob/main/hardware/bom.md)
   * Beschaltungsplan
   * DIY Aufbau
 
