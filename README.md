@@ -1,10 +1,12 @@
 # 💐Danksagung
-Vielen Dank an Udo für seinen stetigen Support, insbesondere dann wenn es etwas schwieriger wurde, ein guter Lehrmeister der es versteht die Menschen zur "Selbsthilfe" zu erziehen!
+Vielen Dank an **Udo** für seinen stetigen Support, insbesondere dann wenn es etwas schwieriger wurde, ein guter Lehrmeister der es versteht die Menschen zur "Selbsthilfe" zu erziehen!
 
-Vielen Dank auch an xxx, sein Code diente als Startpunkt für die Codierung des Pojekts
+Vielen Dank an xxx, sein Code diente als Startpunkt für die Codierung des Pojekts und war wahrlich eine Inspiration!
 
-Many thanks to @hostcc for his dynamic on time component, which made my life such easy to use the controller even without HA
+Many thanks to **@hostcc** for his dynamic on time component, which made my life such easy to use the controller even without HA
 [esphome-component-dynamic-on-time](https://github.com/hostcc/esphome-component-dynamic-on-time)
+
+Vielen Dank auch an die Macher von ChatGPT und Gemini, ohne die KIs wäre es nie zu einer solchen Software gekommen.
 
 ---
 
