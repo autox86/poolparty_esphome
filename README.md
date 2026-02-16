@@ -25,8 +25,7 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
 
 * **[Die Hardware](https://github.com/autox86/poolparty_esphome/blob/main/hardware/readme.md)**
   * [BOM (Bill of Material)](https://github.com/autox86/poolparty_esphome/blob/main/hardware/bom.md)
-  * Beschaltungsplan
-  * DIY Aufbau
+  * [Anschlussplan, Eklärung und schematischer Aufbau](https://github.com/autox86/poolparty_esphome/blob/main/hardware/wiring.md)
 
 
 * **[Die Software](https://github.com/autox86/poolparty_esphome/blob/main/software/readme.md)**
