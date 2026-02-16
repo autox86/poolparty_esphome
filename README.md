@@ -127,7 +127,7 @@ Ein Projekt wie dieses entsteht selten im Alleingang. Mein besonderer Dank gilt:
 
 # 🚨 Disclaimer & Rechtliche Hinweise
 
-### ⚠️ Wichtige Warnung vorab
+### ⚠️ Wichtige Warnung
 
 Dies ist ein privates **Bastelprojekt (Do-It-Yourself)**. Die Arbeit mit elektrischen Komponenten, Wasser und chemischen Prozessen (Salzelektrolyse) birgt erhebliche Risiken.
 
