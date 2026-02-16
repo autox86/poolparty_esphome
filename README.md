@@ -1,15 +1,52 @@
-# 🏊 Pool-Steuerung ESPHome (VFD, Tuya, Modbus)
+# 🏊 DIY Pool-Steuerung mit ESPHome
 
-Dieses Repository enthält die Konfiguration für eine intelligente Pool-Steuerung basierend auf ESPHome. Es steuert einen Frequenzumrichter (FU), überwacht Wasserwerte via Tuya und misst den Durchfluss sowie den Energieverbrauch.
+Dieses Projekt ist der Versuch, eine vollautomatische Poolsteuerung auf Basis von **ESPHome** zu erstellen.
 
-## 🛠 Features & Komponenten
+Der Controller ist so „codiert“, dass er **völlig autark** und unabhängig von einer Hausautomation (z.B. Home Assistant) funktioniert.
 
-| Komponente | Funktion | Protokoll/Anschluss |
-| :--- | :--- | :--- |
-| **VFD (Mr. WU)** | Steuerung der Poolpumpe (Frequenz/Modus) | Modbus RS485 |
-| **Tuya W2839** | Messung von pH, ORP und Temperatur | Tuya Serial |
-| **PZEM-017** | Überwachung der Salzelektrolyse (DC) | Modbus RS485 |
-| **YF-DN40 / S201** | Durchflussmessung Hauptstrom & Messzelle | Pulse Counter (GPIO) |
+### Detaillierte Informationen
+
+Detaillierte Informationen sind unter folgenden Links zu finden:
+
+* **Hardware (BOM und Bilder)**
+  * Beschaltungsplan
+  * DIY Aufbau
+
+
+* **Die Software**
+  * Ablaufplan
+  * Sensoren
+  * Sicherheitsfunktionen
+  * Betriebsmodi
+  * Webserver UI
+
+
+* **Handbücher der Komponenten**
+
+---
+
+## 🏛️ Highlevel Aufbau
+
+<img width="1458" height="874" alt="image" src="https://github.com/user-attachments/assets/df9cd9b8-b4b7-45e0-bbb4-2964d131ecc5" />
+
+
+---
+
+## 🛠 Komponenten
+
+| Komponente | Modell | Funktion | Protokoll/Anschluss |
+| --- | --- | --- | --- |
+| **Frequenzumrichter** | CNWeiken WK600D – 0022 – M1T | Steuerung der Poolpumpe (Frequenz) | Modbus RS485 |
+| **Messgerät ORP/PH** | Tuya W2839 Watercontroller | Messung von pH, ORP und Temperatur | UART Serial (RX/TX) |
+| **Energiemesser (DC)** | PEACEFAIR PZEM-017 | Überwachung der Salzelektrolyse (DC), Erkennung von Low Salt | Modbus RS485 |
+| **Durchflussmesser** | YF-DN40 / S201 | Durchflussmessung Hauptstrom & Messzelle | Pulse Counter (GPIO) |
+| **H-Brücke** | Display3000 D-PHB02-Opto | Professionelle H-Brücke zum Schalten und Umpolen der Salzelektrolyse | Output (GPIO 3,3V) |
+| **Relais** | Eltako Relais (1 oder 2 Kanal) | Zum Schutz des Controllers werden Dauerströme über Eltako geschaltet | Stromstoß (200-250ms) |
+| **Salzelektrolysezelle** | Zodiac LM2-40 | Salzelektrolysezelle für 40g/h | 24V Gleichstrom |
+| **Netzteil 24V 10A** | Meanwell NDR – 240-24 | Spannungversorgung für Salzelektrolyse und Energiemesser | 230V In / 24V Out |
+| **PH Pumpe** | *XxX* | Pumpe für PH Minus | 230V Relaisausgang |
+| **Poolcontroller (ESP32)** | Rocketcontroller Astra (inkl. RS485) | Steuereinheit aller Funktionen | 230V |
+| **Wärmepumpe** | Sunrain BYC035 TE3 | 3 Phasen 35KW Wärmepumpe | Modbus RS485 |
 
 ---
 
@@ -17,42 +54,52 @@ Dieses Repository enthält die Konfiguration für eine intelligente Pool-Steueru
 
 Die Steuerung verfügt über vordefinierte Modi, die sowohl die Frequenz als auch die Sicherheitsfreigaben für Chemie steuern:
 
-* **35% Stromsparen:** Niedriger Durchfluss, Chemie aktiv.
-* **57% - 100% Badebetrieb:** Erhöhter Durchfluss für optimale Filterung.
+* **55% Stromsparen:** Niedriger Durchfluss, Chemie aktiv.
+* **70% / 85% / 100% Badebetrieb:** Erhöhter Durchfluss für optimale Filterung.
 * **0% Wartung:** Alles AUS, Skripte gestoppt, Dosierung gesperrt.
-* **35% Winterbetrieb:** Frostschutzlauf, Chemie & Tuya-Sensoren deaktiviert.
+* **55% Winterbetrieb:** Frostschutzlauf, Chemie & Tuya-Sensoren deaktiviert.
 
 ---
 
 ## 🛡 Sicherheitslogik (Interlocks)
 
 Die Dosierung (pH / Chlor) ist softwareseitig mehrfach abgesichert:
-1.  **Pumpen-Check:** Nur wenn `poolpump_ok` wahr ist.
-2.  **Durchfluss-Check:** Validierung über die Flow-Sensoren.
-3.  **Watchdog:** Tuya-Werte werden nur akzeptiert, wenn sie ungleich 0 und keine NaNs sind.
 
-> [!IMPORTANT]
-> Ein pH-Wert unter 1.0 oder ein "eingefrorener" Tuya-Wert führt zum sofortigen Stopp der Dosierung via Watchdog-Timer.
+* **Pumpen-Check:** Grundvoraussetzung ist ein Status-Check des Frequenzumrichters und (wenn installiert) ein Durchflusscheck.
+* **Watchdog:** Wir verlassen uns nicht auf angenommene Zustände, sondern validieren diese kontinuierlich.
 
 ---
 
-## 📊 Sensor-Übersicht (Auszug)
+## 📊 Übersicht: Sensor- und Schaltmöglichkeiten
 
-### Modbus Register (Inverter)
-- **0x1001**: Aktuelle Frequenz ($Hz$)
-- **0x1007**: Drehzahl ($U/min$)
-- **0x2000**: Start/Stop Kommando
-
-### Chemische Werte
-- **pH-Wert:** Datapoint 106 (0.01 Multiplikator)
-- **ORP:** Datapoint 131 ($mV$)
-- **Temperatur:** Datapoint 8 ($°C$)
+* Frequenzsteuerung (Modbus Register)
+* Energiemesser (Modbus Register)
+* Chemische Werte (Tuya W2839)
+* Salzelektrolyse (Zodiac LM2-40) – Ansteuerung über H-Brücke
+* Durchflusssensoren für Pumpe und Messzelle (YF-DN40 / S201)
+* Temperaturmessung (DS18B20 OneWire)
+* PH-Dosierpumpe (230V Relais)
+* Schalter für Wartungsmodus
+* Taster für PH Tank Reset (nach Auffüllen)
 
 ---
 
 ## 🚀 Installation
 
-1. Erstelle eine neue Datei `pool_control.yaml` in deinem ESPHome Verzeichnis.
+1. Erstelle eine neue Datei `poolcontroller.yaml` in deinem ESPHome Verzeichnis.
 2. Kopiere den Code aus der Config-Datei hinein.
-3. Passe die Substitutions (`friendly_name`, `yfdn40`, etc.) an deine Hardware an.
-4. Flashe den ESP32/ESP8266.
+3. Passe die **Substitutions** an deine Wünsche an.
+*(Tipp: Siehe [ESPHome Secrets Guide](https://esphome.io/guides/yaml/#secrets-and-the-secretsyaml-file))*
+```yaml
+substitutions:
+  device_name: "poolcontroller"
+  friendly_name: "Pool"
+  friendly_name_entity: "#"
+  domain: !secret domain
+  ssid1_ap: !secret wifi_ssid
+  ssid1_pw: !secret wifi_pass
+
+```
+
+
+4. Flashe den ESP32 (OTA, ESPHome Web Flasher etc.).
