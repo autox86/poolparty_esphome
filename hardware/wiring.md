@@ -10,7 +10,8 @@ Hier ein Blick auf das Versuchsobjekt im Testlabor...
 
 # Die DC Seite: Schematisch
 Damit der Funke (nur metaphorisch!) überspringt, habe ich hier einen ordentlichen Schaltplan der Gleichstromseite erstellt. Ideal für alle, die das Projekt als Inspiration für den eigenen Nachbau nutzen möchten:
-<img width="945" height="442" alt="image" src="https://github.com/user-attachments/assets/9c85b5f7-a7cd-44f1-a138-901f11073fa0" />
+<img width="2735" height="1236" alt="image" src="https://github.com/user-attachments/assets/5ac1774b-f7ce-49ba-85b2-b7f4231be52f" />
+
 
 ---
 
