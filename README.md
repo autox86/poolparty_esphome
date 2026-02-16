@@ -10,8 +10,24 @@ Ein Projekt wie dieses entsteht selten im Alleingang. Mein besonderer Dank gilt:
 **OpenAI (ChatGPT) & Google (Gemini)**: Ein großes Dankeschön an die Entwickler dieser KIs. Ohne diese Unterstützung wäre die Software in dieser Form nie entstanden. 🤖
 
 ---
+Hier ist ein Entwurf für deinen Disclaimer, der sowohl rechtlich klar als auch optisch ansprechend formatiert ist. Ich habe den Tonfall etwas seriöser gestaltet, ohne den DIY-Charakter zu verlieren.
 
-# 🏊 DIY Pool-Steuerung mit ESPHome
+---
+
+# 🚨 Disclaimer & Rechtliche Hinweise
+
+### ⚠️ Wichtige Warnung vorab
+
+Dies ist ein privates **Bastelprojekt (Do-It-Yourself)**. Die Arbeit mit elektrischen Komponenten, Wasser und chemischen Prozessen (Salzelektrolyse) birgt erhebliche Risiken.
+
+* **Eigenverantwortung:** Jeder Nutzer handelt auf eigenes Risiko. Du bist selbst für die Sicherheit deiner Installation, deiner Geräte sowie für den Schutz deiner Mitmenschen verantwortlich.
+* **Haftungsausschluss:** Im Falle von Sachschäden, Fehlfunktionen oder Personenschäden übernehme ich keinerlei Haftung oder Verantwortung.
+* **Fachpersonal:** Insbesondere Arbeiten an der **AC-Seite (230V)** müssen zwingend durch eine qualifizierte Elektrofachkraft durchgeführt oder zumindest abgenommen werden.
+
+---
+
+
+# 🏊 Pool-Steuerung mit ESPHome (DIY)
 
 Dieses Projekt ist der Versuch, eine vollautomatische Poolsteuerung auf Basis von **ESPHome** zu erstellen.
 
