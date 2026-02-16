@@ -99,6 +99,10 @@ Der Anschluss ist systematisch aufgebaut:
 * **Steuereingang (A1):** Hier geht der geschaltete 230V-Impuls vom Astra-Controller ein.
 * **Neutralleiter-Referenz (A2):** Damit das Relais den Schaltimpuls verarbeiten kann, wird der Anschluss A2 mit dem **Neutralleiter (N)** verbunden.
 
+In unserem Poolcontroller Projekt sieht das wie folgt aus:
+<img width="957" height="714" alt="image" src="https://github.com/user-attachments/assets/ff53cc85-02e7-470b-b7a0-b6f16f1fe7af" />
+
+
 ---
 
 
