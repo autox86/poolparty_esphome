@@ -6,7 +6,7 @@ Der Controller ist so „codiert“, dass er **völlig autark** und unabhängig 
 
 ---
 
-📑 ### Detaillierte Informationen
+### 📑Detaillierte Informationen
 
 Detaillierte Informationen sind unter folgenden Links zu finden:
 
