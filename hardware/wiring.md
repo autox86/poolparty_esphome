@@ -12,9 +12,6 @@ Hier ein Blick auf das Versuchsobjekt im Testlabor...
 Damit der Funke (nur metaphorisch!) überspringt, habe ich hier einen ordentlichen Schaltplan der Gleichstromseite erstellt. Ideal für alle, die das Projekt als Inspiration für den eigenen Nachbau nutzen möchten:
 <img width="945" height="442" alt="image" src="https://github.com/user-attachments/assets/9c85b5f7-a7cd-44f1-a138-901f11073fa0" />
 
-
-Hier ist eine strukturierte und professionell formulierte Fassung für dein GitHub-Repository. Ich habe die Erklärungen präziser gestaltet und die FAQ-Sektion in ein modernes Design gebracht.
-
 ---
 
 ## Technische Funktionsweise & Logik
