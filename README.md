@@ -1,3 +1,13 @@
+# 💐Danksagung
+Vielen Dank an Udo für seinen stetigen Support, insbesondere dann wenn es etwas schwieriger wurde, ein guter Lehrmeister der es versteht die Menschen zur "Selbsthilfe" zu erziehen!
+
+Vielen Dank auch an xxx, sein Code diente als Startpunkt für die Codierung des Pojekts
+
+Many thanks to @hostcc for his dynamic on time component, which made my life such easy to use the controller even without HA
+[esphome-component-dynamic-on-time](https://github.com/hostcc/esphome-component-dynamic-on-time)
+
+---
+
 # 🏊 DIY Pool-Steuerung mit ESPHome
 
 Dieses Projekt ist der Versuch, eine vollautomatische Poolsteuerung auf Basis von **ESPHome** zu erstellen.
