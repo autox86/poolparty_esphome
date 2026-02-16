@@ -1,30 +1,3 @@
-# 🙏 Danksagung / Credits 
-Ein Projekt wie dieses entsteht selten im Alleingang. Mein besonderer Dank gilt:
-
-**Udo:** Für seinen stetigen Support, besonders in den schwierigen Phasen. Ein wahrer Lehrmeister, der Hilfe zur Selbsthilfe perfekt beherrscht! 🎓
-
-**xxx:** Dein Code war das Fundament und die Inspiration für die gesamte Software-Entwicklung dieses Projekts. 🚀
-
-**@hostcc:** Many thanks for the [esphome-component-dynamic-on-time](https://github.com/hostcc/esphome-component-dynamic-on-time). This dynamic time component made it incredibly easy to use the controller even without Home Assistant! ⏱️
-
-**OpenAI (ChatGPT) & Google (Gemini)**: Ein großes Dankeschön an die Entwickler dieser KIs. Ohne diese Unterstützung wäre die Software in dieser Form nie entstanden. 🤖
-
-
----
-
-# 🚨 Disclaimer & Rechtliche Hinweise
-
-### ⚠️ Wichtige Warnung vorab
-
-Dies ist ein privates **Bastelprojekt (Do-It-Yourself)**. Die Arbeit mit elektrischen Komponenten, Wasser und chemischen Prozessen (Salzelektrolyse) birgt erhebliche Risiken.
-
-* **Eigenverantwortung:** Jeder Nutzer handelt auf eigenes Risiko. Du bist selbst für die Sicherheit deiner Installation, deiner Geräte sowie für den Schutz deiner Mitmenschen verantwortlich.
-* **Haftungsausschluss:** Im Falle von Sachschäden, Fehlfunktionen oder Personenschäden übernehme ich keinerlei Haftung oder Verantwortung.
-* **Fachpersonal:** Insbesondere Arbeiten an der **AC-Seite (230V)** müssen zwingend durch eine qualifizierte Elektrofachkraft durchgeführt oder zumindest abgenommen werden.
-
----
-
-
 # 🏊 Pool-Steuerung mit ESPHome (DIY)
 
 Dieses Projekt ist der Versuch, eine vollautomatische Poolsteuerung auf Basis von **ESPHome** zu erstellen.
@@ -134,3 +107,35 @@ substitutions:
 
 
 4. Flashe den ESP32 (OTA, ESPHome Web Flasher etc.).
+
+
+---
+
+# 🙏 Danksagung / Credits 
+Ein Projekt wie dieses entsteht selten im Alleingang. Mein besonderer Dank gilt:
+
+**Udo:** Für seinen stetigen Support, besonders in den schwierigen Phasen. Ein wahrer Lehrmeister, der Hilfe zur Selbsthilfe perfekt beherrscht! 🎓
+
+**xxx:** Dein Code war das Fundament und die Inspiration für die gesamte Software-Entwicklung dieses Projekts. 🚀
+
+**@hostcc:** Many thanks for the [esphome-component-dynamic-on-time](https://github.com/hostcc/esphome-component-dynamic-on-time). This dynamic time component made it incredibly easy to use the controller even without Home Assistant! ⏱️
+
+**OpenAI (ChatGPT) & Google (Gemini)**: Ein großes Dankeschön an die Entwickler dieser KIs. Ohne diese Unterstützung wäre die Software in dieser Form nie entstanden. 🤖
+
+
+---
+
+# 🚨 Disclaimer & Rechtliche Hinweise
+
+### ⚠️ Wichtige Warnung vorab
+
+Dies ist ein privates **Bastelprojekt (Do-It-Yourself)**. Die Arbeit mit elektrischen Komponenten, Wasser und chemischen Prozessen (Salzelektrolyse) birgt erhebliche Risiken.
+
+* **Eigenverantwortung:** Jeder Nutzer handelt auf eigenes Risiko. Du bist selbst für die Sicherheit deiner Installation, deiner Geräte sowie für den Schutz deiner Mitmenschen verantwortlich.
+* **Haftungsausschluss:** Im Falle von Sachschäden, Fehlfunktionen oder Personenschäden übernehme ich keinerlei Haftung oder Verantwortung.
+* **Fachpersonal:** Insbesondere Arbeiten an der **AC-Seite (230V)** müssen zwingend durch eine qualifizierte Elektrofachkraft durchgeführt oder zumindest abgenommen werden.
+
+
+
+
+
