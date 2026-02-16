@@ -72,7 +72,15 @@ Um die Suche zu erleichtern, hier die schematischen Darstellungen der wichtigste
 
 
 
-## Das Ergebnis könnte ähnlich dem folgden aussehen (Versuchsaufbau)
+## Das Ergebnis könnte ähnlich dem folgenden aussehen (Versuchsaufbau)
 <img width="630" height="821" alt="image" src="https://github.com/user-attachments/assets/a121115f-3035-4e7e-8d23-be64908cfc82" />
 
+
+<img width="1853" height="792" alt="image" src="https://github.com/user-attachments/assets/4d2828ac-fdbb-402b-bf41-b550a5323d26" />
+
+
+<img width="957" height="714" alt="image" src="https://github.com/user-attachments/assets/67812261-0389-4223-bdd4-9118b8dce020" />
+
+
+<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/11eb7cad-66ba-495e-a75d-59b0945db3a2" />
 
