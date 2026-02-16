@@ -7,7 +7,7 @@ Ein Projekt wie dieses entsteht selten im Alleingang. Mein besonderer Dank gilt:
 
 **@hostcc:** Many thanks for the esphome-component-dynamic-on-time. This dynamic component made it incredibly easy to use the controller even without Home Assistant! ⏱️
 
-OpenAI (ChatGPT) & Google (Gemini): Ein großes Dankeschön an die Entwickler dieser KIs. Ohne diese Unterstützung wäre die Software in dieser Form nie entstanden. 🤖
+**OpenAI (ChatGPT) & Google (Gemini)**: Ein großes Dankeschön an die Entwickler dieser KIs. Ohne diese Unterstützung wäre die Software in dieser Form nie entstanden. 🤖
 
 ---
 
