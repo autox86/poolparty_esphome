@@ -9,8 +9,6 @@ Ein Projekt wie dieses entsteht selten im Alleingang. Mein besonderer Dank gilt:
 
 **OpenAI (ChatGPT) & Google (Gemini)**: Ein großes Dankeschön an die Entwickler dieser KIs. Ohne diese Unterstützung wäre die Software in dieser Form nie entstanden. 🤖
 
----
-Hier ist ein Entwurf für deinen Disclaimer, der sowohl rechtlich klar als auch optisch ansprechend formatiert ist. Ich habe den Tonfall etwas seriöser gestaltet, ohne den DIY-Charakter zu verlieren.
 
 ---
 
