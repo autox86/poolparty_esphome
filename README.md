@@ -1,12 +1,13 @@
-# 💐Danksagung
-Vielen Dank an **Udo** für seinen stetigen Support, insbesondere dann wenn es etwas schwieriger wurde, ein guter Lehrmeister der es versteht die Menschen zur "Selbsthilfe" zu erziehen!
+# 🙏 Danksagung / Credits 
+Ein Projekt wie dieses entsteht selten im Alleingang. Mein besonderer Dank gilt:
 
-Vielen Dank an xxx, sein Code diente als Startpunkt für die Codierung des Pojekts und war wahrlich eine Inspiration!
+**Udo:** Für seinen stetigen Support, besonders in den schwierigen Phasen. Ein wahrer Lehrmeister, der Hilfe zur Selbsthilfe perfekt beherrscht! 🎓
 
-Many thanks to **@hostcc** for his dynamic on time component, which made my life such easy to use the controller even without HA
-[esphome-component-dynamic-on-time](https://github.com/hostcc/esphome-component-dynamic-on-time)
+**xxx:** Dein Code war das Fundament und die Inspiration für die gesamte Software-Entwicklung dieses Projekts. 🚀
 
-Vielen Dank auch an die Macher von ChatGPT und Gemini, ohne die KIs wäre es nie zu einer solchen Software gekommen.
+**@hostcc:** Many thanks for the esphome-component-dynamic-on-time. This dynamic component made it incredibly easy to use the controller even without Home Assistant! ⏱️
+
+OpenAI (ChatGPT) & Google (Gemini): Ein großes Dankeschön an die Entwickler dieser KIs. Ohne diese Unterstützung wäre die Software in dieser Form nie entstanden. 🤖
 
 ---
 
