@@ -69,3 +69,36 @@ Die Überwachung durch den PZEM-017 hat zwei zentrale Aufgaben:
 </details>
 
 ---
+
+Hier ist ein Entwurf für die AC-Seite, der Sicherheitshinweise mit einer klaren technischen Erläuterung kombiniert.
+
+---
+
+## Die AC-Seite: Schematischer Aufbau
+
+> [!CAUTION]
+> **Sicherheitshinweis:** Arbeiten an 230V-Anlagen sind lebensgefährlich und gehören zwingend in die Hände einer **Elektrofachkraft**. Die folgende Darstellung dient ausschließlich der theoretischen Veranschaulichung.
+
+Um den Anschluss der Stromstoßschalter (Eltako-Relais) zu verdeutlichen, betrachten wir das folgende Schema:
+
+<img width="572" height="417" alt="image" src="https://github.com/user-attachments/assets/b96bfc13-4fb0-45fc-a065-7f552a739a19" />
+
+
+### Funktionsweise der Schaltung
+
+In dieser Konfiguration dient der abgebildete Taster als Stellvertreter für das **Relais des Astra-Controllers**. Der Controller gibt einen kurzen Stromstoß-Impuls (ca. **200–250 ms**) ab – ein kurzes „Ein/Aus“ –, um den Schaltzustand des Eltakos zu ändern.
+
+Die Lampe im Schema repräsentiert unsere tatsächliche Last im Projekt: Das **24V-Netzteil** sowie den **Tuya W2839 Watercontroller**.
+
+### Anschlussbelegung des Eltako-Relais
+
+Der Anschluss ist systematisch aufgebaut:
+
+* **Versorgung (L):** Die Phase wird direkt an den Versorgungseingang des Relais sowie an den Taster (Astra-Relais) geführt.
+* **Last-Ausgang:** Vom Schaltausgang des Eltakos führt die Leitung direkt zum Verbraucher (Netzteil/Tuya).
+* **Steuereingang (A1):** Hier geht der geschaltete 230V-Impuls vom Astra-Controller ein.
+* **Neutralleiter-Referenz (A2):** Damit das Relais den Schaltimpuls verarbeiten kann, wird der Anschluss A2 mit dem **Neutralleiter (N)** verbunden.
+
+---
+
+
