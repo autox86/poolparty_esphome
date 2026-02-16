@@ -5,7 +5,7 @@ Ein Projekt wie dieses entsteht selten im Alleingang. Mein besonderer Dank gilt:
 
 **xxx:** Dein Code war das Fundament und die Inspiration für die gesamte Software-Entwicklung dieses Projekts. 🚀
 
-**@hostcc:** Many thanks for the esphome-component-dynamic-on-time. This dynamic component made it incredibly easy to use the controller even without Home Assistant! ⏱️
+**@hostcc:** Many thanks for the [esphome-component-dynamic-on-time](https://github.com/hostcc/esphome-component-dynamic-on-time). This dynamic time component made it incredibly easy to use the controller even without Home Assistant! ⏱️
 
 **OpenAI (ChatGPT) & Google (Gemini)**: Ein großes Dankeschön an die Entwickler dieser KIs. Ohne diese Unterstützung wäre die Software in dieser Form nie entstanden. 🤖
 
