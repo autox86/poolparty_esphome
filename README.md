@@ -58,7 +58,7 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
 
 ## 🏛️ Highlevel Aufbau
 
-<img width="1458" height="874" alt="image" src="https://github.com/user-attachments/assets/df9cd9b8-b4b7-45e0-bbb4-2964d131ecc5" />
+<img width="1760" height="1055" alt="image" src="https://github.com/user-attachments/assets/3dd7aaa5-0d94-4e61-9db2-41e312b8367e" />
 
 
 ---
