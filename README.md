@@ -25,7 +25,9 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
 
 * **[Die Hardware](https://github.com/autox86/poolparty_esphome/blob/main/hardware/readme.md)**
   * [BOM (Bill of Material)](https://github.com/autox86/poolparty_esphome/blob/main/hardware/bom.md)
-  * [Anschlussplan, Eklärung und schematischer Aufbau](https://github.com/autox86/poolparty_esphome/blob/main/hardware/wiring.md)
+  * [Anschlussplan, Eklärung und schematischer Aufbau DC / AC](https://github.com/autox86/poolparty_esphome/blob/main/hardware/wiring.md)
+  * [Vorbereitung des Tuya W2839 & Rocketcontroller Astra](https://github.com/autox86/poolparty_esphome/blob/main/hardware/tuya_rocket_prepare.md)
+  
 
 
 * **[Die Software](https://github.com/autox86/poolparty_esphome/blob/main/software/readme.md)**
