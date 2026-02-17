@@ -6,6 +6,47 @@ Der Controller ist so „codiert“, dass er **völlig autark** und unabhängig 
 
 ---
 
+
+## 🏛️ Highlevel Aufbau
+
+<img width="1760" height="1055" alt="image" src="https://github.com/user-attachments/assets/3dd7aaa5-0d94-4e61-9db2-41e312b8367e" />
+
+
+---
+
+## 📊 Übersicht: Sensor- und Schaltmöglichkeiten
+
+* Frequenzsteuerung (Modbus Register)
+* Energiemesser (Modbus Register)
+* Chemische Werte (Tuya W2839)
+* Salzelektrolyse (Zodiac LM2-40) – Ansteuerung über H-Brücke
+* Durchflusssensoren für Pumpe und Messzelle (YF-DN40 / S201)
+* Temperaturmessung (DS18B20 OneWire)
+* PH-Dosierpumpe (230V Relais)
+* Schalter für Wartungsmodus
+* Taster für PH Tank Reset (nach Auffüllen)
+
+---
+
+## 🛠 Komponenten
+
+| Komponente | Modell | Funktion | Protokoll/Anschluss |
+| --- | --- | --- | --- |
+| **Frequenzumrichter** | CNWeiken WK600D – 0022 – M1T | Steuerung der Poolpumpe (Frequenz) | Modbus RS485 |
+| **Messgerät ORP/PH** | Tuya W2839 Watercontroller | Messung von pH, ORP und Temperatur | UART Serial (RX/TX) |
+| **Energiemesser (DC)** | PEACEFAIR PZEM-017 | Überwachung der Salzelektrolyse (DC), Erkennung von Low Salt | Modbus RS485 |
+| **Durchflussmesser** | YF-DN40 / S201 | Durchflussmessung Hauptstrom & Messzelle | Pulse Counter (GPIO) |
+| **H-Brücke** | Display3000 D-PHB02-Opto | Professionelle H-Brücke zum Schalten und Umpolen der Salzelektrolyse | Output (GPIO 3,3V) |
+| **Relais** | Eltako Relais (1 oder 2 Kanal) | Zum Schutz des Controllers werden Dauerströme über Eltako geschaltet | Stromstoß (200-250ms) |
+| **Salzelektrolysezelle** | Zodiac LM2-40 | Salzelektrolysezelle für 40g/h | 24V Gleichstrom |
+| **Netzteil 24V 10A** | Meanwell NDR – 240-24 | Spannungversorgung für Salzelektrolyse und Energiemesser | 230V In / 24V Out |
+| **PH Pumpe** | *XxX* | Pumpe für PH Minus | 230V Relaisausgang |
+| **Poolcontroller (ESP32)** | Rocketcontroller Astra (inkl. RS485) | Steuereinheit aller Funktionen | 230V |
+| **Wärmepumpe** | Sunrain BYC035 TE3 | 3 Phasen 35KW Wärmepumpe | Modbus RS485 |
+
+---
+
+
 ### 📑Detaillierte Informationen
 
 Detaillierte Informationen sind unter folgenden Links zu finden:
@@ -29,30 +70,8 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
 
 ---
 
-## 🏛️ Highlevel Aufbau
-
-<img width="1760" height="1055" alt="image" src="https://github.com/user-attachments/assets/3dd7aaa5-0d94-4e61-9db2-41e312b8367e" />
 
 
----
-
-## 🛠 Komponenten
-
-| Komponente | Modell | Funktion | Protokoll/Anschluss |
-| --- | --- | --- | --- |
-| **Frequenzumrichter** | CNWeiken WK600D – 0022 – M1T | Steuerung der Poolpumpe (Frequenz) | Modbus RS485 |
-| **Messgerät ORP/PH** | Tuya W2839 Watercontroller | Messung von pH, ORP und Temperatur | UART Serial (RX/TX) |
-| **Energiemesser (DC)** | PEACEFAIR PZEM-017 | Überwachung der Salzelektrolyse (DC), Erkennung von Low Salt | Modbus RS485 |
-| **Durchflussmesser** | YF-DN40 / S201 | Durchflussmessung Hauptstrom & Messzelle | Pulse Counter (GPIO) |
-| **H-Brücke** | Display3000 D-PHB02-Opto | Professionelle H-Brücke zum Schalten und Umpolen der Salzelektrolyse | Output (GPIO 3,3V) |
-| **Relais** | Eltako Relais (1 oder 2 Kanal) | Zum Schutz des Controllers werden Dauerströme über Eltako geschaltet | Stromstoß (200-250ms) |
-| **Salzelektrolysezelle** | Zodiac LM2-40 | Salzelektrolysezelle für 40g/h | 24V Gleichstrom |
-| **Netzteil 24V 10A** | Meanwell NDR – 240-24 | Spannungversorgung für Salzelektrolyse und Energiemesser | 230V In / 24V Out |
-| **PH Pumpe** | *XxX* | Pumpe für PH Minus | 230V Relaisausgang |
-| **Poolcontroller (ESP32)** | Rocketcontroller Astra (inkl. RS485) | Steuereinheit aller Funktionen | 230V |
-| **Wärmepumpe** | Sunrain BYC035 TE3 | 3 Phasen 35KW Wärmepumpe | Modbus RS485 |
-
----
 
 ## ⚙️ Betriebsmodi (Work Modes)
 
@@ -74,19 +93,6 @@ Die Dosierung (pH / Chlor) ist softwareseitig mehrfach abgesichert:
 
 ---
 
-## 📊 Übersicht: Sensor- und Schaltmöglichkeiten
-
-* Frequenzsteuerung (Modbus Register)
-* Energiemesser (Modbus Register)
-* Chemische Werte (Tuya W2839)
-* Salzelektrolyse (Zodiac LM2-40) – Ansteuerung über H-Brücke
-* Durchflusssensoren für Pumpe und Messzelle (YF-DN40 / S201)
-* Temperaturmessung (DS18B20 OneWire)
-* PH-Dosierpumpe (230V Relais)
-* Schalter für Wartungsmodus
-* Taster für PH Tank Reset (nach Auffüllen)
-
----
 
 ## 🚀 Installation
 
