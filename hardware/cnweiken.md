@@ -39,12 +39,12 @@ Für den kombinierten Betrieb (Modbus und Handbetrieb) müssen die folgenden Par
 | **P4-05** | 0 | Eingangsanschluss-Einstellung |
 | **P7-01** | 1 | Anzeige-Parameter |
 | **P0-28** | 0 | Motor-Parameter |
-| **PD-00** | 6005 | Modbus-Adresse |
-| **PD-01** | 0 | Modbus-Kommunikationsformat |
-| **PD-02** | 005 | Modbus-Baudrate |
+| **PD-00** | 6005 | Modbus-Baudrate |
+| **PD-01** | 0 | Modbus-Data-Format |
+| **PD-02** | 005 | Modbus-Local-Adress |
 | **PD-03** | 02 | Modbus-Zeitüberschreitung |
 | **PD-04** | 000 | Modbus-Antwortverzögerung |
-| **PD-05** | 31 | Modbus-Datenformat |
+| **PD-05** | 31 | Modbus-Protokoll-Typ |
 | **P6-00** | 1 | Start/Stopp Control |
 | **P6-01** | 2 | Start/Stopp Control |
 | **P6-03** | 10.00 | Startup Frequency |
