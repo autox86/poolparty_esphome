@@ -63,3 +63,138 @@ Beim Start oder Reboot des ESP:
 
 ### Logik
 Timer ist **nur aktiv**, wenn:
+`Zeitfenster OK
+UND Wochentag erlaubt
+UND Timer nicht deaktiviert`
+
+
+### Besonderheiten
+- Triggert **definierte Scripts**, keine direkten Schaltaktionen
+- Einheitliche Quelle für:
+  - Pumpenlauf
+  - Chlorfreigabe
+  - pH-Freigabe
+
+---
+
+## 🧪 pH-Dosierung
+
+### Funktionen
+- pH-Regelung über:
+  - pH-Istwert
+  - Min / Max Grenzwerte
+- Dosiermenge:
+  - max. pro Zyklus
+  - max. pro Tag
+- Förderleistung parametrierbar (l/h → intern ml/s)
+- Tanküberwachung
+
+### Sicherheitslogik
+- ❌ Keine Dosierung ohne laufende Pumpe
+- ❌ Keine Dosierung bei leerem Tank
+- ❌ Sperre nach Zyklus (Beruhigungsphase)
+- ❌ Tageslimit verhindert Überdosierung
+
+### Besonderheiten
+- Tankgröße **dynamisch änderbar**
+- Tank-Reset physisch **oder** per Web
+- Letzter Zyklus wird geloggt (ml)
+
+---
+
+## ⚡ Chlorinator / ORP-Regelung
+
+### Funktionen
+- ORP-geführte Chlorproduktion
+- Laufzeitberechnung abhängig von:
+  - ORP-Differenz
+  - Poolvolumen
+  - Pumpenleistung
+  - pH-Wert
+  - Wassertemperatur
+- Zyklische Polaritätsumkehr (Zellschutz)
+- Tages- & Zykluslimit
+
+### Sicherheitslogik
+- ❌ Keine Produktion ohne Pumpenvorlauf
+- ❌ Kein Betrieb im Wartungsmodus
+- ❌ Kein Betrieb unter Mindestlaufzeit (~30 min)
+- ❌ Kein Überschreiten des Tageslimits
+- ❌ Sofortiger Stopp bei Fehler / Timer-Ende
+
+### Besonderheiten
+- **Dead-Time (10 s)** vor Einschalten der H-Brücke
+- 24 V Netzteil wird **nur bei Bedarf** aktiviert
+- Laufzeit wird **dynamisch gekürzt**, wenn Tagesbudget fast erreicht
+
+---
+
+## 🔄 Wartungsmodus (Besonderheit)
+
+### Verhalten
+- Sperrt **alle Automatikfunktionen**
+- Verhindert:
+  - Chlorproduktion
+  - pH-Dosierung
+  - Pumpenautomatik
+- Aktivierbar:
+  - physischer Taster
+  - Web / HA
+
+➡️ **Zentraler „Alles sicher“-Modus**
+
+---
+
+## 📡 Online- & Statusüberwachung
+
+### Überwachte Komponenten
+- Frequenzumrichter (Pumpe)
+- Chlorinator-Netzteil (24 V)
+- Tuya-Modul
+- Wärmepumpe
+- PV-Zähler
+
+### Verwendung
+- Statusanzeige im Web / HA
+- Entscheidungsgrundlage für Automatik
+- Anzeige im Status-Script (Debug)
+
+---
+
+## 🧯 Sicherheits- & Failsafe-Mechanismen
+
+- Alle Aktoren:
+  - **ALWAYS_OFF** bei Boot
+- Keine verdeckten Abhängigkeiten
+- Manuelle Schalter sind:
+  - **nicht** für Dauerbetrieb gedacht
+  - zusätzlich abgesichert
+- Emergency-Stop bei:
+  - Pumpenausfall
+  - Timer-Ende
+  - Wartung
+  - Sensor-Fehler
+
+---
+
+## 🧠 Architektur-Highlights
+
+- Klare Trennung:
+  - **Sensorik**
+  - **Entscheidungslogik**
+  - **Aktorsteuerung**
+- State-Machine-ähnliches Verhalten ohne Overengineering
+- Vollständig HA- & Web-konfigurierbar
+- Debug-freundlich (Status-Script, Logs, Textsensoren)
+
+---
+
+## ✅ Zusammenfassung
+
+Dieser Poolcontroller ist:
+
+- 🔒 **Sicher**
+- 🧠 **Intelligent**
+- 🧩 **Modular**
+- 🔧 **Wartbar**
+- 🧪 **Praxisnah**
