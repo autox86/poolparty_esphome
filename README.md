@@ -7,6 +7,30 @@ Der Controller ist so „codiert“, dass er **völlig autark** und unabhängig 
 ---
 
 
+### 📑Detaillierte Informationen
+
+Detaillierte Informationen sind unter folgenden Links zu finden:
+
+* **[Die Hardware](https://github.com/autox86/poolparty_esphome/blob/main/hardware/readme.md)**
+  * [BOM (Bill of Material)](https://github.com/autox86/poolparty_esphome/blob/main/hardware/bom.md)
+  * [Anschlussplan, Eklärung und schematischer Aufbau DC / AC](https://github.com/autox86/poolparty_esphome/blob/main/hardware/wiring.md)
+  * [Vorbereiten des Tuya W2839 & Rocketcontroller Astra](https://github.com/autox86/poolparty_esphome/blob/main/hardware/tuya_rocket_prepare.md)
+  * [Vorbereiten der Frequenzsteuerung CNWeiken WK600](https://github.com/autox86/poolparty_esphome/blob/main/hardware/cnweiken.md)
+
+
+* **[Die Software](https://github.com/autox86/poolparty_esphome/blob/main/software/readme.md)**
+  * Ablaufplan
+  * Sensoren
+  * Sicherheitsfunktionen
+  * Betriebsmodi
+  * Webserver UI
+
+
+* **[Handbücher der Komponenten](https://github.com/autox86/poolparty_esphome/blob/main/manuals/readme.md)**
+
+---
+
+
 ## 🏛️ Highlevel Aufbau
 
 <img width="1760" height="1055" alt="image" src="https://github.com/user-attachments/assets/3dd7aaa5-0d94-4e61-9db2-41e312b8367e" />
@@ -45,33 +69,6 @@ Der Controller ist so „codiert“, dass er **völlig autark** und unabhängig 
 | **Wärmepumpe** | Sunrain BYC035 TE3 | 3 Phasen 35KW Wärmepumpe | Modbus RS485 |
 
 ---
-
-
-### 📑Detaillierte Informationen
-
-Detaillierte Informationen sind unter folgenden Links zu finden:
-
-* **[Die Hardware](https://github.com/autox86/poolparty_esphome/blob/main/hardware/readme.md)**
-  * [BOM (Bill of Material)](https://github.com/autox86/poolparty_esphome/blob/main/hardware/bom.md)
-  * [Anschlussplan, Eklärung und schematischer Aufbau DC / AC](https://github.com/autox86/poolparty_esphome/blob/main/hardware/wiring.md)
-  * [Vorbereiten des Tuya W2839 & Rocketcontroller Astra](https://github.com/autox86/poolparty_esphome/blob/main/hardware/tuya_rocket_prepare.md)
-  * [Vorbereiten der Frequenzsteuerung CNWeiken WK600](https://github.com/autox86/poolparty_esphome/blob/main/hardware/cnweiken.md)
-
-
-* **[Die Software](https://github.com/autox86/poolparty_esphome/blob/main/software/readme.md)**
-  * Ablaufplan
-  * Sensoren
-  * Sicherheitsfunktionen
-  * Betriebsmodi
-  * Webserver UI
-
-
-* **[Handbücher der Komponenten](https://github.com/autox86/poolparty_esphome/blob/main/manuals/readme.md)**
-
----
-
-
-
 
 ## ⚙️ Betriebsmodi (Work Modes)
 
