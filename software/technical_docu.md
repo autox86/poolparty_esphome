@@ -1,4 +1,4 @@
-# 📘 Poolsteuerung – Technische Dokumentation (ESPHome)
+# 📘 Poolsteuerung – Ablauf-Dokumentation (ESPHome)
 
 Diese Dokumentation beschreibt die interne Logik der Poolsteuerung mit Fokus auf  
 **Sicherheit**, **Automatik**, **Dosierung** und **Betriebsmodi**.
