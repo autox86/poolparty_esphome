@@ -21,6 +21,7 @@ Hier sind die Hard-Facts, was das System ständig im Griff haben muss:
 | **Aktor** ⚡ | Salzelektrolyse steuern |
 | **Aktor** 🔄 | Poolpumpe via Frequenzumrichter (FU) regeln |
 | **Aktor** 📱 | Tuya W2829 schalten |
+| **Aktor** 📱 | Wärmepumpe schalten / regeln |
 | **Sensor** 🌊 | Durchfluss im Hauptstrom & in der Messzelle checken |
 | **Sensor** 🧪 | ORP (Redox) & PH-Werte messen |
 | **Sensor** 🌡️ | Temperaturen (Wasser, Raum, Außen) im Blick behalten |
