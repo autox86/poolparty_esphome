@@ -27,11 +27,9 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
 
 
 * **[Die Software](https://github.com/autox86/poolparty_esphome/blob/main/software/readme.md)**
-  * Ablaufplan
-  * Sensoren
-  * Sicherheitsfunktionen
-  * Betriebsmodi
-  * Webserver UI
+  * [Technische Dokumentation](https://github.com/autox86/poolparty_esphome/blob/main/software/technical_docu.md)
+  * Home Assitant Intergration + Dashboard (in Arbeit)
+  
 
 
 * **[Handbücher der Komponenten](https://github.com/autox86/poolparty_esphome/blob/main/manuals/readme.md)**
