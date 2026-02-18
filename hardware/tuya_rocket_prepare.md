@@ -8,7 +8,7 @@ Um das preiswerte Messgerät für ORP und pH mit unserem ESP32 (Astra Controller
 
 Nach genauerer Betrachtung der internen Verarbeitung stufen wir die schaltbaren Steckdosen als potenziell unsicher ein. Daher entfernen wir diese komplett:
 
-* **Kabel trennen:** Schneide das Zuleitungskabel der Steckdosen nah am Gehäuse ab.
+* **Kabel trennen:** Schneide das Zuleitungskabel der Steckdosen nah am Gehäuse der **Steckdosen** ab.
 * **Adern vorbereiten:** Nach dem Abisolieren kommen vier Adern zum Vorschein (Gelb, Grün, Blau, Rot).
 * **Sichern:** Die Adern **Gelb** und **Grün** werden jeweils einzeln mit **Wago-Klemmen (Serie 221)** gesichert.
 * **Konfektionieren:** Die Adern **Rot (Phase)** und **Blau (Neutralleiter)** werden abisoliert und fachgerecht mit **Aderendhülsen (0,50 mm²)** versehen.
