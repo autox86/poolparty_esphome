@@ -3,6 +3,14 @@
 Dieses Projekt ist der Versuch, eine vollautomatische Poolsteuerung auf Basis von **ESPHome** zu erstellen.
 
 Der Controller ist so „codiert“, dass er **völlig autark** und unabhängig von einer Hausautomation (z.B. Home Assistant) funktioniert.
+Dennoch ist eine Integration, insbesondere in HA sehr sinnvoll und auch steuerbar.
+
+Die Steuerung ist weitestgehend "trocken" getestet und ich schließe nicht aus, dass Änderungen beim "realen" Einsatz erforderlich sind.
+
+Für den Nachbau des Projektes ist ein Grundverständnis von Programmierung und Elektrotechnik von Vorteil, es wurde aber bewusst auf "professionelle" Schemas verzichtet damit auch Laien in die Lage versetzt werden die Funktionsweise, Verkabelungen und Logiken zu verstehen.
+
+Die configurations-yaml selbst ist versehen von Kommentaren um eine Art Nachvollziehbarkeit zu ermöglichen.
+
 
 ---
 
