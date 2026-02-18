@@ -189,12 +189,3 @@ UND Timer nicht deaktiviert`
 
 ---
 
-## ✅ Zusammenfassung
-
-Dieser Poolcontroller ist:
-
-- 🔒 **Sicher**
-- 🧠 **Intelligent**
-- 🧩 **Modular**
-- 🔧 **Wartbar**
-- 🧪 **Praxisnah**
