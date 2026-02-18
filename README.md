@@ -11,6 +11,12 @@ Für den Nachbau des Projektes ist ein Grundverständnis von Programmierung und 
 
 Die configurations-yaml selbst ist versehen von Kommentaren um eine Art Nachvollziehbarkeit zu ermöglichen.
 
+### Features in Entwicklung:
+- Hardware Installation am Pool
+- Wärmepumpe via Modbus
+- Integration in HA mit Dashboard und Steuermöglichkeiten
+
+
 
 ---
 
