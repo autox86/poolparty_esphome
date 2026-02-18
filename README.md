@@ -122,7 +122,7 @@ Ein Projekt wie dieses entsteht selten im Alleingang. Mein besonderer Dank gilt:
 
 **Udo:** Für seinen stetigen Support, besonders in den schwierigen Phasen. Ein wahrer Lehrmeister, der Hilfe zur Selbsthilfe perfekt beherrscht! 🎓
 
-**xxx:** Dein Code war das Fundament und die Inspiration für die gesamte Software-Entwicklung dieses Projekts. 🚀
+**@alausser:** [Dein Code](https://github.com/alausser/poolcontroller) war das Fundament und die Inspiration für die gesamte Software-Entwicklung dieses Projekts. 🚀
 
 **@hostcc:** Many thanks for the [esphome-component-dynamic-on-time](https://github.com/hostcc/esphome-component-dynamic-on-time). This dynamic time component made it incredibly easy to use the controller even without Home Assistant! ⏱️
 
