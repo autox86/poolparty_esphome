@@ -22,12 +22,12 @@ Der **Workmode** definiert den globalen Betriebszustand der Anlage. Er steuert:
 ### Verfügbare Modi
 
 | Modus | Bedeutung | Pumpenfrequenz | Dosierung | Frostwächter
-|-----|---------|---------------|-----------|
-| 55 % Stromsparen | Normalbetrieb, energiesparend | 55 % | erlaubt |
-| 70 % Badebetrieb | Standardbetrieb | 70 % | erlaubt |
-| 85 % Badebetrieb | Hohe Umwälzung | 85 % | erlaubt |
-| 100 % Badebetrieb | Maximale Leistung | 100 % | erlaubt |
-| 0 % Wartung | Service / Arbeiten | 100 %* | **gesperrt** |
+|-----|---------|---------------|-----------|-----------|
+| 55 % Stromsparen | Normalbetrieb, energiesparend | 55 % | erlaubt | Inaktiv
+| 70 % Badebetrieb | Standardbetrieb | 70 % | erlaubt | Inaktiv
+| 85 % Badebetrieb | Hohe Umwälzung | 85 % | erlaubt | Inaktiv
+| 100 % Badebetrieb | Maximale Leistung | 100 % | erlaubt | Inaktiv 
+| 0 % Wartung | Service / Arbeiten | 100 %* | **gesperrt** | Inaktiv
 | 55 % Winterbetrieb | Winter / Stillstand | 55 % | **gesperrt** | Aktiv
 
 \* Im Wartungsmodus wird bewusst 100 % gesetzt, damit der Inverter **manuell** bedient werden kann (z. B. Rückspülen).
