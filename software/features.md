@@ -189,3 +189,32 @@ UND Timer nicht deaktiviert`
 
 ---
 
+
+## 🧩 Konfig-Matrix – Welcher Parameter wirkt wo?
+
+Diese Matrix ist Gold wert für Wartung & spätere Erweiterungen.
+
+| PARAMETER                  | WIRKT AUF                               |
+|----------------------------|----------------------------------------|
+| timer_start / stop         | Pumpenstart, Chlor-, pH-Freigabe       |
+| allowed_weekdays           | Gesamte Automatik                       |
+| maintenance_mode           | Sperrt alle Scripts                     |
+| pump_min_runtime           | Chlor & pH Freigabe                     |
+| pump_target_frequency      | FU Modbus Write                         |
+| pump_restart_allowed       | Verhalten nach Reboot                   |
+| ph_target                  | pH Regelung                             |
+| ph_min / ph_max            | Dosierfreigabe                          |
+| ph_max_ml_per_cycle        | Dosierdauer                             |
+| ph_max_ml_per_day          | Tageslimit                              |
+| ph_tank_size               | Reichweitenberechnung                   |
+| ph_pause_time              | Beruhigungsphase                         |
+| orp_target                 | Chlor Laufzeit                          |
+| orp_min_runtime            | Chlorfreigabe                           |
+| chlor_max_runtime_day      | Tageslimit                              |
+| chlor_dead_time            | H-Brücken-Schutz                        |
+| chlor_polarity_interval    | Zellschutz                              |
+| water_temperature          | ORP Laufzeitkorrektur                   |
+| pool_volume                | Chlor Laufzeit                           |
+| pump_flow_rate             | Chlor Effizienz                          |
+
+
