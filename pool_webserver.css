@@ -1,0 +1,40 @@
+/* Deine bestehenden Grid-Fixes */
+.grid { display: flex !important; flex-direction: column !important; }
+#entities { width: 100% !important; max-width: 100% !important; }
+#logs { 
+  width: 100% !important; 
+  max-width: 100% !important; 
+  margin-left: 0 !important; 
+  margin-top: 2rem !important; 
+  background-color: #1e1e1e !important;
+}
+
+/* --- Der harte Fix für die Log-Zeilen v3 --- */
+
+/* 1. Den gesamten Log-Container auf Monospace setzen */
+#logs, .log-row, .log-message, esp-log {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+  font-size: 13px !important;
+  white-space: pre !important;
+}
+
+/* 2. Sicherstellen, dass Zeitstempel und Level NICHT umbrechen */
+.log-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 5px !important;
+  border-bottom: 1px solid #333 !important; /* Optionale Trennlinie pro Log */
+}
+
+/* 3. Die Nachricht selbst darf keinen Zeilenumbruch erzwingen */
+.log-message {
+  display: inline-block !important;
+  white-space: pre !important;
+}
+
+/* 4. Verhindern, dass ESPHome die Zeitstempel in eine eigene Zeile wirft */
+.log-time, .log-level, .log-tag {
+  display: inline-block !important;
+  min-width: fit-content !important;
+}
