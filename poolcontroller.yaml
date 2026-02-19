@@ -14,85 +14,78 @@ substitutions:
   ssid2_pw: !secret wifi_autox_pass
 
   #GPIO definitions
-  pin_relay1:               GPIO25
-  pin_relay2:               GPIO26
-  pin_relay3:               GPIO33
-  pin_relay4:               GPIO32
-  ledwifi:                  GPIO04
-  buzzer:                   GPIO12
-  txd0:                     GPIO01 #UART Tuya Reader (not needed actually)
-  rxd0:                     GPIO03 #UART Tuya Reader
-  txd1:                     GPIO17 #UART Modbus RS485
-  rxd1:                     GPIO16 #UART Modbus RS485
-  pwmh_hbridge:             GPIO13 #s2cs - brought outside to screw header as I/O
-  spics0:                   GPIO05
-  spiclk:                   GPIO18
-  spimiso:                  GPIO19
-  spimosi:                  GPIO23
-  i2csda:                   GPIO21
-  i2cscl:                   GPIO22
-  i2cint:                   GPIO02
-  prog:                     GPIO00 #Für Flash auf GND ziehen, EN kurz auf GND ziehen danach wieder loslassen (3,3V)
+  pin_relay1: GPIO25
+  pin_relay2: GPIO26
+  pin_relay3: GPIO33
+  pin_relay4: GPIO32
+  ledwifi: GPIO04
+  buzzer: GPIO12
+  txd0: GPIO01 #UART Tuya Reader (not needed actually)
+  rxd0: GPIO03 #UART Tuya Reader
+  txd1: GPIO17 #UART Modbus RS485
+  rxd1: GPIO16 #UART Modbus RS485
+  pwmh_hbridge: GPIO13 #s2cs - brought outside to screw header as I/O
+  spics0: GPIO05
+  spiclk: GPIO18
+  spimiso: GPIO19
+  spimosi: GPIO23
+  i2csda: GPIO21
+  i2cscl: GPIO22
+  i2cint: GPIO02
+  prog: GPIO00 #Für Flash auf GND ziehen, EN kurz auf GND ziehen danach wieder loslassen (3,3V)
 
   #Input_only GPIOs - All Screw Header
-  yfdn40:                   GPIO34
-  yfs201:                   GPIO35
-  phtank_reset:             GPIO36
-  maintenance:              GPIO39
+  yfdn40: GPIO34
+  yfs201: GPIO35
+  phtank_reset: GPIO36
+  maintenance: GPIO39
 
   #Input/Output GPIO - All Screw Header
-  phase_hbridge:            GPIO14
-  onewire:                  GPIO15
-  inout16:                  GPIO16
-  inout27          :        GPIO27 #GPIO27 / RF433
+  phase_hbridge: GPIO14
+  onewire: GPIO15
+  inout16: GPIO16
+  inout27: GPIO27 #GPIO27 / RF433
 
   #Code Subs
-  modbusid_freq_inv:      modbus_freq_inv
-  modbusid_heat_pump:     modbus_sunway
-  modbusid_energy_meter:  meter_ds100
-  name_pzem17:            Elektrolyse
+  modbusid_freq_inv: modbus_freq_inv
+  modbusid_heat_pump: modbus_sunway
+  modbusid_energy_meter: meter_ds100
+  name_pzem17: Elektrolyse
 
-################Die goldene Regel der Prioritäten###############################
-################################################################################
-# In ESPHome gilt: Höhere Zahlen werden zuerst ausgeführt.
-# 800.0 (WLAN/Netzwerk)
-# 600.0 (Core)
-# 200.0 (Standard Sensoren)
-# 40.0 (UART Bus Default) Die Hardware-Schnittstelle muss bereit sein.
-# 40.0 (Modbus Hub Default) Der Controller, der die Kommunikation verwaltet und zeitgleich mit UART startet
-# 40.0 (Modbus Sensor Default) Erbt die Priorität des Controllers.
-# -15.0 (Dein Ziel für on_boot)
+  ################Die goldene Regel der Prioritäten###############################
+  ################################################################################
+  # In ESPHome gilt: Höhere Zahlen werden zuerst ausgeführt.
+  # 800.0 (WLAN/Netzwerk)
+  # 600.0 (Core)
+  # 200.0 (Standard Sensoren)
+  # 40.0 (UART Bus Default) Die Hardware-Schnittstelle muss bereit sein.
+  # 40.0 (Modbus Hub Default) Der Controller, der die Kommunikation verwaltet und zeitgleich mit UART startet
+  # 40.0 (Modbus Sensor Default) Erbt die Priorität des Controllers.
+  # -15.0 (Dein Ziel für on_boot)
 
-# Für den Poolcontroller folgendes:
-# 800.0 (WLAN/Netzwerk)
-# 600.0 (Core)
-# 200.0 (Standard Sensoren)
-# 40.0 (UART Bus) Die Hardware-Schnittstelle muss bereit sein.
-# 35.0 (Modbus Hub) Der Controller, der die Kommunikation verwaltet und zeitgleich mit UART startet
-# 30.0 (Modbus Sensor) Erbt die Priorität des Controllers.
-# 10.0 (Dein Ziel für on_boot)
+  # Für den Poolcontroller folgendes:
+  # 800.0 (WLAN/Netzwerk)
+  # 600.0 (Core)
+  # 200.0 (Standard Sensoren)
+  # 40.0 (UART Bus) Die Hardware-Schnittstelle muss bereit sein.
+  # 35.0 (Modbus Hub) Der Controller, der die Kommunikation verwaltet und zeitgleich mit UART startet
+  # 30.0 (Modbus Sensor) Erbt die Priorität des Controllers.
+  # 10.0 (Dein Ziel für on_boot)
 
-# Zentrale Verwaltung der Prioritäten
-  uart_prior:       "40.0"
-  modbushub_prior:  "35.0"
+  # Zentrale Verwaltung der Prioritäten
+  uart_prior: "40.0"
+  modbushub_prior: "35.0"
   modbusctrl_prior: "30.0"
-  on_boot_prior:    "10.0"
-
+  on_boot_prior: "10.0"
 
   #Update frequency und command throttle für Modbus
-      #command_throttle (Optional, Time): minimum time in between 2 requests to the device. Default is 0ms.
-      #update_interval (Optional, Time): The interval that the sensors should be checked. Defaults to 60 seconds.
-  throttle_modbus_heatpump:      "200ms"
-  upd_int_modbus_heatpump:       "60s"
-  throttle_modbus_energy_meter:  "5s"
-  upd_int_modbus_energy_meter:   "60s"
-  
-  #Timer
-  PumpStartTimeHour: "9" #Startzeit der Pumpe Stunden
-  PumpStartTimeMinute: "00" #Startzeit der Pumpe Minuten
-  PumpEndTimeHour: "20" #Endzeit der Pumpe Stunden
-  PumpEndTimeMinute: "00" #Startzeit der Pumpe Minuten
-  
+  #command_throttle (Optional, Time): minimum time in between 2 requests to the device. Default is 0ms.
+  #update_interval (Optional, Time): The interval that the sensors should be checked. Defaults to 60 seconds.
+  throttle_modbus_heatpump: "200ms"
+  upd_int_modbus_heatpump: "60s"
+  throttle_modbus_energy_meter: "5s"
+  upd_int_modbus_energy_meter: "60s"
+
   # #Poolcontroller-Logics Intial Values
   checkIntervalORP: "2 min" #Angabe nach der Zahl ist wichtig!!
   checkIntervalPH: "5 min" #Angabe nach der Zahl ist wichtig!!
@@ -119,16 +112,16 @@ external_components:
   # - source: github://esphome/esphome@2025.7.3
   #   components: [uart]
   #   refresh: 1h
-  # - source: github://esphome/esphome@2023.12.1  
+  # - source: github://esphome/esphome@2023.12.1
   #   components: [tuya]
   #   refresh: 1h
 
 status_led:
-#LED-Zustand Bedeutung
-# Blinken langsam ->  WLAN wird gesucht
-# Blinken schnell ->  Verbindung zu API/MQTT noch nicht fertig
-# Dauerlicht AN ->  WLAN + API/MQTT OK
-# Aus -> Gerät ist aus / GPIO invertiert
+  #LED-Zustand Bedeutung
+  # Blinken langsam ->  WLAN wird gesucht
+  # Blinken schnell ->  Verbindung zu API/MQTT noch nicht fertig
+  # Dauerlicht AN ->  WLAN + API/MQTT OK
+  # Aus -> Gerät ist aus / GPIO invertiert
   pin:
     number: ${ledwifi}
     inverted: true
@@ -143,7 +136,6 @@ rtttl:
 
 #Must be activated to enter safe mode after 10 failed normal boot
 safe_mode:
-
 
 ######################################################################
 # Pool
@@ -168,234 +160,233 @@ safe_mode:
 ######################################################################
 
 globals:
-
   - id: glo_workmode
     type: std::string
     initial_value: '""' # Workmode in variabel
-    restore_value: 'true' 
+    restore_value: "true"
   - id: glo_frost_start_time
     type: uint32_t
-    initial_value: '0'
+    initial_value: "0"
   - id: glo_frost_active
     type: bool
-    initial_value: 'false' #frostschutz aktiv?
+    initial_value: "false" #frostschutz aktiv?
     restore_value: no
   - id: last_switch_action
     type: uint32_t
-    initial_value: '0' #Used for storing a switch action, (see switch_poolpump)
-    restore_value: 'false'
+    initial_value: "0" #Used for storing a switch action, (see switch_poolpump)
+    restore_value: "false"
   - id: glo_restart_allowed
     type: bool
-    initial_value: 'false' #In case there was a restart performed, unexpected or not we indicate if we shall restart the pump
-    restore_value: 'false'
+    initial_value: "false" #In case there was a restart performed, unexpected or not we indicate if we shall restart the pump
+    restore_value: "false"
   - id: glo_last_reset_reason
     type: std::string
     initial_value: '"Initialwert"'
-    restore_value: 'false'
+    restore_value: "false"
   - id: boot_log_buffer
     type: std::string
     initial_value: '""'
   - id: glo_uart_priority
     type: float
-    initial_value: '40.0' # Priority
-    restore_value: 'false'
+    initial_value: "40.0" # Priority
+    restore_value: "false"
   - id: glo_maintenance
     type: bool
-    restore_value: 'true'
-    initial_value: 'false' #Haben wir den Workmode maintenance?
+    restore_value: "true"
+    initial_value: "false" #Haben wir den Workmode maintenance?
   - id: glo_modbushub_priority
     type: float
-    initial_value: '35.0' # Priority
-    restore_value: 'false'
+    initial_value: "35.0" # Priority
+    restore_value: "false"
   - id: glo_modbussensor_priority
     type: float
-    initial_value: '30.0' # Priority
-    restore_value: 'false'
+    initial_value: "30.0" # Priority
+    restore_value: "false"
   - id: glo_on_boot_priority
     type: float
-    initial_value: '10.0' # Priority
-    restore_value: 'false'
+    initial_value: "10.0" # Priority
+    restore_value: "false"
   - id: glo_pump_active_via_automation
     type: bool
-    restore_value: 'true'
-    initial_value: 'false' #Wurde die Pumpe via Intervall gestartet?
+    restore_value: "true"
+    initial_value: "false" #Wurde die Pumpe via Intervall gestartet?
   - id: glo_ph_allowed
     type: bool
-    restore_value: 'true'
-    initial_value: 'false' #PH Erlaubt? Sicher ist sicher, PH Injektor initial auf false
+    restore_value: "true"
+    initial_value: "false" #PH Erlaubt? Sicher ist sicher, PH Injektor initial auf false
   - id: glo_orp_allowed
     type: bool
-    restore_value: 'true'
-    initial_value: 'false' #Sicher ist sicher, Chlorinator initial auf false
+    restore_value: "true"
+    initial_value: "false" #Sicher ist sicher, Chlorinator initial auf false
   - id: glo_hp_allowed
     type: bool
-    restore_value: 'true'
-    initial_value: 'false' #Sicher ist sicher, HeatPump initial auf false
-  - id: use_flow_dn40 
+    restore_value: "true"
+    initial_value: "false" #Sicher ist sicher, HeatPump initial auf false
+  - id: use_flow_dn40
     type: bool
-    restore_value: 'true'
-    initial_value: 'true' #FlowSensor angeschlossen? true or false
-  - id: use_flow_s201 
+    restore_value: "true"
+    initial_value: "true" #FlowSensor angeschlossen? true or false
+  - id: use_flow_s201
     type: bool
-    restore_value: 'true'
-    initial_value: 'true' #FlowSensor angeschlossen? true or false
+    restore_value: "true"
+    initial_value: "true" #FlowSensor angeschlossen? true or false
   - id: chlorinator_polarity
     type: bool
-    initial_value: 'false' #Polarität für die Zelle merken (Umpolung beim Start)
+    initial_value: "false" #Polarität für die Zelle merken (Umpolung beim Start)
     restore_value: yes
-  - id: chlorinator_runtime_seconds 
+  - id: chlorinator_runtime_seconds
     type: int
-    initial_value: '0' #globale helfer variabel für Chlorproduktion
-    restore_value: 'false'
+    initial_value: "0" #globale helfer variabel für Chlorproduktion
+    restore_value: "false"
   - id: chlorinator_remaining_seconds
     type: int
-    initial_value: '0' #globale helfer variabel für Chlorberechnung
-    restore_value: 'false'
+    initial_value: "0" #globale helfer variabel für Chlorberechnung
+    restore_value: "false"
   - id: chlor_needed
     type: bool
-    initial_value: 'false' # Chlor nötig --> True / False
+    initial_value: "false" # Chlor nötig --> True / False
   - id: chlorinator_max_reached
     type: bool
-    initial_value: 'false' # Chlorinator max Laufzeit erreicht?
+    initial_value: "false" # Chlorinator max Laufzeit erreicht?
   - id: chlor_run_time_max_day
     type: float
-    initial_value: '480' # Minuten die der Chlorinator pro Tag maximal erreichen darf änderbar über Nummernfeld
+    initial_value: "480" # Minuten die der Chlorinator pro Tag maximal erreichen darf änderbar über Nummernfeld
     restore_value: "true"
   - id: chlor_run_time_max_cycle
     type: float
-    initial_value: '30' # Minuten die der Chlorinator pro Zyklus maximal erreichen darf änderbar über Nummernfeld
+    initial_value: "30" # Minuten die der Chlorinator pro Zyklus maximal erreichen darf änderbar über Nummernfeld
     restore_value: "true"
   - id: chlorinator_today_run_time
     type: float
-    initial_value: '0' # Tageslaufzeit in Sekunden (bereits gelaufen)
-    restore_value: 'false'
+    initial_value: "0" # Tageslaufzeit in Sekunden (bereits gelaufen)
+    restore_value: "false"
   - id: max_ph_ml_per_cycle
     type: float
-    initial_value: '100' # ml die der Dispenser pro Zyklus maximal injezieren darf, änderbar über Nummernfeld
-    restore_value: 'true'
+    initial_value: "100" # ml die der Dispenser pro Zyklus maximal injezieren darf, änderbar über Nummernfeld
+    restore_value: "true"
   - id: max_ph_ml_per_day
     type: float
-    initial_value: '300' # ml die der Dispenser täglich maximal injezieren darf, änderbar über Nummernfeld
-    restore_value: 'true'
+    initial_value: "300" # ml die der Dispenser täglich maximal injezieren darf, änderbar über Nummernfeld
+    restore_value: "true"
   - id: glo_orp_max
     type: float
-    initial_value: '800' # Der Maximal Wert für ORP
-    restore_value: 'true'
+    initial_value: "800" # Der Maximal Wert für ORP
+    restore_value: "true"
   - id: glo_orp_min
     type: float
-    initial_value: '600' # Der Minimal Wert für ORP
-    restore_value: 'true'
+    initial_value: "600" # Der Minimal Wert für ORP
+    restore_value: "true"
   - id: glo_orp_target
     type: int
-    initial_value: '750' #globale helfer variabel für Chlorberechnung
-    restore_value: 'true'
+    initial_value: "750" #globale helfer variabel für Chlorberechnung
+    restore_value: "true"
   - id: ph_cycles
     type: float
-    initial_value: '1' # Anzahl an PH Laufzyklen pro Tag
+    initial_value: "1" # Anzahl an PH Laufzyklen pro Tag
   - id: ph_locked
     type: bool
-    initial_value: 'false' #Verhindert eine weitere PH Injezierung wenn Grenzwerte erreicht sind
+    initial_value: "false" #Verhindert eine weitere PH Injezierung wenn Grenzwerte erreicht sind
   - id: ph_max
     type: float
-    initial_value: '7.8' # Maximaler PH Wert den das Wasser haben darf, änderbar über Nummernfeld
-    restore_value: 'true'
+    initial_value: "7.8" # Maximaler PH Wert den das Wasser haben darf, änderbar über Nummernfeld
+    restore_value: "true"
   - id: ph_max_injection_reached
     type: bool
-    initial_value: 'false' # Check: Haben wir die maximale Tagesdosis an PH Minus erreicht?
-    restore_value: 'false'
+    initial_value: "false" # Check: Haben wir die maximale Tagesdosis an PH Minus erreicht?
+    restore_value: "false"
   - id: ph_min
     type: float
-    initial_value: '6.8' # Maximaler PH Wert den das Wasser haben darf, änderbar über Nummernfeld
-    restore_value: 'true'
-  - id: ph_ml_per_second 
+    initial_value: "6.8" # Maximaler PH Wert den das Wasser haben darf, änderbar über Nummernfeld
+    restore_value: "true"
+  - id: ph_ml_per_second
     type: float
-    initial_value: '100' #ml die der Dispenser pro Sekunde injeziert, änderbar über Nummernfeld
-    restore_value: 'true'
+    initial_value: "100" #ml die der Dispenser pro Sekunde injeziert, änderbar über Nummernfeld
+    restore_value: "true"
   - id: ph_needed
     type: bool
-    initial_value: 'false' # Check: PH Minus nötig?
+    initial_value: "false" # Check: PH Minus nötig?
   - id: glo_ph_target
     type: float
-    initial_value: '7.0' # PH wert der angestrebt wird.
-    restore_value: 'true'  
-  - id: ph_tank_capacity_ml 
+    initial_value: "7.0" # PH wert der angestrebt wird.
+    restore_value: "true"
+  - id: ph_tank_capacity_ml
     type: float
-    restore_value: 'true'
-    initial_value: '20000' # Volumen des PH Behälters in ML - änderbar über Nummernfeld
+    restore_value: "true"
+    initial_value: "20000" # Volumen des PH Behälters in ML - änderbar über Nummernfeld
   - id: ph_tank_refill
     type: bool
-    initial_value: 'false' # Tank leer, also nachfüllen?
-    restore_value: 'true'  
+    initial_value: "false" # Tank leer, also nachfüllen?
+    restore_value: "true"
   - id: ph_tank_remaining
     type: float
-    initial_value: '20000' # Verbleibender Tankinhalt
-    restore_value: 'true'
-  - id: ph_today_ml 
+    initial_value: "20000" # Verbleibender Tankinhalt
+    restore_value: "true"
+  - id: ph_today_ml
     type: float
-    initial_value: '0' # Tageszähler:PH Minus an dem heutigen Tag injeziert in ml
-    restore_value: 'true' 
-  - id: phdispenser_today_run_time 
+    initial_value: "0" # Tageszähler:PH Minus an dem heutigen Tag injeziert in ml
+    restore_value: "true"
+  - id: phdispenser_today_run_time
     type: float
-    initial_value: '0' # Tgeszähler:PH Dispenser Laufzeit in sekunden
-    restore_value: 'false' 
+    initial_value: "0" # Tgeszähler:PH Dispenser Laufzeit in sekunden
+    restore_value: "false"
   - id: poolpump_ok
     type: bool
-    initial_value: 'false' # CheckVariabel: Ist Poolpumpenvorlaufzeit erreicht ? True / False
+    initial_value: "false" # CheckVariabel: Ist Poolpumpenvorlaufzeit erreicht ? True / False
   - id: poolvolume
     type: float
     restore_value: no
-    initial_value: '45000'  #Größe deines Pools in Liter, änderbar über Nummernfeld
+    initial_value: "45000" #Größe deines Pools in Liter, änderbar über Nummernfeld
   - id: poolpump_flow_max
     type: float
     restore_value: no
-    initial_value: '12.0'  #Durchfluss Poolpumpe bei 100%
+    initial_value: "12.0" #Durchfluss Poolpumpe bei 100%
   - id: PumpPreRunTime
     type: float
-    initial_value: '10' # Vorlaufzeit der Poolpumpe in Minuten angebe, änderbar über Nummernfeld
-    restore_value: 'true'
+    initial_value: "10" # Vorlaufzeit der Poolpumpe in Minuten angebe, änderbar über Nummernfeld
+    restore_value: "true"
   - id: poolpump_start_time
     type: unsigned long
-    initial_value: '0'  #Rechenhilfe für PumpPreRunTime (Vorlaufzeit)
+    initial_value: "0" #Rechenhilfe für PumpPreRunTime (Vorlaufzeit)
   - id: glo_set_frequency
     type: float
-    initial_value: '100' #globale variabel zum Konvertieren des Betriebsmodus (Select als String) zu einer Zahl
-    restore_value: 'true'
+    initial_value: "100" #globale variabel zum Konvertieren des Betriebsmodus (Select als String) zu einer Zahl
+    restore_value: "true"
   - id: phdispenser_cycle_time
     type: float
-    initial_value: '0'  # Zähler für die Laufzeit des aktuellen PH-Zyklus in Sekunden
-    restore_value: 'false'
+    initial_value: "0" # Zähler für die Laufzeit des aktuellen PH-Zyklus in Sekunden
+    restore_value: "false"
   - id: ph_last_cycle_ml
     type: float
-    initial_value: '0'  # Menge an PH Minus (ml) im letzten Zyklus, für Tank-Update beim Ausschalten
-    restore_value: 'false'
+    initial_value: "0" # Menge an PH Minus (ml) im letzten Zyklus, für Tank-Update beim Ausschalten
+    restore_value: "false"
   - id: glo_timer_start_hour
     type: int
-    initial_value: '9' # Speichert die Stunde des Timers
+    initial_value: "9" # Speichert die Stunde des Timers
     restore_value: yes
   - id: glo_timer_start_min
     type: int
-    initial_value: '0' # Speichert die Minute des Timers
+    initial_value: "0" # Speichert die Minute des Timers
     restore_value: yes
   - id: glo_timer_stopp_hour
     type: int
-    initial_value: '9' # Speichert die Stunde des Timers
+    initial_value: "9" # Speichert die Stunde des Timers
     restore_value: yes
   - id: glo_timer_stopp_min
     type: int
-    initial_value: '0' # Speichert die Minute des Timers
+    initial_value: "0" # Speichert die Minute des Timers
     restore_value: yes
   - id: glo_tuya_last_seen_ms
     type: uint32_t
-    initial_value: "0"   # Zeit seit letztem Kontakt mit Tuya Controller
+    initial_value: "0" # Zeit seit letztem Kontakt mit Tuya Controller
     restore_value: false
   - id: glo_tuya_online
     type: bool
-    initial_value: "false"  # Wird über irgendeinen Tuya sensor befüllt
+    initial_value: "false" # Wird über irgendeinen Tuya sensor befüllt
     restore_value: false
   - id: glo_tuya_uart_seen_recently
     type: bool
-    initial_value: "false"  # Haben wir den Controller kürzlich noch gesehen?
-    restore_value: false 
+    initial_value: "false" # Haben wir den Controller kürzlich noch gesehen?
+    restore_value: false
 
 # https://esphome.io/components/esphome.html#adjusting-flash-writes
 preferences:
@@ -409,13 +400,13 @@ preferences:
 ################################################################################
 
 ############################Messungen/Status####################################
-###Bei jedem Zyklus werden die Logikfunktionen getriggert und entsprechend Flags 
+###Bei jedem Zyklus werden die Logikfunktionen getriggert und entsprechend Flags
 ###(globale Variablen) gesetzt. Zudem wird der Status in der Logausgabe angezeigt
 ################################################################################
 interval:
   - interval: 7s
     then:
-      - if: 
+      - if:
           condition:
             - time.has_time:
           then:
@@ -423,15 +414,15 @@ interval:
             - delay: 50ms
             - script.execute: script_check_PumpPreRunTime #Vorlaufzeit der Pumpe erreicht?
             - delay: 50ms
-            - script.execute: script_check_chlor_needed #Überprüfe ob Chlorbedarf 
+            - script.execute: script_check_chlor_needed #Überprüfe ob Chlorbedarf
             - delay: 50ms
             - script.execute: script_check_ph_needed #Überprüfe ob PH Bedarf
             - delay: 50ms
       - script.execute: script_status #Schreibe Status ins Log
       - delay: 50ms
-      
-# Anstarten der Pumpe nach einen Restart des ESP32 / Frostschutz
-      - if: 
+
+      # Anstarten der Pumpe nach einen Restart des ESP32 / Frostschutz
+      - if:
           condition:
             - lambda: |-
                 float temp = id(sensor_outdoor_temp).state;
@@ -456,14 +447,13 @@ interval:
                 }
             - script.execute: script_pumpstart
 
-
-################################PH-Minus Interval###############################
-###Bei jedem Zyklus wird das ph_locked flag zurückgesetzt um eine erneute
-### PH Dosierung zu ermöglichen und die PH Dosierung gestartet
-################################################################################
+  ################################PH-Minus Interval###############################
+  ###Bei jedem Zyklus wird das ph_locked flag zurückgesetzt um eine erneute
+  ### PH Dosierung zu ermöglichen und die PH Dosierung gestartet
+  ################################################################################
   - interval: ${checkIntervalPH}
     then:
-      - if: 
+      - if:
           condition:
             - time.has_time
             - lambda: return id(glo_ph_allowed);
@@ -472,38 +462,38 @@ interval:
           then:
             - if:
                 condition:
-                  - lambda: return id(poolpump_ok) && id(ph_needed) && !id(ph_max_injection_reached) && (id(ph_tank_remaining) > 500.0);  
+                  - lambda: return id(poolpump_ok) && id(ph_needed) && !id(ph_max_injection_reached) && (id(ph_tank_remaining) > 500.0);
                 then:
                   - switch.turn_on: switch_phdosierpumpe
                   - lambda: |-
                       ESP_LOGI("PH-Minus Interval", "PH Dosierung über Zeitintervall angefragt.");
                 else:
-                    - lambda: |-
-                        // Bestimme den Grund
-                        std::string reason;
-                        if (!id(poolpump_ok)) {
-                          reason = "IntervalPH - Vorlaufzeitpumpe nicht erreicht";
-                        } else if (!id(ph_needed)) {
-                          reason = "IntervalPH - kein PH Bedarf (PH ok)";
-                        } else if (id(ph_max_injection_reached)) {
-                          reason = "IntervalPH - tägliches PH-Limit erreicht";
-                        } else if (id(ph_tank_remaining) <= 500.0) {
-                          reason = "IntervalPH - PH Tank fast leer --> Auffüllen und Reset drücken!";
-                          id(ph_tank_refill) = true;
-                        } else {
-                          reason = "IntervalPH - Unbekannte Blockade (ggf. glo_ph_allowed)";
-                        }
-                        // Log-Ausgabe
-                        id(txt_sens_status).publish_state(reason);
-                        ESP_LOGW("PH-Minus Interval", "PH Dosierpumpe über Interval Start verhindert weil: %s", reason.c_str());
+                  - lambda: |-
+                      // Bestimme den Grund
+                      std::string reason;
+                      if (!id(poolpump_ok)) {
+                        reason = "IntervalPH - Vorlaufzeitpumpe nicht erreicht";
+                      } else if (!id(ph_needed)) {
+                        reason = "IntervalPH - kein PH Bedarf (PH ok)";
+                      } else if (id(ph_max_injection_reached)) {
+                        reason = "IntervalPH - tägliches PH-Limit erreicht";
+                      } else if (id(ph_tank_remaining) <= 500.0) {
+                        reason = "IntervalPH - PH Tank fast leer --> Auffüllen und Reset drücken!";
+                        id(ph_tank_refill) = true;
+                      } else {
+                        reason = "IntervalPH - Unbekannte Blockade (ggf. glo_ph_allowed)";
+                      }
+                      // Log-Ausgabe
+                      id(txt_sens_status).publish_state(reason);
+                      ESP_LOGW("PH-Minus Interval", "PH Dosierpumpe über Interval Start verhindert weil: %s", reason.c_str());
 
-#########################ORP (Chlorinator) Interval#################################################
-##Bei jedem Zyklus werden die Flags geprüft und nach bedarf der Chlorinator eingeschaltet##
-##
-###########################################################################################
+  #########################ORP (Chlorinator) Interval#################################################
+  ##Bei jedem Zyklus werden die Flags geprüft und nach bedarf der Chlorinator eingeschaltet##
+  ##
+  ###########################################################################################
   - interval: ${checkIntervalORP}
     then:
-      - if: 
+      - if:
           condition:
             - time.has_time
             - lambda: return id(glo_orp_allowed);
@@ -519,33 +509,31 @@ interval:
                       ESP_LOGI("ORP Interval", "Chlorinator über Zeitintervall angefragt.");
                   #- script.execute: script_chlorinator_by_interval
                   - switch.turn_on: switch_chlorinator
-                  
-                  
+
                 else:
-                    - lambda: |-
-                        // Bestimme den Grund
-                        std::string reason;
-                        if (!id(poolpump_ok)) {
-                          reason = "IntervalORP - Vorlaufzeitpumpe nicht erreicht";
-                        } else if (!id(chlor_needed)) {
-                          reason = "IntervalORP - kein Chlor Bedarf (ORP ok)";
-                        } else if (id(chlorinator_max_reached)) {
-                          reason = "IntervalORP - tägliche ORP-Laufzeit erreicht";
-                        } else {
-                          reason = "IntervalORP - Unbekannte Blockade (ggf. glo_ph_allowed)";
-                        }
-                        // Log-Ausgabe
-                        id(txt_sens_status).publish_state(reason);
-                        ESP_LOGW("IntervalORP", "Chlorinator über Interval Start verhindert weil: %s", reason.c_str());
+                  - lambda: |-
+                      // Bestimme den Grund
+                      std::string reason;
+                      if (!id(poolpump_ok)) {
+                        reason = "IntervalORP - Vorlaufzeitpumpe nicht erreicht";
+                      } else if (!id(chlor_needed)) {
+                        reason = "IntervalORP - kein Chlor Bedarf (ORP ok)";
+                      } else if (id(chlorinator_max_reached)) {
+                        reason = "IntervalORP - tägliche ORP-Laufzeit erreicht";
+                      } else {
+                        reason = "IntervalORP - Unbekannte Blockade (ggf. glo_ph_allowed)";
+                      }
+                      // Log-Ausgabe
+                      id(txt_sens_status).publish_state(reason);
+                      ESP_LOGW("IntervalORP", "Chlorinator über Interval Start verhindert weil: %s", reason.c_str());
 
-
-######################Sicherheitsinterval############################
-#Das Interval prüft laufend ob der Chlorinator oder PH Dosierpumpe noch läuft
-#Fehlerfall: Poolpumpe, Flow Sensor --> aus
-#Chlorinator: Maximale Laufzeit (Tag) erreicht? --> aus
-#PH: Maximale Menge pro Tag errreicht? --> aus
-#Countdown aus Berechnung erreicht? --> aus
-####################################################################################
+  ######################Sicherheitsinterval############################
+  #Das Interval prüft laufend ob der Chlorinator oder PH Dosierpumpe noch läuft
+  #Fehlerfall: Poolpumpe, Flow Sensor --> aus
+  #Chlorinator: Maximale Laufzeit (Tag) erreicht? --> aus
+  #PH: Maximale Menge pro Tag errreicht? --> aus
+  #Countdown aus Berechnung erreicht? --> aus
+  ####################################################################################
   - interval: 7s
     then:
       - if:
@@ -689,7 +677,7 @@ interval:
                     }
                   }
                 }
-                
+
                 // --- E. Timer check - Abschaltung weil außerhalb der Zeit (Sicherheitsintervall Teil) ---
                 if (!id(bs_timer_allows_run).state && (id(inv_running).state == 1 && id(glo_pump_active_via_automation))) {
                   ESP_LOGW("safety-interval", "Abschaltung Pumpe - Außerhalb des Timers!");
@@ -699,17 +687,15 @@ interval:
                   id(script_stopp_all).execute();
                 }
 
-
 ################################################################################
 ######## Skripte ###############################################################
 ################################################################################
 script:
+  ############################## Tuya WatchDog ###################################
+  ################################################################################
 
-############################## Tuya WatchDog ###################################
-################################################################################
-
-#!!!!NOT WORKING CORRECTLY!!!
-#############################
+  #!!!!NOT WORKING CORRECTLY!!!
+  #############################
   # - id: script_tuya_watchdog
   #   mode: single
   #   then:
@@ -728,7 +714,7 @@ script:
   #             ESP_LOGW("tuya_watchdog", "Tuya OFFLINE → Status reset");
   #             id(glo_tuya_online) = false; // "...dann merken wir uns jetzt: Es ist OFFLINE."
   #             id(bs_tuya_online).publish_state(false);
-              
+
   #             // HIER: Sensoren auf NAN setzen, damit HA nicht mit alten Werten rechnet
   #             id(ph_measvalue).publish_state(NAN);
   #             id(orp_measvalue).publish_state(NAN);
@@ -737,17 +723,17 @@ script:
   #         //Logik für Tuya Ein/Aus (Eltako Toggle)
   #         //Im Winterbetrieb muss Tuya aus / bei allen anderen Modi, wenn nicht Wartung, muss Tuya laufen
   #         const std::string mode = id(select_work_mode).current_option();
-  #         if ((mode == "55% Winterbetrieb" && id(glo_tuya_online)) || 
+  #         if ((mode == "55% Winterbetrieb" && id(glo_tuya_online)) ||
   #             (mode != "55% Winterbetrieb" && mode != "0% Wartung" && !id(glo_tuya_online))) {
   #                 ESP_LOGW("tuya_watchdog", "Falscher Zustand. Togglen des Eltakos für Tuya");
   #                 id(switch_relay3_tuya).turn_on(); //Impuls geben
-                  
+
   #                 // 1. Variable sofort umschalten
   #                 id(glo_tuya_online) = !id(glo_tuya_online);
   #                 id(bs_tuya_online).publish_state(id(glo_tuya_online));
 
   #                 // 2. WICHTIG: Den Zeitstempel auf JETZT setzen (Gnadenfrist)
-  #                 // Das verhindert, dass der else-Block im nächsten Durchlauf 
+  #                 // Das verhindert, dass der else-Block im nächsten Durchlauf
   #                 // die Variable sofort wieder zurückdreht.
   #                 id(glo_tuya_last_seen_ms) = millis();
   #         }
@@ -799,18 +785,18 @@ script:
                   id(glo_tuya_last_seen_ms) = millis();
           }
 
-############################## Bootscript#######################################
-################################################################################
+  ############################## Bootscript#######################################
+  ################################################################################
   - id: script_on_boot
     mode: restart
     then:
       - lambda: |-
-          
+
           id(boot_log_buffer) = "BOOT-START: Initialisierung...\n";
           // Wir erzwingen in der Software sofort den Zustand AUS
           id(switch_chlorinator).publish_state(false);
           id(boot_log_buffer) += "PHASE 1: Chlorinator-Switch-State auf AUS gesetzt.\n";
-          
+
           // 1. HA Sync: Werte aus Globals in die UI pushen
           // Frequenz
           id(number_target_frequency).publish_state(id(glo_set_frequency)); 
@@ -826,7 +812,7 @@ script:
           id(ph_pump_setter).publish_state(id(ph_ml_per_second) * 3.6);
           id(chlor_run_time_max_day_setter).publish_state(id(chlor_run_time_max_day));
           id(ph_tank_capacity_setter).publish_state(id(ph_tank_capacity_ml));
-          
+
           // Inverter / Pumpe
           id(pump_prerun_time_setter).publish_state(id(PumpPreRunTime));
           id(glo_pump_active_via_automation) = false; //resete den Wert nach Boot
@@ -847,19 +833,19 @@ script:
           condition:
             time.has_time:
           timeout: 15s
-      
+
       - delay: 10s
       - lambda: |-
-          
+
           ///////// Chlorinator Online Status after Boot ////////
           ///////////////////////////////////////////////////////
           // Wir holen den Rohwert des Spannungssensors
           float v = id(pzem_dc_voltage).state;
-          
+
           // Wenn das Netzteil aus ist, liefert der PZEM keine Daten.
           // ESPHome markiert den Sensor dann als 'nan' (Not a Number).
           bool is_online = !std::isnan(v) && v > 10.0;
-          
+
           // Jetzt setzen wir unseren Online-Sensor aktiv auf den echten Status
           id(bs_pzem_online).publish_state(is_online);
 
@@ -878,7 +864,7 @@ script:
 
           // Nur wenn run_state sinnhafte Zahlen hat und der Status 1 (läuft) oder 3 (aus)
           bool is_online2 = !std::isnan(run_state) && (run_state == 1.0 || run_state == 3.0);
-          
+
           // Jetzt setzen wir unseren Online-Sensor aktiv auf den echten Status
           id(bs_inv_online).publish_state(is_online2);
 
@@ -931,39 +917,35 @@ script:
           call.set_option(id(select_work_mode).current_option()); // Nutzt den wiederhergestellten Wert
           call.perform();
 
+      - rtttl.play: "two_short:d=4,o=5,b=100:16e6,16e6"
 
-      - rtttl.play: 'two_short:d=4,o=5,b=100:16e6,16e6'
+  #Nice to Have
+  #'two_short:d=4,o=5,b=100:16e6,16e6'
+  #'A-Team:d=8,o=5,b=125:4d#6,a#,2d#6,16p,g#,4a#,4d#.,p,16g,16a#,d#6,a#,f6,2d#6,16p,c#.6,16c6,16a#,g#.,2a#'
+  #'The Simpsons:d=4,o=5,b=160:c.6,e6,f#6,8a6,g.6,e6,c6,8a,8f#,8f#,8f#,2g,8p,8p,8f#,8f#,8f#,8g,a#.,8c6,8c6,8c6,c6'
+  #'Indiana:d=4,o=5,b=250:e,8p,8f,8g,8p,1c6,8p.,d,8p,8e,1f,p.,g,8p,8a,8b,8p,1f6,p,a,8p,8b,2c6,2d6,2e6,e,8p,8f,8g,8p,1c6,p,d6,8p,8e6,1f.6,g,8p,8g,e.6,8p,d6,8p,8g,e.6,8p,d6,8p,8g,f.6,8p,e6,8p,8d6,2c6'
+  #'TakeOnMe:d=4,o=4,b=160:8f#5,8f#5,8f#5,8d5,8p,8b,8p,8e5,8p,8e5,8p,8e5,8g#5,8g#5,8a5,8b5,8a5,8a5,8a5,8e5,8p,8d5,8p,8f#5,8p,8f#5,8p,8f#5,8e5,8e5,8f#5,8e5,8f#5,8f#5,8f#5,8d5,8p,8b,8p,8e5,8p,8e5,8p,8e5,8g#5,8g#5,8a5,8b5,8a5,8a5,8a5,8e5,8p,8d5,8p,8f#5,8p,8f#5,8p,8f#5,8e5,8e5'
+  #'Entertainer:d=4,o=5,b=140:8d,8d#,8e,c6,8e,c6,8e,2c.6,8c6,8d6,8d#6,8e6,8c6,8d6,e6,8b,d6,2c6,p,8d,8d#,8e,c6,8e,c6,8e,2c.6,8p,8a,8g,8f#,8a,8c6,e6,8d6,8c6,8a,2d6'
+  #'Muppets:d=4,o=5,b=250:c6,c6,a,b,8a,b,g,p,c6,c6,a,8b,8a,8p,g.,p,e,e,g,f,8e,f,8c6,8c,8d,e,8e,8e,8p,8e,g,2p,c6,c6,a,b,8a,b,g,p,c6,c6,a,8b,a,g.,p,e,e,g,f,8e,f,8c6,8c,8d,e,8e,d,8d,c'
+  #'Xfiles:d=4,o=5,b=125:e,b,a,b,d6,2b.,1p,e,b,a,b,e6,2b.,1p,g6,f#6,e6,d6,e6,2b.,1p,g6,f#6,e6,d6,f#6,2b.,1p,e,b,a,b,d6,2b.,1p,e,b,a,b,e6,2b.,1p,e6,2b.'
+  #'Looney:d=4,o=5,b=140:32p,c6,8f6,8e6,8d6,8c6,a.,8c6,8f6,8e6,8d6,8d#6,e.6,8e6,8e6,8c6,8d6,8c6,8e6,8c6,8d6,8a,8c6,8g,8a#,8a,8f'
 
-
-#Nice to Have
-      #'two_short:d=4,o=5,b=100:16e6,16e6'
-      #'A-Team:d=8,o=5,b=125:4d#6,a#,2d#6,16p,g#,4a#,4d#.,p,16g,16a#,d#6,a#,f6,2d#6,16p,c#.6,16c6,16a#,g#.,2a#'
-      #'The Simpsons:d=4,o=5,b=160:c.6,e6,f#6,8a6,g.6,e6,c6,8a,8f#,8f#,8f#,2g,8p,8p,8f#,8f#,8f#,8g,a#.,8c6,8c6,8c6,c6'
-      #'Indiana:d=4,o=5,b=250:e,8p,8f,8g,8p,1c6,8p.,d,8p,8e,1f,p.,g,8p,8a,8b,8p,1f6,p,a,8p,8b,2c6,2d6,2e6,e,8p,8f,8g,8p,1c6,p,d6,8p,8e6,1f.6,g,8p,8g,e.6,8p,d6,8p,8g,e.6,8p,d6,8p,8g,f.6,8p,e6,8p,8d6,2c6'
-      #'TakeOnMe:d=4,o=4,b=160:8f#5,8f#5,8f#5,8d5,8p,8b,8p,8e5,8p,8e5,8p,8e5,8g#5,8g#5,8a5,8b5,8a5,8a5,8a5,8e5,8p,8d5,8p,8f#5,8p,8f#5,8p,8f#5,8e5,8e5,8f#5,8e5,8f#5,8f#5,8f#5,8d5,8p,8b,8p,8e5,8p,8e5,8p,8e5,8g#5,8g#5,8a5,8b5,8a5,8a5,8a5,8e5,8p,8d5,8p,8f#5,8p,8f#5,8p,8f#5,8e5,8e5'
-      #'Entertainer:d=4,o=5,b=140:8d,8d#,8e,c6,8e,c6,8e,2c.6,8c6,8d6,8d#6,8e6,8c6,8d6,e6,8b,d6,2c6,p,8d,8d#,8e,c6,8e,c6,8e,2c.6,8p,8a,8g,8f#,8a,8c6,e6,8d6,8c6,8a,2d6'
-      #'Muppets:d=4,o=5,b=250:c6,c6,a,b,8a,b,g,p,c6,c6,a,8b,8a,8p,g.,p,e,e,g,f,8e,f,8c6,8c,8d,e,8e,8e,8p,8e,g,2p,c6,c6,a,b,8a,b,g,p,c6,c6,a,8b,a,g.,p,e,e,g,f,8e,f,8c6,8c,8d,e,8e,d,8d,c'
-      #'Xfiles:d=4,o=5,b=125:e,b,a,b,d6,2b.,1p,e,b,a,b,e6,2b.,1p,g6,f#6,e6,d6,e6,2b.,1p,g6,f#6,e6,d6,f#6,2b.,1p,e,b,a,b,d6,2b.,1p,e,b,a,b,e6,2b.,1p,e6,2b.'
-      #'Looney:d=4,o=5,b=140:32p,c6,8f6,8e6,8d6,8c6,a.,8c6,8f6,8e6,8d6,8d#6,e.6,8e6,8e6,8c6,8d6,8c6,8e6,8c6,8d6,8a,8c6,8g,8a#,8a,8f'
-
-
-###################### Chlorinator Polarity - Umpolung Zelle####################
-################################################################################
+  ###################### Chlorinator Polarity - Umpolung Zelle####################
+  ################################################################################
   - id: script_chlorinator_polarity
     mode: restart # Wichtig: Falls es neu getriggert wird, bricht es alte Delays ab
     then:
       # 1. Erstmal alles AUS (Sicherheit!)
       - switch.turn_off: switch_chlor_run_gpio
       - delay: 5s # Kurze Pause, damit die H-Brücke abfallen kann
-      
+
       # 2. Richtung umschalten
       - lambda: |-
           id(chlorinator_polarity) = !id(chlorinator_polarity);
           ESP_LOGI("chlorinator", "Polarität gewechselt, Richtung für diesen Zyklus: %s", id(chlorinator_polarity) ? "GPIOHigh" : "GPIOLow");
 
-
-############################ Stopp all - Wartungsmode ##########################
-################################################################################
+  ############################ Stopp all - Wartungsmode ##########################
+  ################################################################################
   - id: script_stopp_all
     mode: single
     then:
@@ -971,12 +953,10 @@ script:
       - lambda: |-
           ESP_LOGI("script_stopp_all", "Chlorinator wird gestoppt");
       - switch.turn_off: switch_chlorinator
-
       # 2) PH Pumpe stoppen
       - lambda: |-
           ESP_LOGI("script_stopp_all", "PH Pumpe wird gestoppt");
       - switch.turn_off: switch_phdosierpumpe
-
       # 3) kurze Pause für sauberes Abschalten
       - delay: 5s
 
@@ -989,14 +969,13 @@ script:
                 ESP_LOGI("script_stopp_all", "Poolpumpe wird ausgeschaltet");
             - switch.turn_off: switch_poolpump
 
-
-#################################### Pumpe starten #############################
-################################################################################
+  #################################### Pumpe starten #############################
+  ################################################################################
   - id: script_pumpstart
     mode: restart
     then:
       - if:
-          condition: 
+          condition:
             #Die FU darf nicht laufen UND die Frequenz darf nicht 0 sein
             - lambda: "return (id(inv_running).state != 1 && id(glo_set_frequency) >= 55);"
           then:
@@ -1019,13 +998,13 @@ script:
                 then:
                   - if:
                       condition:
-              # 4.) Wenn DN40 Flow Sensor aktiv ist → 15 Sekunden warten
+                        # 4.) Wenn DN40 Flow Sensor aktiv ist → 15 Sekunden warten
                         - lambda: |-
                             ESP_LOGI("script_pumpstart","FU läuft, warte 15s und überprüfe Durchfluss am DN40");
                             return id(use_flow_dn40);
                       then:
                         - delay: 15s
-              # 5.) DN40 prüfen oder ignorieren weil nicht installiert
+                  # 5.) DN40 prüfen oder ignorieren weil nicht installiert
                   - if:
                       condition:
                         - lambda: |-
@@ -1065,9 +1044,8 @@ script:
             - lambda: |-
                 ESP_LOGW("script_pumpstart","Pumpenstart übersprungen: FU läuft bereits");
 
-
-############Improved check_PumpPreRunTime Script################################
-################################################################################
+  ############Improved check_PumpPreRunTime Script################################
+  ################################################################################
   - id: script_check_PumpPreRunTime
     mode: single
     then:
@@ -1096,9 +1074,8 @@ script:
               }
           }
 
-
-######Improved PH Needed Script#################################################
-################################################################################
+  ######Improved PH Needed Script#################################################
+  ################################################################################
   - id: script_check_ph_needed
     mode: single
     then:
@@ -1106,63 +1083,143 @@ script:
           // PH Minus benötigt, wenn aktueller PH Wert > Maximalwert
           id(ph_needed) = (id(ph_measvalue).state > id(ph_max));
 
-
-######Improved check_chlor_needed Script########################################
-################################################################################
+  ######Improved check_chlor_needed Script########################################
+  ################################################################################
   - id: script_check_chlor_needed
     mode: single
     then:
       - lambda: |-
           id(chlor_needed) = (id(orp_measvalue).state < id(glo_orp_min));
 
+  ######Status Script#############################################################
+  ################################################################################
+  # - id: script_status
+  #   mode: single
+  #   then:
+  #     - lambda: |-
+  #         // Das "return;" muss hier weg bleiben, damit der Code läuft!
+  #         // 0. Workmode Global Variabel Check
+  #         ESP_LOGW(##################################################################################);
+  #         ESP_LOGW(##########################Status - Start##########################################);
+  #         ESP_LOGW(##################################################################################);
+  #         ESP_LOGI("Status", "Workmode wenn nicht 'Wartung'          | %s ", id(glo_workmode).c_str());
+  #         // 1. Poolpumpe (Bool Global)
+  #         ESP_LOGI("Status", "Poolpumpenvorlauf status               |  %s    |", id(poolpump_ok) ? "OK" : "Warten");
+  #         // 2. Chlor (Bool Global + Sensoren)
+  #         ESP_LOGI("Status", "Chlor benötigt:                        |  %s    | ORP Ist: %.2f Min: %.2f",
+  #                  id(chlor_needed) ? "Ja" : "Nein", id(orp_measvalue).state, id(glo_orp_min));
+  #         // 3. Max-Werte (Bool Globals)
+  #         ESP_LOGI("Status", "Chlor tägl. max. erreicht              |  %s    |", id(chlorinator_max_reached) ? "JA" : "Nein");
+  #         // 4. Darf ORP interval loslaufen?
+  #         ESP_LOGI("Status", "Chlorlauf erlaubt?                     | %s     |", id(glo_orp_allowed) ? "Ja" : "Nein(glo_orp_allowed == false)");
+  #         // 5. PH (Bool Global + Sensoren)
+  #         ESP_LOGI("Status", "PH benötigt:                           |  %s    | PH Ist: %.2f Max: %.2f",
+  #                  id(ph_needed) ? "Ja" : "Nein", id(ph_measvalue).state, id(ph_max));
+  #         // 6. PH Dosierung (Bool Global + Float Globals)
+  #         ESP_LOGI("Status", "PH Minus tägl. max. erreicht           |  %s    | Ist: %.2fml Max: %.2fml",
+  #                  id(ph_max_injection_reached) ? "JA" : "Nein", id(ph_today_ml), id(max_ph_ml_per_day));
+  #         // 7. PH Sperre (Bool Global)
+  #         ESP_LOGI("Status", "PH Minus Zyklus gesperrt               |  %s    |", id(ph_locked) ? "Ja" : "Nein");
+  #         // 8. Tank (Float Global)
+  #         ESP_LOGI("Status", "PH Tank nachfüllen?                    |  %s    | Tankgröße: %.2fl Füllstand: %.2fl", id(ph_tank_refill) ? "Ja" : "Nein", (id(ph_tank_capacity_ml) / 1000.0), (id(ph_tank_remaining) / 1000.0));
+  #         // 9. PH Pumpe Laufzeit in Minuten heute
+  #         ESP_LOGI("Status", "Laufzeit PH Dosierung heute            | %.2f Min |", (id(phdispenser_today_run_time) / 60.0f));
+  #         // 10. PH Pumpe Laufzeit in Minuten heute
+  #         ESP_LOGI("Status", "Laufzeit PH Dosierung Zyklus           | %.2f Min |", (id(phdispenser_cycle_time) / 60.0f));
+  #         // 11. Laufzeit Chlorinator Heute Gesamt (Umrechnung von Sekunden in Minuten)
+  #         ESP_LOGI("Status", "Laufzeit Chlorinator heute             | %.2f Min |", (id(chlorinator_today_run_time) / 60.0f));
+  #         // 12. Restlaufzeit Chlorinator dieser Zyklus (Umrechnung von Sekunden in Minuten)
+  #         ESP_LOGI("Status", "Chlorinator läuft noch für             | %.2f Min |", (id(chlorinator_remaining_seconds) / 60.0f));
+  #         // 13. Polarität des Chlorinators
+  #         ESP_LOGI("Status", "Polarität derzeitiger Zyklus           | %s     |", id(chlorinator_polarity) ? "GPIOHigh" : "GPIOLow");
+  #         // 14. Timer Einstellungen (Start & Stop Zeit)
+  #         ESP_LOGI("Status", "Timer Startzeit:                       |  %02.0f:%02.0f   |",
+  #                 id(number_timer_hour_on).state, id(number_timer_minute_on).state);
+  #         ESP_LOGI("Status", "Timer Stoppzeit:                       |  %02.0f:%02.0f   |",
+  #                 id(number_timer_hour_off).state, id(number_timer_minute_off).state);
+  #         // 15. Timer Freigabe (Dein bs_timer_allows_run)
+  #         ESP_LOGI("Status", "Interval/Lauf durch timer erlaubt?     |  %s      |",
+  #                 id(bs_timer_allows_run).state ? "JA" : "NEIN");
+  #         ESP_LOGI(############################Status - End##########################################);
+  #         ESP_LOGI(##################################################################################);
 
-######Status Script#############################################################
-################################################################################
   - id: script_status
-    mode: single     
+    mode: single
     then:
       - lambda: |-
-          // Das "return;" muss hier weg bleiben, damit der Code läuft!
-          // 0. Workmode Global Variabel Check
-          ESP_LOGI("Status", "Workmode wenn nicht 'Wartung'          | %s ", id(glo_workmode).c_str());
-          // 1. Poolpumpe (Bool Global)
-          ESP_LOGI("Status", "Poolpumpenvorlauf status               |  %s    |", id(poolpump_ok) ? "OK" : "Warten");
-          // 2. Chlor (Bool Global + Sensoren)
-          ESP_LOGI("Status", "Chlor benötigt:                        |  %s    | ORP Ist: %.2f Min: %.2f", 
-                   id(chlor_needed) ? "Ja" : "Nein", id(orp_measvalue).state, id(glo_orp_min));
-          // 3. Max-Werte (Bool Globals)
-          ESP_LOGI("Status", "Chlor tägl. max. erreicht              |  %s    |", id(chlorinator_max_reached) ? "JA" : "Nein");
-          // 4. Darf ORP interval loslaufen?
-          ESP_LOGI("Status", "Chlorlauf erlaubt?                     | %s     |", id(glo_orp_allowed) ? "Ja" : "Nein(glo_orp_allowed == false)");
-          // 5. PH (Bool Global + Sensoren)
-          ESP_LOGI("Status", "PH benötigt:                           |  %s    | PH Ist: %.2f Max: %.2f", 
-                   id(ph_needed) ? "Ja" : "Nein", id(ph_measvalue).state, id(ph_max));
-          // 6. PH Dosierung (Bool Global + Float Globals)
-          ESP_LOGI("Status", "PH Minus tägl. max. erreicht           |  %s    | Ist: %.2fml Max: %.2fml", 
-                   id(ph_max_injection_reached) ? "JA" : "Nein", id(ph_today_ml), id(max_ph_ml_per_day));
-          // 7. PH Sperre (Bool Global)
-          ESP_LOGI("Status", "PH Minus Zyklus gesperrt               |  %s    |", id(ph_locked) ? "Ja" : "Nein");
-          // 8. Tank (Float Global)
-          ESP_LOGI("Status", "PH Tank nachfüllen?                    |  %s    | Tankgröße: %.2fl Füllstand: %.2fl", id(ph_tank_refill) ? "Ja" : "Nein", (id(ph_tank_capacity_ml) / 1000.0), (id(ph_tank_remaining) / 1000.0));
-          // 9. PH Pumpe Laufzeit in Minuten heute
-          ESP_LOGI("Status", "Laufzeit PH Dosierung heute            | %.2f Min |", (id(phdispenser_today_run_time) / 60.0f));
-          // 10. PH Pumpe Laufzeit in Minuten heute
-          ESP_LOGI("Status", "Laufzeit PH Dosierung Zyklus           | %.2f Min |", (id(phdispenser_cycle_time) / 60.0f));
-          // 11. Laufzeit Chlorinator Heute Gesamt (Umrechnung von Sekunden in Minuten)
-          ESP_LOGI("Status", "Laufzeit Chlorinator heute             | %.2f Min |", (id(chlorinator_today_run_time) / 60.0f));
-          // 12. Restlaufzeit Chlorinator dieser Zyklus (Umrechnung von Sekunden in Minuten)
-          ESP_LOGI("Status", "Chlorinator läuft noch für             | %.2f Min |", (id(chlorinator_remaining_seconds) / 60.0f));
-          // 13. Polarität des Chlorinators
-          ESP_LOGI("Status", "Polarität derzeitiger Zyklus           | %s     |", id(chlorinator_polarity) ? "GPIOHigh" : "GPIOLow");
-          // 14. Timer Einstellungen (Start & Stop Zeit)
-          ESP_LOGI("Status", "Timer Startzeit:                       |  %02.0f:%02.0f   |", 
-                  id(number_timer_hour_on).state, id(number_timer_minute_on).state);
-          ESP_LOGI("Status", "Timer Stoppzeit:                       |  %02.0f:%02.0f   |", 
-                  id(number_timer_hour_off).state, id(number_timer_minute_off).state);
-          // 15. Timer Freigabe (Dein bs_timer_allows_run)
-          ESP_LOGI("Status", "Interval/Lauf durch timer erlaubt?     |  %s      |", 
-                  id(bs_timer_allows_run).state ? "JA" : "NEIN");
+          const char* TAG = "Status";
 
+          ESP_LOGW(TAG, "");
+          ESP_LOGW(TAG, "");
+          ESP_LOGW(TAG, "##################################################################################");
+          ESP_LOGW(TAG, "##########################Status - Start##########################################");
+          ESP_LOGW(TAG, "##################################################################################");
+          ESP_LOGW(TAG, "");
+
+          // 0. Workmode Global Variabel Check
+          ESP_LOGI(TAG, "%-40s | %s", "Workmode wenn nicht 'Wartung'", id(glo_workmode).c_str());
+
+          // 1. Poolpumpe (Bool Global)
+          ESP_LOGI(TAG, "%-40s | %-12s |", "Poolpumpenvorlauf status", id(poolpump_ok) ? "OK" : "Warten");
+
+          ESP_LOGI(TAG, "--- Chlor / Desinfektion ---------------------------------------------------------");
+
+          // 2. Chlor (Bool Global + Sensoren)
+          ESP_LOGI(TAG, "%-40s | %-12s | ORP Ist: %.2f Min: %.2f", 
+                   "Chlor benötigt:", id(chlor_needed) ? "Ja" : "Nein", id(orp_measvalue).state, id(glo_orp_min));
+
+          // 3. Max-Werte (Bool Globals)
+          ESP_LOGI(TAG, "%-40s | %-12s |", "Chlor tägl. max. erreicht", id(chlorinator_max_reached) ? "JA" : "Nein");
+
+          // 4. Darf ORP interval loslaufen?
+          ESP_LOGI(TAG, "%-40s | %-12s |", "Chlorlauf erlaubt?", id(glo_orp_allowed) ? "Ja" : "Nein");
+
+          // 11. Laufzeit Chlorinator Heute Gesamt
+          ESP_LOGI(TAG, "%-40s | %9.2f Min |", "Laufzeit Chlorinator heute", (id(chlorinator_today_run_time) / 60.0f));
+
+          // 12. Restlaufzeit Chlorinator dieser Zyklus
+          ESP_LOGI(TAG, "%-40s | %9.2f Min |", "Chlorinator läuft noch für", (id(chlorinator_remaining_seconds) / 60.0f));
+
+          // 13. Polarität des Chlorinators
+          ESP_LOGI(TAG, "%-40s | %-12s |", "Polarität derzeitiger Zyklus", id(chlorinator_polarity) ? "GPIOHigh" : "GPIOLow");
+
+          ESP_LOGI(TAG, "--- PH-Wert Regulierung ----------------------------------------------------------");
+
+          // 5. PH (Bool Global + Sensoren)
+          ESP_LOGI(TAG, "%-40s | %-12s | PH Ist: %.2f Max: %.2f", 
+                   "PH benötigt:", id(ph_needed) ? "Ja" : "Nein", id(ph_measvalue).state, id(ph_max));
+
+          // 6. PH Dosierung (Bool Global + Float Globals)
+          ESP_LOGI(TAG, "%-40s | %-12s | Ist: %.2fml Max: %.2fml", 
+                   "PH Minus tägl. max. erreicht", id(ph_max_injection_reached) ? "JA" : "Nein", id(ph_today_ml), id(max_ph_ml_per_day));
+
+          // 7. PH Sperre (Bool Global)
+          ESP_LOGI(TAG, "%-40s | %-12s |", "PH Minus Zyklus gesperrt", id(ph_locked) ? "Ja" : "Nein");
+
+          // 8. Tank (Float Global)
+          ESP_LOGI(TAG, "%-40s | %-12s | Tankgröße: %.2fl Füllstand: %.2fl", 
+                   "PH Tank nachfüllen?", id(ph_tank_refill) ? "Ja" : "Nein", (id(ph_tank_capacity_ml) / 1000.0), (id(ph_tank_remaining) / 1000.0));
+
+          // 9. PH Pumpe Laufzeit in Minuten heute
+          ESP_LOGI(TAG, "%-40s | %9.2f Min |", "Laufzeit PH Dosierung heute", (id(phdispenser_today_run_time) / 60.0f));
+
+          // 10. PH Pumpe Laufzeit in Minuten heute
+          ESP_LOGI(TAG, "%-40s | %9.2f Min |", "Laufzeit PH Dosierung Zyklus", (id(phdispenser_cycle_time) / 60.0f));
+
+          ESP_LOGI(TAG, "--- Zeitsteuerung ----------------------------------------------------------------");
+
+          // 14. Timer Einstellungen (Start & Stop Zeit)
+          ESP_LOGI(TAG, "%-40s |  %02.0f:%02.0f - %02.0f:%02.0f  |", 
+                   "Timer Start/Stoppzeit", id(number_timer_hour_on).state, id(number_timer_minute_on).state, id(number_timer_hour_off).state, id(number_timer_minute_off).state);
+
+          // 15. Timer Freigabe (Dein bs_timer_allows_run)
+          ESP_LOGI(TAG, "%-40s | %-12s |", "Interval/Lauf durch timer erlaubt?", id(bs_timer_allows_run).state ? "JA" : "NEIN");
+
+          ESP_LOGW(TAG, "");
+          ESP_LOGW(TAG, "##################################################################################");
+          ESP_LOGW(TAG, "############################Status - End##########################################");
+          ESP_LOGW(TAG, "");
+          ESP_LOGW(TAG, "");
 
           // Updating Frontend (Einzelne Text-Felder)
           if (id(bs_pzem_online).state) {
@@ -1183,9 +1240,8 @@ script:
               }
           }
 
-
-###########Script triggered by interval for Chlorinator#########################
-################################################################################
+  ###########Script triggered by interval for Chlorinator#########################
+  ################################################################################
   - id: script_chlorinator_by_interval
     mode: single
     then:
@@ -1205,15 +1261,15 @@ script:
             return;
           }
           id(switch_chlorinator).publish_state(true);
-      
+
       # Einschalten des Chlorinators
       # Schritt 1: 24V einschalten, falls diese aus ist
       - if:
           condition:
-            - lambda: 'return !id(bs_pzem_online).state;'
+            - lambda: "return !id(bs_pzem_online).state;"
           then:
             - switch.turn_on: switch_relay4_power24v
-            - lambda: |- 
+            - lambda: |-
                 ESP_LOGI("switch_chlorinator", "24 Volt Netzteil eingeschaltet!");
                 id(switch_chlorinator).publish_state(true);
             - delay: 2s
@@ -1230,7 +1286,7 @@ script:
             - switch.turn_off: switch_chlor_direction_gpio # Richtung "GPIOLow"
             - lambda: ESP_LOGI("switch_chlorinator", "H-BrückePhase GPIO = 0V");
       - delay: 10s # DIE WICHTIGSTE PAUSE: Dead-Time vor dem Einschalten des Stroms
-      
+
       # Schritt 3: H-Brücke einschalten und Zelle mit 24V bestromen
       - switch.turn_on: switch_chlor_run_gpio
       - lambda: |-
@@ -1238,55 +1294,54 @@ script:
           ESP_LOGI("chlorinator", "Geplante Laufzeit: %d Sek", id(chlorinator_runtime_seconds));
           ESP_LOGI("switch_chlorinator", "Aktuelle Restlaufzeit: %d Sek", id(chlorinator_remaining_seconds));
 
-
-################################################################################
-#############Calculate the estimates duration of the chlorinator################
-################################################################################
-# -------------------------------------------------------------------
-# Chlorinator Laufzeit-Berechnung – Feste Annahmen & Modellgrenzen
-#
-# Dieses Berechnungsmodell ist eine praxisnahe NÄHERUNG und basiert
-# auf folgenden FESTEN ANNAHMEN:
-#
-# 1) Pool / Wasser
-#    - Poolvolumen: 45m3 Liter (Änderbar in Globals)
-#    - Salzwasserpool mit Salzkonzentration gemäß Zodiac LM2:
-#      ca. 3200–4000 ppm (wird als optimal angenommen)
-#
-# 2) Chlorinator
-#    - Elektrolysezelle: Zodiac LM2-40
-#    - Maximale Chlorproduktion: 40 g Chlor pro Stunde
-#    - Produktion wird linear skaliert über Effizienzfaktoren
-#
-# 3) ORP / Chlorbedarf
-#    - Ziel-ORP: 750 mV
-#    - Näherung: 10 mV ORP ≈ 0.01 mg/l freies Chlor
-#    - ORP dient als Proxy für Chlorbedarf (kein direktes ppm-Messen)
-#
-# 4) pH-Wert
-#    - Ideal-pH: 7.0
-#    - Abweichungen vom Idealwert beeinflussen die Chloreffizienz
-#      linear (Faustformel aus Poolpraxis)
-#
-# 5) Temperatur
-#    - Referenztemperatur: 25 °C
-#    - Höhere Temperaturen beschleunigen Reaktionen
-#    - Niedrigere Temperaturen verlangsamen die Chlorwirkung
-#
-# 6) Umwälzung / Pumpe
-#    - Poolpumpe liefert bei 100 % Frequenz: 12 m³/h
-#    - Aktuelle Förderleistung wird linear aus Inverterfrequenz
-#      (inv_frequency) abgeleitet
-#
-# 7) Modellgrenzen
-#    - Keine Berücksichtigung von:
-#        * Cyanursäure (CYA)
-#        * direkter Sonneneinstrahlung / UV
-#        * Badebelastung
-#        * organischer Schmutzlast
-#    - Ziel ist eine STABILE, VORHERSEHBARE Regelung,
-#      keine laborgenau chemische Simulation
-# -------------------------------------------------------------------
+  ################################################################################
+  #############Calculate the estimates duration of the chlorinator################
+  ################################################################################
+  # -------------------------------------------------------------------
+  # Chlorinator Laufzeit-Berechnung – Feste Annahmen & Modellgrenzen
+  #
+  # Dieses Berechnungsmodell ist eine praxisnahe NÄHERUNG und basiert
+  # auf folgenden FESTEN ANNAHMEN:
+  #
+  # 1) Pool / Wasser
+  #    - Poolvolumen: 45m3 Liter (Änderbar in Globals)
+  #    - Salzwasserpool mit Salzkonzentration gemäß Zodiac LM2:
+  #      ca. 3200–4000 ppm (wird als optimal angenommen)
+  #
+  # 2) Chlorinator
+  #    - Elektrolysezelle: Zodiac LM2-40
+  #    - Maximale Chlorproduktion: 40 g Chlor pro Stunde
+  #    - Produktion wird linear skaliert über Effizienzfaktoren
+  #
+  # 3) ORP / Chlorbedarf
+  #    - Ziel-ORP: 750 mV
+  #    - Näherung: 10 mV ORP ≈ 0.01 mg/l freies Chlor
+  #    - ORP dient als Proxy für Chlorbedarf (kein direktes ppm-Messen)
+  #
+  # 4) pH-Wert
+  #    - Ideal-pH: 7.0
+  #    - Abweichungen vom Idealwert beeinflussen die Chloreffizienz
+  #      linear (Faustformel aus Poolpraxis)
+  #
+  # 5) Temperatur
+  #    - Referenztemperatur: 25 °C
+  #    - Höhere Temperaturen beschleunigen Reaktionen
+  #    - Niedrigere Temperaturen verlangsamen die Chlorwirkung
+  #
+  # 6) Umwälzung / Pumpe
+  #    - Poolpumpe liefert bei 100 % Frequenz: 12 m³/h
+  #    - Aktuelle Förderleistung wird linear aus Inverterfrequenz
+  #      (inv_frequency) abgeleitet
+  #
+  # 7) Modellgrenzen
+  #    - Keine Berücksichtigung von:
+  #        * Cyanursäure (CYA)
+  #        * direkter Sonneneinstrahlung / UV
+  #        * Badebelastung
+  #        * organischer Schmutzlast
+  #    - Ziel ist eine STABILE, VORHERSEHBARE Regelung,
+  #      keine laborgenau chemische Simulation
+  # -------------------------------------------------------------------
 
   - id: script_calc_chlorinator_runtime
     mode: single
@@ -1306,7 +1361,7 @@ script:
           // --- 1. TAGESLIMIT PRÜFUNG ---
           // Umrechnung Minuten (max) in Sekunden für den Vergleich
           float max_daily_sec = id(chlor_run_time_max_day) * 60.0;
-          
+
           if (id(chlorinator_today_run_time) >= max_daily_sec) {
             id(chlorinator_max_reached) = true;
             id(chlorinator_runtime_seconds) = 0;
@@ -1353,7 +1408,7 @@ script:
           // --- 4. LAUFZEIT & ZYKLUS-LIMIT ---
           float runtime_hours = needed_chlorine_g / effective_prod;
           int runtime_seconds = (int)(runtime_hours * 3600.0);
-          
+
           // A) Begrenzung durch Zyklus-Limit
           int max_cycle_sec = (int)(id(chlor_run_time_max_cycle) * 60);
           if (runtime_seconds > max_cycle_sec) {
@@ -1379,27 +1434,27 @@ script:
             orp_delta, needed_chlorine_g, pump_flow_m3_h, ph_actual, temp_actual, runtime_seconds
           );
 
-
 #Enable logging
 debug:
   update_interval: 5s
 
 #Logger must be at least debug (default)
 logger:
-  level: DEBUG #INFO
+  #level: DEBUG
+  level: INFO
   baud_rate: 0
   #enable for serial debugging
   #baud_rate: 115200
 
 #Enable Home Assistant API
 api:
-  encryption: 
+  encryption:
     key: !secret api_key
   #no reboot in case HA is down - can require full reboot when HA is back
   reboot_timeout: 0s
   on_client_connected:
     then:
-      - delay: 2s  # Kurze Gedenksekunde, bis der Log-Stream stabil ist
+      - delay: 2s # Kurze Gedenksekunde, bis der Log-Stream stabil ist
       - lambda: |-
           if (!id(boot_log_buffer).empty()) {
             ESP_LOGW("boot_report", "---------------------------------------");
@@ -1431,9 +1486,9 @@ wifi:
       password: "${ssid1_pw}"
     - ssid: "${ssid2_ap}"
       password: "${ssid2_pw}"
-    
+
     #https://esphome.io/components/wifi.html#connecting-to-multiple-networks
-    #Instead using a AP, using a Rescue Network, so you can span a AP 
+    #Instead using a AP, using a Rescue Network, so you can span a AP
     #with your mobile and ESP is connecting to the same
     - ssid: "rescue"
       password: "safemysoul"
@@ -1488,13 +1543,13 @@ time:
     id: sntp_time
     timezone: Europe/Berlin
     servers:
-    - pool.ntp.org
+      - pool.ntp.org
     on_time:
       - seconds: 2
         minutes: 0
         hours: 0
         then:
-          - logger.log: 
+          - logger.log:
               format: "Zähler für tägliche Mengen zurückgesetzt."
               level: info
           - lambda: |
@@ -1511,16 +1566,15 @@ time:
               id(ph_needed) = false;
 
 uart:
-#Tuya RX / TX
+  #Tuya RX / TX
   - id: uart_0
     tx_pin: ${txd0}
     rx_pin: ${rxd0}
     baud_rate: 115200
     rx_buffer_size: 512
     setup_priority: ${uart_prior}
-  
 
-#Modbus for Rocket Controller (8N1)
+  #Modbus for Rocket Controller (8N1)
   - id: modbus_uart
     tx_pin: ${txd1}
     rx_pin: ${rxd1}
@@ -1531,7 +1585,7 @@ uart:
 
 one_wire:
   - platform: gpio
-    pin: 
+    pin:
       number: ${onewire}
 
 modbus:
@@ -1540,73 +1594,73 @@ modbus:
   setup_priority: ${modbushub_prior}
 
 modbus_controller:
-- id: modbus_freq_inv
-  modbus_id: rocket_modbus
-  address: 0x05
-  setup_priority: ${modbushub_prior}
-  command_throttle: 200ms
-  update_interval: 5s
-  max_cmd_retries: 1 #Default:4, nach zwei Fehlversuchen wird das Gerät als Offline markiert
-  on_offline:
-    then:
-      - lambda: |-
-          ESP_LOGW("modbus_freq_inv", "Controller meldet: Gerät ist offline. Nulle Sensoren.");
-          id(bs_inv_online).publish_state(false);
-          id(inv_voltage_out).publish_state(0.00);
-          id(inv_voltage_bus).publish_state(0.00);
-          id(inv_current_out).publish_state(0.00);
-          id(inv_torque_out).publish_state(0.00);
-          id(inv_speed).publish_state(0.00);
-          id(inv_running).publish_state(NAN);
-  on_online:
-    then:
-      - binary_sensor.template.publish:
-          id: bs_inv_online
-          state: ON
+  - id: modbus_freq_inv
+    modbus_id: rocket_modbus
+    address: 0x05
+    setup_priority: ${modbushub_prior}
+    command_throttle: 200ms
+    update_interval: 5s
+    max_cmd_retries: 1 #Default:4, nach zwei Fehlversuchen wird das Gerät als Offline markiert
+    on_offline:
+      then:
+        - lambda: |-
+            ESP_LOGW("modbus_freq_inv", "Controller meldet: Gerät ist offline. Nulle Sensoren.");
+            id(bs_inv_online).publish_state(false);
+            id(inv_voltage_out).publish_state(0.00);
+            id(inv_voltage_bus).publish_state(0.00);
+            id(inv_current_out).publish_state(0.00);
+            id(inv_torque_out).publish_state(0.00);
+            id(inv_speed).publish_state(0.00);
+            id(inv_running).publish_state(NAN);
+    on_online:
+      then:
+        - binary_sensor.template.publish:
+            id: bs_inv_online
+            state: ON
 
-- id: ${modbusid_heat_pump}
-  modbus_id: rocket_modbus
-  address: 0x01
-  setup_priority: -10
-  command_throttle: ${throttle_modbus_heatpump}
-  update_interval: ${upd_int_modbus_heatpump}
-  on_offline:
-    then:
-      - lambda: |-
-          ESP_LOGW("${modbusid_heat_pump}", "Controller meldet: Gerät ist offline. Nulle Sensoren.");
-          id(bs_hp_online).publish_state(false);
-  on_online:
-    then:
-      - binary_sensor.template.publish:
-          id: bs_hp_online
-          state: ON
+  - id: ${modbusid_heat_pump}
+    modbus_id: rocket_modbus
+    address: 0x01
+    setup_priority: -10
+    command_throttle: ${throttle_modbus_heatpump}
+    update_interval: ${upd_int_modbus_heatpump}
+    on_offline:
+      then:
+        - lambda: |-
+            ESP_LOGW("${modbusid_heat_pump}", "Controller meldet: Gerät ist offline. Nulle Sensoren.");
+            id(bs_hp_online).publish_state(false);
+    on_online:
+      then:
+        - binary_sensor.template.publish:
+            id: bs_hp_online
+            state: ON
 
-- id: ${modbusid_energy_meter}
-  modbus_id: rocket_modbus
-  address: 0x04
-  setup_priority: -10
-  command_throttle: ${throttle_modbus_energy_meter}
-  update_interval: ${upd_int_modbus_energy_meter}
-  on_offline:
-    then:
-      - lambda: |-
-          ESP_LOGW("${modbusid_energy_meter}", "Controller meldet: Gerät ist offline. Nulle Sensoren.");
-          id(bs_energy_meter_online).publish_state(false);
-  on_online:
-    then:
-      - binary_sensor.template.publish:
-          id: bs_energy_meter_online
-          state: ON
+  - id: ${modbusid_energy_meter}
+    modbus_id: rocket_modbus
+    address: 0x04
+    setup_priority: -10
+    command_throttle: ${throttle_modbus_energy_meter}
+    update_interval: ${upd_int_modbus_energy_meter}
+    on_offline:
+      then:
+        - lambda: |-
+            ESP_LOGW("${modbusid_energy_meter}", "Controller meldet: Gerät ist offline. Nulle Sensoren.");
+            id(bs_energy_meter_online).publish_state(false);
+    on_online:
+      then:
+        - binary_sensor.template.publish:
+            id: bs_energy_meter_online
+            state: ON
 
-- id: pzem_hub
-  modbus_id: rocket_modbus
-  address: 0x01
-  setup_priority: -10
-  command_throttle: 100ms
-  #Das update interval wird nun auf Sensorebene vergeben
-  update_interval: "4s"
-  max_cmd_retries: 1 #Default:4, nach zwei Fehlversuchen wird das Gerät als Offline markiert
-  on_offline:
+  - id: pzem_hub
+    modbus_id: rocket_modbus
+    address: 0x01
+    setup_priority: -10
+    command_throttle: 100ms
+    #Das update interval wird nun auf Sensorebene vergeben
+    update_interval: "4s"
+    max_cmd_retries: 1 #Default:4, nach zwei Fehlversuchen wird das Gerät als Offline markiert
+    on_offline:
       then:
         - lambda: |-
             ESP_LOGW("pzem_hub", "Controller meldet: Gerät ist offline. Nulle Sensoren.");
@@ -1614,40 +1668,40 @@ modbus_controller:
             id(pzem_dc_voltage).publish_state(0.0);
             id(pzem_dc_current).publish_state(0.0);
             id(pzem_dc_power).publish_state(0.0);
-  on_online:
-    then:
-      - binary_sensor.template.publish:
-          id: bs_pzem_online
-          state: ON
+    on_online:
+      then:
+        - binary_sensor.template.publish:
+            id: bs_pzem_online
+            state: ON
 
 #Tuya with ignoring what we do not need
 tuya:
   uart_id: uart_0
-  ignore_mcu_update_on_datapoints: 
-  - "102"
-  - "103"
-  - "107"
-  - "108"
-  - "143"
-  - "142"
-  - "141"
-  - "138"
-  - "137"
-  - "136"
-  - "128"
-  - "127"
-  - "126"
-  - "123"
-  - "122"
-  - "121"
-  - "118"
-  - "117"
-  - "116"
-  - "113"
-  - "112"
-  - "111"
-  - "132"
-  - "133"
+  ignore_mcu_update_on_datapoints:
+    - "102"
+    - "103"
+    - "107"
+    - "108"
+    - "143"
+    - "142"
+    - "141"
+    - "138"
+    - "137"
+    - "136"
+    - "128"
+    - "127"
+    - "126"
+    - "123"
+    - "122"
+    - "121"
+    - "118"
+    - "117"
+    - "116"
+    - "113"
+    - "112"
+    - "111"
+    - "132"
+    - "133"
   on_datapoint_update:
     - sensor_datapoint: 8
       datapoint_type: int # Wichtig: Hier muss der Typ stehen
@@ -1688,7 +1742,7 @@ text_sensor:
       if (days > 3650) {
         return {"Wird gestartet..."};
       }
-      
+
       if (days > 0) {
         return {esphome::str_sprintf("%dd %dh %dm %ds", days, hours, minutes, seconds)};
       } else if (hours > 0) {
@@ -1714,9 +1768,9 @@ text_sensor:
       web_server:
         sorting_group_id: grp_system
       entity_category: diagnostic
-  
+
   - platform: template
-    name: "${friendly_name_entity} Chlor Polarity"
+    name: "${friendly_name_entity} Chlor Polarität"
     id: txt_chlor_pol
     icon: "mdi:swap-horizontal"
     web_server:
@@ -1744,7 +1798,7 @@ text_sensor:
     id: txt_sens_status
     icon: "mdi:message-text-outline"
     web_server:
-        sorting_group_id: grp_system
+      sorting_group_id: grp_system
     entity_category: diagnostic
     #initial_value: "Bereit"
 
@@ -1767,19 +1821,18 @@ sensor:
   - platform: dallas_temp
     id: sensor_outdoor_temp
     name: "${friendly_name_entity} Außentemperatur °C"
-    # adress ist im Log, für ersten Start 
+    # adress ist im Log, für ersten Start
     # address auskommentieren und nur den "neuen" Dallas anschließen
     address: 0x843c01b556227b28
     icon: "mdi:thermometer"
     web_server:
       sorting_group_id: grp_sensors
       sorting_weight: 51
-    
 
   - platform: dallas_temp
     id: sensor_water_temp
     name: "${friendly_name_entity} Wasser Temperatur"
-    # address ist im Log, für ersten Start 
+    # address ist im Log, für ersten Start
     # address auskommentieren und nur den "neuen" Dallas anschließen
     #address: 0x843c01b556227b28
     icon: "mdi:thermometer"
@@ -1800,9 +1853,9 @@ sensor:
     icon: "mdi:timer-sand"
     lambda: |-
       if (id(poolpump_start_time) == 0) return 0.0f;
-      
+
       float elapsed = (millis() - id(poolpump_start_time)) / 60000.0f;
-      
+
       // Begrenze die Anzeige auf die maximale Vorlaufzeit
       if (elapsed > id(PumpPreRunTime)) {
         return (float)id(PumpPreRunTime);
@@ -1821,7 +1874,7 @@ sensor:
     state_class: measurement
     lambda: |-
       return id(ph_today_ml);  // ml → Liter
-    update_interval: 120s  # optional, alle 10 Sekunden aktualisieren
+    update_interval: 120s # optional, alle 10 Sekunden aktualisieren
 
   - platform: template
     name: "${friendly_name_entity} PH Tank Restinhalt"
@@ -1835,8 +1888,7 @@ sensor:
     state_class: measurement
     lambda: |-
       return id(ph_tank_remaining) / 1000.0;  // ml → Liter
-    update_interval: 120s  # optional, alle 10 Sekunden aktualisieren
-
+    update_interval: 120s # optional, alle 10 Sekunden aktualisieren
 
   #Brauchen wir nicht mehr, ersetzt durch tuya: on_datapoint_update
   # #Reading tuya W2839 Pool ORP / PH / Temp
@@ -1860,7 +1912,7 @@ sensor:
   #         // Validierung: Nur wenn der Wert im sinnvollen Bereich liegt,
   #         // akzeptieren wir ihn als echtes Lebenszeichen.
   #         // Ein pH von exakt 0.0 oder NaN ist bei Rauschen/Fehlern häufig.
-  #         if (!std::isnan(x)) { 
+  #         if (!std::isnan(x)) {
   #           id(glo_tuya_last_seen_ms) = millis();
   #         } else {
   #             // Optional: Ein Log-Eintrag zum Debuggen (kann später raus)
@@ -1879,8 +1931,8 @@ sensor:
     icon: "mdi:ph"
     accuracy_decimals: 2
     filters:
-        - multiply: 0.01
-        - throttle: 10s
+      - multiply: 0.01
+      - throttle: 10s
 
   - platform: "tuya"
     name: "${friendly_name_entity} Aktueller ORP Wert"
@@ -1895,9 +1947,8 @@ sensor:
     filters:
       - throttle: 10s
 
-
-########################## YF DN40 Flow Meter – Pumpe###########################
-################################################################################
+  ########################## YF DN40 Flow Meter – Pumpe###########################
+  ################################################################################
   - platform: pulse_counter
     id: flow_pump
     pin: ${yfdn40}
@@ -1916,7 +1967,7 @@ sensor:
       # Pulses per Liter/min: 27 (x/27) => x is pulses received =x L/min *60 = x L/hr
       - lambda: |-
           return (x / 27.0) * 60.0;  // L/Std.
-      - throttle: 10s  # nur alle 10s an HA senden
+      - throttle: 10s # nur alle 10s an HA senden
     total:
       name: "${friendly_name_entity} Durchfluss Pumpe Tag"
       unit_of_measurement: "L"
@@ -1931,9 +1982,8 @@ sensor:
         - lambda: |-
             return x / 27.0;  // L gesamt
 
-
-###################### YF S201 Flow Meter – Messzelle###########################
-################################################################################
+  ###################### YF S201 Flow Meter – Messzelle###########################
+  ################################################################################
   - platform: pulse_counter
     id: flow_meter
     pin: ${yfs201}
@@ -1951,7 +2001,7 @@ sensor:
       #Pulses per Liter/min: 450 (x/27) => x is pulses received =x L/min *60 = x L/hr
       - lambda: |-
           return (x / 450.0) * 60.0;  // l/Std.
-      - throttle: 10s  # nur alle 10s an HA senden
+      - throttle: 10s # nur alle 10s an HA senden
     total:
       name: "${friendly_name_entity} Durchfluss Messzelle Tag"
       unit_of_measurement: "L"
@@ -1962,11 +2012,11 @@ sensor:
         sorting_weight: 75
       icon: "mdi:opacity"
       filters:
-      #   # Tageswert kumuliert aus Pulse -> Liter
+        #   # Tageswert kumuliert aus Pulse -> Liter
         - lambda: |-
             return x / 450.0;  // L gesamt
 
-#Working config - Frequenzumrichter von Mr WU
+  #Working config - Frequenzumrichter von Mr WU
   - platform: modbus_controller
     modbus_controller_id: modbus_freq_inv
     name: "${friendly_name_entity} INV:Derzeitige Frequenz in Hz"
@@ -1980,13 +2030,14 @@ sensor:
     state_class: measurement
     unit_of_measurement: "Hz"
     icon: "mdi:sine-wave"
+    accuracy_decimals: 2
     filters:
       - multiply: 0.01
-      - throttle: 10s  # nur alle 10s an HA senden
+      - throttle: 10s # nur alle 10s an HA senden
     #update_interval: 10
 
   - platform: modbus_controller
-    modbus_controller_id: modbus_freq_inv 
+    modbus_controller_id: modbus_freq_inv
     name: "${friendly_name_entity} INV:Spannung des Bus"
     id: inv_voltage_bus
     register_type: holding
@@ -1999,14 +2050,15 @@ sensor:
     state_class: measurement
     unit_of_measurement: "V"
     entity_category: diagnostic
+    accuracy_decimals: 2
     icon: "mdi:flash-outline"
     filters:
       - multiply: 0.001
-      - throttle: 10s  # nur alle 10s an HA senden
-    #update_interval: 21600 
+      - throttle: 10s # nur alle 10s an HA senden
+    #update_interval: 21600
 
   - platform: modbus_controller
-    modbus_controller_id: modbus_freq_inv 
+    modbus_controller_id: modbus_freq_inv
     name: "${friendly_name_entity} INV:Ausgangsspannung in V"
     id: inv_voltage_out
     register_type: holding
@@ -2018,14 +2070,15 @@ sensor:
     device_class: voltage
     state_class: measurement
     unit_of_measurement: "V"
+    accuracy_decimals: 2
     entity_category: diagnostic
     icon: "mdi:flash"
     filters:
-      - throttle: 10s  # nur alle 10s an HA senden
+      - throttle: 10s # nur alle 10s an HA senden
     #update_interval: 120
 
   - platform: modbus_controller
-    modbus_controller_id: modbus_freq_inv 
+    modbus_controller_id: modbus_freq_inv
     name: "${friendly_name_entity} INV:Ausgangsstrom in A"
     id: inv_current_out
     register_type: holding
@@ -2037,14 +2090,15 @@ sensor:
     device_class: current
     state_class: measurement
     unit_of_measurement: "A"
+    accuracy_decimals: 2
     entity_category: diagnostic
     icon: "mdi:current-ac"
     filters:
-      - throttle: 10s  # nur alle 10s an HA senden
+      - throttle: 10s # nur alle 10s an HA senden
     #update_interval: 120
 
   - platform: modbus_controller
-    modbus_controller_id: modbus_freq_inv 
+    modbus_controller_id: modbus_freq_inv
     name: "${friendly_name_entity} INV:Ausgangsdrehmoment Nm"
     id: inv_torque_out
     register_type: holding
@@ -2055,14 +2109,15 @@ sensor:
     value_type: U_WORD
     state_class: measurement
     unit_of_measurement: "Nm"
+    accuracy_decimals: 2
     entity_category: diagnostic
     icon: "mdi:arm-flex"
     filters:
-      - throttle: 10s  # nur alle 10s an HA senden
+      - throttle: 10s # nur alle 10s an HA senden
     #update_interval: 120
 
   - platform: modbus_controller
-    modbus_controller_id: modbus_freq_inv 
+    modbus_controller_id: modbus_freq_inv
     name: "${friendly_name_entity} INV:Derzeitige Geschwindigkeit U-min"
     id: inv_speed
     register_type: holding
@@ -2072,14 +2127,15 @@ sensor:
       sorting_weight: 84
     value_type: U_WORD
     state_class: measurement
+    accuracy_decimals: 2
     unit_of_measurement: "U-min"
     entity_category: diagnostic
     icon: "mdi:speedometer"
     filters:
-      - throttle: 10s  # nur alle 10s an HA senden
+      - throttle: 10s # nur alle 10s an HA senden
     #update_interval: 10
 
-#when VFD is running state=1, when VFD is not running state=3
+  #when VFD is running state=1, when VFD is not running state=3
   - platform: modbus_controller
     modbus_controller_id: modbus_freq_inv
     name: "${friendly_name_entity} INV: Running Status"
@@ -2103,7 +2159,7 @@ sensor:
               id(bs_inv_running).publish_state(false);
             }
 
-#PZEMDC über Modbus
+  #PZEMDC über Modbus
   - platform: modbus_controller
     modbus_controller_id: pzem_hub
     name: "${friendly_name_entity} ${name_pzem17} Spannung"
@@ -2119,7 +2175,7 @@ sensor:
     accuracy_decimals: 2
     force_update: true
     filters:
-      - multiply: 0.01  # 0x0540 = 1344 -> 134.4V (Beispielwert)
+      - multiply: 0.01 # 0x0540 = 1344 -> 134.4V (Beispielwert)
 
   - platform: modbus_controller
     modbus_controller_id: pzem_hub
@@ -2136,12 +2192,12 @@ sensor:
     accuracy_decimals: 2
     filters:
       - multiply: 0.01
-      # Ein Delta von 0.05A bis 0.1A ist meist ideal. 
+      # Ein Delta von 0.05A bis 0.1A ist meist ideal.
       # So werden kleine Schwankungen (Rauschen) ignoriert.
       - delta: 0.05
       # ODER: Sende spätestens alle 60 Sekunden einen Wert an HA auch wenn er gleich blieb.
       - heartbeat: 10s
-      - throttle: 300s  # Nur alle 300s einen Wert ausgeben
+      - throttle: 300s # Nur alle 300s einen Wert ausgeben
 
   - platform: modbus_controller
     modbus_controller_id: pzem_hub
@@ -2158,12 +2214,12 @@ sensor:
     accuracy_decimals: 2
     filters:
       - multiply: 0.1
-      # DELTA-Filter: Sende nur, wenn sich der Wert um mindestens 3.0 Watt 
+      # DELTA-Filter: Sende nur, wenn sich der Wert um mindestens 3.0 Watt
       # zum letzten gesendeten Wert unterscheidet.
       - delta: 3.0
       # ODER: Sende spätestens alle 60 Sekunden einen Wert an HA auch wenn er gleich blieb.
       - heartbeat: 10s
-      - throttle: 300s  # Nur alle 300s einen Wert ausgeben
+      - throttle: 300s # Nur alle 300s einen Wert ausgeben
 
   - platform: total_daily_energy
     name: "${friendly_name_entity} ${name_pzem17} Energie Heute"
@@ -2180,7 +2236,7 @@ sensor:
     filters:
       # Umrechnung von Wattstunden (Wh) in Kilowattstunden (kWh)
       - multiply: 0.001
-      - throttle: 300s  # Nur alle 300s einen Wert ausgeben
+      - throttle: 300s # Nur alle 300s einen Wert ausgeben
 
 select:
   - platform: template
@@ -2193,12 +2249,12 @@ select:
     entity_category: config
     restore_value: true
     optimistic: false
-    initial_option: 'YF-DN40 & YF-S201'
+    initial_option: "YF-DN40 & YF-S201"
     options:
-      - 'No Flow Sensors'
-      - 'YF-DN40'
-      - 'YF-S201'
-      - 'YF-DN40 & YF-S201'
+      - "No Flow Sensors"
+      - "YF-DN40"
+      - "YF-S201"
+      - "YF-DN40 & YF-S201"
     set_action:
       - lambda: |-
           // Den gewählten Wert sofort im UI bestätigen
@@ -2209,7 +2265,7 @@ select:
           if (opt == "YF-DN40 & YF-S201") {
             id(use_flow_dn40) = true;
             id(use_flow_s201) = true;
-          
+
           } else if (opt == "YF-DN40") {
             id(use_flow_dn40) = true;
             id(use_flow_s201) = false;
@@ -2230,7 +2286,7 @@ select:
             id(use_flow_s201)
           );
 
-# === Select für Pumpenmodus / Frequenz ===
+  # === Select für Pumpenmodus / Frequenz ===
   - platform: template
     name: "${friendly_name_entity} Pumpenmodus"
     id: select_work_mode
@@ -2301,7 +2357,7 @@ number:
     modbus_controller_id: modbus_freq_inv
     id: number_target_frequency
     icon: "mdi:speedometer"
-    disabled_by_default: true 
+    disabled_by_default: true
     web_server:
       sorting_group_id: grp_debug
     entity_category: config
@@ -2311,17 +2367,17 @@ number:
     multiply: 100
     address: 0x1000
     step: 1
-    
+
     # Darf hier nicht gesetzt werden, weil das sonst zu Problemen führt mit der 100% Anlaufphase in script_pumpstart
     # on_value:
     #   - lambda: |-
     #       id(glo_set_frequency) = x;
 
-# ###########################################
-# # Template Numbers / Setter für ESPHome   #
-# # Steuern PH, ORP, Chlorinator, Pumpen    #
-# # Mit HA-Push und Kommentaren             #
-# ###########################################
+  # ###########################################
+  # # Template Numbers / Setter für ESPHome   #
+  # # Steuern PH, ORP, Chlorinator, Pumpen    #
+  # # Mit HA-Push und Kommentaren             #
+  # ###########################################
 
   # Durchfluss Poolpumpe bei 100%
   - platform: template
@@ -2343,7 +2399,6 @@ number:
           id(poolpump_flow_max) = x;
           // HA informieren
           id(poolpump_flow_max_setter).publish_state(x);
-
 
   # PH Kanister Größe (ml)
   - platform: template
@@ -2373,7 +2428,7 @@ number:
           id(ph_tank_capacity_setter).publish_state(x);
       - logger.log:
           format: "PH Kanistergröße auf %.0f ml gesetzt"
-          args: ['x']
+          args: ["x"]
           level: INFO
 
   # PH Max Wert Wasser
@@ -2554,13 +2609,12 @@ number:
       - lambda: |-
           // 1. Den Wert für die Anzeige im Webserver spiegeln (l/h)
           id(ph_pump_setter).publish_state(x);
-          
+
           // 2. Umrechnung für die interne Variable (l/h -> ml/s)
           // Formel: (x * 1000) / 3600  => x / 3.6
           id(ph_ml_per_second) = x / 3.6;
-          
-          ESP_LOGI("ph_pump_setter", "PH Förderleistung angepasst: %.2f l/h (entspricht %.4f ml/s)", x, id(ph_ml_per_second));
 
+          ESP_LOGI("ph_pump_setter", "PH Förderleistung angepasst: %.2f l/h (entspricht %.4f ml/s)", x, id(ph_ml_per_second));
 
   # Chlorinator max Laufzeit Tag(min)
   - platform: template
@@ -2618,7 +2672,6 @@ number:
       - lambda: |-
           id(PumpPreRunTime) = (int)x;
           id(pump_prerun_time_setter).publish_state(x);
-
 
   #Dynamic Timer Komponente - Start
   - platform: template
@@ -2685,163 +2738,160 @@ number:
     max_value: 59
     step: 1
     mode: box
-    
 
 #!One Time required only!
 #Leaving in for documentation
 
-  # # ORP -2000 2000
-  # - platform: "tuya"
-  #   id: num_orp_low_tuya
-  #   name: "W2839_ORP_LOW_LIMIT"
-  #   number_datapoint: 133
-  #   unit_of_measurement: "mV"
-  #   min_value: -2000
-  #   max_value: 2000
-  #   step: 1
-  #   multiply: 1
-  #   datapoint_hidden:
-  #     datapoint_type: int
-  #     initial_value: -2000
-  #     restore_value: yes
+# # ORP -2000 2000
+# - platform: "tuya"
+#   id: num_orp_low_tuya
+#   name: "W2839_ORP_LOW_LIMIT"
+#   number_datapoint: 133
+#   unit_of_measurement: "mV"
+#   min_value: -2000
+#   max_value: 2000
+#   step: 1
+#   multiply: 1
+#   datapoint_hidden:
+#     datapoint_type: int
+#     initial_value: -2000
+#     restore_value: yes
 
-  # - platform: "tuya"
-  #   id: num_orp_high_tuya
-  #   name: "W2839_ORP_HIGH_LIMIT"
-  #   number_datapoint: 132
-  #   unit_of_measurement: "mV"
-  #   min_value: -2000
-  #   max_value: 2000
-  #   step: 1
-  #   multiply: 1
-  #   datapoint_hidden:
-  #     datapoint_type: int
-  #     initial_value: 2000
-  #     restore_value: yes
+# - platform: "tuya"
+#   id: num_orp_high_tuya
+#   name: "W2839_ORP_HIGH_LIMIT"
+#   number_datapoint: 132
+#   unit_of_measurement: "mV"
+#   min_value: -2000
+#   max_value: 2000
+#   step: 1
+#   multiply: 1
+#   datapoint_hidden:
+#     datapoint_type: int
+#     initial_value: 2000
+#     restore_value: yes
 
-  # # PH 0 15
-  # - platform: "tuya"
-  #   id: num_ph_low_tuya
-  #   name: "W2839_PH_LOW_LIMIT"
-  #   number_datapoint: 108
-  #   device_class: "pH"
-  #   min_value: 0
-  #   max_value: 15
-  #   step: 0.01
-  #   multiply: 100
-  #   datapoint_hidden:
-  #     datapoint_type: int
-  #     initial_value: 0
-  #     restore_value: yes
+# # PH 0 15
+# - platform: "tuya"
+#   id: num_ph_low_tuya
+#   name: "W2839_PH_LOW_LIMIT"
+#   number_datapoint: 108
+#   device_class: "pH"
+#   min_value: 0
+#   max_value: 15
+#   step: 0.01
+#   multiply: 100
+#   datapoint_hidden:
+#     datapoint_type: int
+#     initial_value: 0
+#     restore_value: yes
 
-  # - platform: "tuya"
-  #   id: num_ph_high_tuya
-  #   name: "W2839_PH_HIGH_LIMIT"
-  #   number_datapoint: 107
-  #   device_class: "pH"
-  #   min_value: 0
-  #   max_value: 15
-  #   step: 0.01
-  #   multiply: 100
-  #   datapoint_hidden:
-  #     datapoint_type: int
-  #     initial_value: 15
-  #     restore_value: yes
+# - platform: "tuya"
+#   id: num_ph_high_tuya
+#   name: "W2839_PH_HIGH_LIMIT"
+#   number_datapoint: 107
+#   device_class: "pH"
+#   min_value: 0
+#   max_value: 15
+#   step: 0.01
+#   multiply: 100
+#   datapoint_hidden:
+#     datapoint_type: int
+#     initial_value: 15
+#     restore_value: yes
 
-  # # Temp -10 110 °C
-  # - platform: "tuya"
-  #   id: num_temp_low_tuya
-  #   name: "W2839_TEMP_LOW_LIMIT"
-  #   number_datapoint: 103
-  #   unit_of_measurement: "°C"
-  #   device_class: "temperature"
-  #   min_value: -10.0
-  #   max_value: 110.0
-  #   step: 0.1
-  #   multiply: 10
-  #   datapoint_hidden:
-  #     datapoint_type: int
-  #     initial_value: -10.0
-  #     restore_value: yes
+# # Temp -10 110 °C
+# - platform: "tuya"
+#   id: num_temp_low_tuya
+#   name: "W2839_TEMP_LOW_LIMIT"
+#   number_datapoint: 103
+#   unit_of_measurement: "°C"
+#   device_class: "temperature"
+#   min_value: -10.0
+#   max_value: 110.0
+#   step: 0.1
+#   multiply: 10
+#   datapoint_hidden:
+#     datapoint_type: int
+#     initial_value: -10.0
+#     restore_value: yes
 
-  # - platform: "tuya"
-  #   id: num_temp_high_tuya
-  #   name: "W2839_TEMP_HIGH_LIMIT"
-  #   number_datapoint: 102
-  #   unit_of_measurement: "°C"
-  #   device_class: "temperature"
-  #   min_value: -10.0
-  #   max_value: 110.0
-  #   step: 0.1
-  #   multiply: 10
-  #   datapoint_hidden:
-  #     datapoint_type: int
-  #     initial_value: 110.0
-  #     restore_value: yes
+# - platform: "tuya"
+#   id: num_temp_high_tuya
+#   name: "W2839_TEMP_HIGH_LIMIT"
+#   number_datapoint: 102
+#   unit_of_measurement: "°C"
+#   device_class: "temperature"
+#   min_value: -10.0
+#   max_value: 110.0
+#   step: 0.1
+#   multiply: 10
+#   datapoint_hidden:
+#     datapoint_type: int
+#     initial_value: 110.0
+#     restore_value: yes
 
 switch:
+  #######################Modbus Switch mit Prüfung################################
+  ################################################################################
+  # #Erste Idee - Funktioniert! - Start#
+  #   - platform: modbus_controller
+  #     modbus_controller_id: modbus_freq_inv
+  #     address: 0x2000
+  #     register_type: holding
+  #     id: switch_poolpump
+  #     name: "${friendly_name_entity} INV:An - Aus"
+  #     #internal: true #Make this switch internal and never trigger it from here?
+  #     restore_mode: ALWAYS_OFF   # important against reboot effects
+  #     icon: "mdi:pump"
 
-#######################Modbus Switch mit Prüfung################################
-################################################################################
-# #Erste Idee - Funktioniert! - Start#
-#   - platform: modbus_controller
-#     modbus_controller_id: modbus_freq_inv
-#     address: 0x2000
-#     register_type: holding
-#     id: switch_poolpump
-#     name: "${friendly_name_entity} INV:An - Aus"
-#     #internal: true #Make this switch internal and never trigger it from here?
-#     restore_mode: ALWAYS_OFF   # important against reboot effects
-#     icon: "mdi:pump"
+  #     write_lambda: |-
+  #       ESP_LOGI("modbus_inverter", "Switch request state = %f", x);
 
-#     write_lambda: |-
-#       ESP_LOGI("modbus_inverter", "Switch request state = %f", x);
+  #       // ========== START ==========
+  #       if (x == 1) {
+  #         if (id(inv_running).state == 1) {
+  #           ESP_LOGW("modbus_inverter", "FU läuft bereits – Startbefehl unterdrückt");
+  #           return false;  // !Modbus will not be sent!
+  #         }
 
-#       // ========== START ==========
-#       if (x == 1) {
-#         if (id(inv_running).state == 1) {
-#           ESP_LOGW("modbus_inverter", "FU läuft bereits – Startbefehl unterdrückt");
-#           return false;  // !Modbus will not be sent!
-#         }
+  #         ESP_LOGI("modbus_inverter", "FU wird gestartet");
 
-#         ESP_LOGI("modbus_inverter", "FU wird gestartet");
+  #         payload.push_back(0x05);  // Slave
+  #         payload.push_back(0x06);  // Write Single Register
+  #         payload.push_back(0x20);  // Addr High
+  #         payload.push_back(0x00);  // Addr Low
+  #         payload.push_back(0x00);
+  #         payload.push_back(0x01);  // START Bit on the register
 
-#         payload.push_back(0x05);  // Slave
-#         payload.push_back(0x06);  // Write Single Register
-#         payload.push_back(0x20);  // Addr High
-#         payload.push_back(0x00);  // Addr Low
-#         payload.push_back(0x00);
-#         payload.push_back(0x01);  // START Bit on the register
+  #         return true;
+  #       }
 
-#         return true;
-#       }
+  #       // ========== STOP ==========
+  #       if (id(inv_running).state != 1) {
+  #         ESP_LOGW("modbus_inverter", "FU steht bereits - Stopbefehl unterdrückt");
+  #         return false;  // !Modbus will not be sent!
+  #       }
 
-#       // ========== STOP ==========
-#       if (id(inv_running).state != 1) {
-#         ESP_LOGW("modbus_inverter", "FU steht bereits - Stopbefehl unterdrückt");
-#         return false;  // !Modbus will not be sent!
-#       }
+  #       ESP_LOGI("modbus_inverter", "FU wird gestoppt");
 
-#       ESP_LOGI("modbus_inverter", "FU wird gestoppt");
+  #       payload.push_back(0x05);
+  #       payload.push_back(0x06);
+  #       payload.push_back(0x20);
+  #       payload.push_back(0x00);
+  #       payload.push_back(0x00);
+  #       payload.push_back(0x05);  // STOP Bit on the register
 
-#       payload.push_back(0x05);
-#       payload.push_back(0x06);
-#       payload.push_back(0x20);
-#       payload.push_back(0x00);
-#       payload.push_back(0x00);
-#       payload.push_back(0x05);  // STOP Bit on the register
+  #       return true;
+  # #Erste Idee - Funktioniert! - Ende#
 
-#       return true;
-# #Erste Idee - Funktioniert! - Ende#
-
-
-#Use template switch Component in ESPHome with Modbus Lambda
+  #Use template switch Component in ESPHome with Modbus Lambda
   - platform: template
     name: "${friendly_name_entity} INV:An - Aus"
     id: switch_poolpump
     icon: "mdi:pump"
     optimistic: true
-    disabled_by_default: true 
+    disabled_by_default: true
     web_server:
       sorting_group_id: grp_debug
     lambda: |-
@@ -2852,7 +2902,7 @@ switch:
       }
       // Ansonsten nehmen wir wieder den echten Sensorwert
       return id(inv_running).state == 1;
-    
+
     turn_on_action:
       - lambda: |-
           // Erstelle den Befehl über die statische Methode der Klasse ModbusCommandItem
@@ -2874,9 +2924,9 @@ switch:
           id(modbus_freq_inv).queue_command(stop_cmd);
           ESP_LOGI("modbus_lambda", "Stop-Befehl (5) an 0x2000 gesendet");
 
-#Working CONF but Switch remains active on WebServer #https://github.com/esphome/esphome-webserver/issues/190
-#Schalter für den Chlorinator - Minimale Bedingungen um manuell schalten zu können
-#Nicht für den Betrieb geeignet - Testing Only!
+  #Working CONF but Switch remains active on WebServer #https://github.com/esphome/esphome-webserver/issues/190
+  #Schalter für den Chlorinator - Minimale Bedingungen um manuell schalten zu können
+  #Nicht für den Betrieb geeignet - Testing Only!
   - platform: template
     name: "${friendly_name_entity} 1_Chlorinator"
     id: switch_chlorinator
@@ -2885,7 +2935,7 @@ switch:
     icon: "mdi:flask-plus"
     web_server:
       sorting_group_id: grp_debug
-    disabled_by_default: true 
+    disabled_by_default: true
     # lambda: |-
     #   return id(switch_chlor_run_gpio).state;
     turn_on_action:
@@ -2902,7 +2952,7 @@ switch:
                   if (!id(poolpump_ok)) reason = "Vorlaufzeitpumpe nicht erreicht";
                   else if (!id(glo_orp_allowed)) reason = "Wartungsmodus!";
                   ESP_LOGW("switch_chlorinator", "Chlorinator kann nicht eingeschaltet werden weil: %s", reason.c_str());
-              - rtttl.play: 'error:d=8,o=5,b=100:4e6' # Kurzer Piep für Fehler!
+              - rtttl.play: "error:d=8,o=5,b=100:4e6" # Kurzer Piep für Fehler!
               - switch.turn_off: switch_chlorinator
 
     turn_off_action:
@@ -2916,18 +2966,18 @@ switch:
         - switch.turn_off: switch_chlor_run_gpio #H-Brücke auschalten
         - delay: 1s
         - switch.turn_off: switch_chlor_direction_gpio #H-Brücke Richtung ausschalten
-        
+
         # 24V ausschalten, falls diese eingeschaltet ist
         - if:
             condition:
-              - lambda: 'return id(bs_pzem_online).state;'
+              - lambda: "return id(bs_pzem_online).state;"
             then:
               # Netzteil ausschalten über Impuls an Eltako, darum switch.turn_on zum "togglen"
-              - switch.turn_on: switch_relay4_power24v 
+              - switch.turn_on: switch_relay4_power24v
 
-#Working CONF but Switch remains active on WebServer #https://github.com/esphome/esphome-webserver/issues/190
-# #Schalter für die PH Dosierpumpe - Minimale Bedingungen um manuell schalten zu können
-# #Nicht für den Betrieb geeignet - Testing Only!
+  #Working CONF but Switch remains active on WebServer #https://github.com/esphome/esphome-webserver/issues/190
+  # #Schalter für die PH Dosierpumpe - Minimale Bedingungen um manuell schalten zu können
+  # #Nicht für den Betrieb geeignet - Testing Only!
   - platform: template
     name: "${friendly_name_entity} 2_PH Dosierpumpe"
     id: switch_phdosierpumpe
@@ -2936,7 +2986,7 @@ switch:
     icon: "mdi:eyedropper-plus"
     web_server:
       sorting_group_id: grp_debug
-    disabled_by_default: true 
+    disabled_by_default: true
     turn_on_action:
       then:
         # 1. Validieren (Der Türsteher)
@@ -2955,8 +3005,8 @@ switch:
               # 3. Physisch schalten
               - switch.turn_on: switch_relay2_ph
               - text_sensor.template.publish:
-                      id: txt_sens_status
-                      state: "switch_phdosierpumpe , Dosierung aktiv"
+                  id: txt_sens_status
+                  state: "switch_phdosierpumpe , Dosierung aktiv"
               - lambda: |-
                   ESP_LOGI("switch_phdosierpumpe", "PH Dosierpumpe wurde eingeschaltet");
             else:
@@ -2972,7 +3022,7 @@ switch:
                   id(txt_sens_status).publish_state(reason);
                   id(switch_phdosierpumpe).publish_state(false);
                   ESP_LOGW("switch_phdosierpumpe", "PH Dosierpumpe kann nicht eingeschaltet werden weil: %s", reason.c_str());
-              - rtttl.play: 'error:d=8,o=5,b=100:4e6' # Kurzer Piep für Fehler!
+              - rtttl.play: "error:d=8,o=5,b=100:4e6" # Kurzer Piep für Fehler!
               - switch.turn_off: switch_phdosierpumpe
     turn_off_action:
       - switch.turn_off: switch_relay2_ph
@@ -2982,7 +3032,6 @@ switch:
           ESP_LOGI("switch_phdosierpumpe", "PH Dosierung beendet. Letzter Zyklus: %.1f ml", id(ph_last_cycle_ml));
           id(txt_sens_status).publish_state(esphome::str_sprintf("PH Dosierung beendet. Letzter Zyklus: %.1f ml", id(ph_last_cycle_ml)));
 
-
   #H-Brücke schaltet Chlorinator: Phase-Pin für die Richtung
   - platform: gpio
     id: switch_chlor_direction_gpio
@@ -2990,7 +3039,7 @@ switch:
     pin:
       number: ${phase_hbridge}
       inverted: False
-      mode: 
+      mode:
         output: true
         pulldown: true
     restore_mode: "ALWAYS_OFF"
@@ -3002,7 +3051,7 @@ switch:
     pin:
       number: ${pwmh_hbridge}
       inverted: False
-      mode: 
+      mode:
         output: true
         pulldown: true
     restore_mode: "ALWAYS_OFF"
@@ -3013,7 +3062,7 @@ switch:
     internal: True
     pin: ${pin_relay1}
     restore_mode: "ALWAYS_OFF"
-    
+
   #Relay 2 == PH Dosieranlage - Internal = Not showing in HA
   - platform: gpio
     id: switch_relay2_ph
@@ -3055,7 +3104,7 @@ switch:
   - platform: safe_mode
     name: "${friendly_name_entity} Neustart (Safe Mode)"
     id: restart_safe
-    disabled_by_default: true 
+    disabled_by_default: true
     web_server:
       sorting_group_id: grp_debug
     entity_category: diagnostic
@@ -3065,7 +3114,7 @@ switch:
   - platform: factory_reset
     name: "${friendly_name_entity} Reset Konfig"
     entity_category: Diagnostic
-    disabled_by_default: true 
+    disabled_by_default: true
     web_server:
       sorting_group_id: grp_debug
     icon: "mdi:factory"
@@ -3158,14 +3207,14 @@ switch:
     name: "${friendly_name_entity} Poolpumpe kein Autostart"
     optimistic: true
     restore_mode: ALWAYS_OFF
-    disabled_by_default: true 
+    disabled_by_default: true
     web_server:
       sorting_group_id: grp_debug
     entity_category: config
-    turn_on_action: 
+    turn_on_action:
       then:
         - lambda: id(glo_restart_allowed) = false;
-    turn_off_action: 
+    turn_off_action:
       then:
         - lambda: id(glo_restart_allowed) = true;
 
@@ -3175,45 +3224,43 @@ switch:
     name: "${friendly_name_entity} Wartungsmodus"
     optimistic: true
     restore_mode: ALWAYS_OFF
-    disabled_by_default: true 
+    disabled_by_default: true
     web_server:
       sorting_group_id: grp_debug
     entity_category: config
-    turn_on_action: 
+    turn_on_action:
       then:
-        - lambda: |- 
+        - lambda: |-
             auto call = id(select_work_mode).make_call();
             call.set_option("0% Wartung");
             call.perform();
-    turn_off_action: 
+    turn_off_action:
       then:
-      - lambda: |- 
+        - lambda: |-
             auto call = id(select_work_mode).make_call();
             call.set_option(id(glo_workmode));
             call.perform();
 
-
-
 button:
-################################################################################
-######################ACHTUNG: NUR Einmalig ausführen###########################
-##Ändert die Slave ID des PZEM17
-##Danach bitte pzem_hub - adresse ändern auf 04!
-################################################################################
+  ################################################################################
+  ######################ACHTUNG: NUR Einmalig ausführen###########################
+  ##Ändert die Slave ID des PZEM17
+  ##Danach bitte pzem_hub - adresse ändern auf 04!
+  ################################################################################
   # - platform: template
   #   name: "PZEM-017 Adresse auf 0x04 setzen"
   #   on_press:
   #     then:
   #       # Wir nutzen die uart_id deines Modbus-Busses (z.B. uart_0 oder uart_pzem)
-  #       - uart.write: 
+  #       - uart.write:
   #           id: modbus_uart
   #           # Modbus Befehl: [Adresse, Funktion 06, Register High, Register Low, Wert High, <SLAVE-ID>, CRC, CRC]
   #           data: [0x01, 0x06, 0x00, 0x02, 0x00, 0x04, 0x28, 0x09]
-            
-            #Hinweis:
-            # Von 04 wieder auf 01 wäre dann also:
-            #data: [0x04, 0x06, 0x00, 0x02, 0x00, 0x01, 0x28, 0x09]
-  
+
+  #Hinweis:
+  # Von 04 wieder auf 01 wäre dann also:
+  #data: [0x04, 0x06, 0x00, 0x02, 0x00, 0x01, 0x28, 0x09]
+
   - platform: template
     name: "${friendly_name_entity} PH Tank Reset"
     id: bt_ph_tank_reset_web
@@ -3229,7 +3276,7 @@ button:
             id(ph_tank_refill) = false;
             id(ph_tank_sensor).publish_state(id(ph_tank_remaining) / 1000.0);
             ESP_LOGI("PH Tank", "Reset via Web: Tank voll.");
-        - rtttl.play: 'two_short:d=4,o=5,b=100:16e6,16e6'
+        - rtttl.play: "two_short:d=4,o=5,b=100:16e6,16e6"
 
   - platform: template
     name: "${friendly_name_entity} PH Heute (ml) Reset"
@@ -3244,13 +3291,12 @@ button:
         - lambda: |-
             id(ph_today_ml) = 0.0;
             ESP_LOGI("PH Max Day Reset", "PH heute (ml) zurückgesetzt");
-        - rtttl.play: 'two_short:d=4,o=5,b=100:16e6,16e6'
-
+        - rtttl.play: "two_short:d=4,o=5,b=100:16e6,16e6"
 
 binary_sensor:
   # Zeigt den Online Status vom Inverter (Poolpumpe) Modul
   - platform: template
-    name: "${friendly_name_entity} Inverter Online"
+    name: "${friendly_name_entity} Frequenzsteuerung Online"
     id: bs_inv_online
     icon: "mdi:toggle-switch-outline"
     web_server:
@@ -3260,7 +3306,7 @@ binary_sensor:
 
   # Zeigt RUN Status vom Inverter (Poolpumpe) Modul
   - platform: template
-    name: "${friendly_name_entity} Inverter Running?"
+    name: "${friendly_name_entity} Frequenzsteuerung Running?"
     id: bs_inv_running
     icon: "mdi:toggle-switch-outline"
     web_server:
@@ -3315,7 +3361,7 @@ binary_sensor:
       inverted: true
     id: bs_ph_tank_reset_physical
     icon: "mdi:barrel"
-    internal: true  # Versteckt den Sensor im Web, da wir ja den Button (oben) haben
+    internal: true # Versteckt den Sensor im Web, da wir ja den Button (oben) haben
     filters:
       - delayed_on: 50ms
     on_press:
@@ -3326,7 +3372,7 @@ binary_sensor:
   - platform: gpio
     id: bs_maintenance
     internal: True
-    pin: 
+    pin:
       number: ${maintenance} # GPIO 39 ist mit pullup 10K versehen
       mode: INPUT
     on_press:
@@ -3391,7 +3437,7 @@ dynamic_on_time:
     sun: switch_timer_sun
     disabled: switch_timer_disabled
     on_time:
-      - logger.log: 
+      - logger.log:
           format: "Poolpumpe Tageszyklus gestartet"
           level: info
       - lambda: id(glo_pump_active_via_automation) = true;
@@ -3410,7 +3456,7 @@ dynamic_on_time:
     sun: switch_timer_sun
     disabled: switch_timer_disabled
     on_time:
-      - logger.log: 
+      - logger.log:
           format: "Poolpumpe Tageszyklus beendet"
           level: info
       - lambda: id(glo_pump_active_via_automation) = false;
