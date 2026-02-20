@@ -316,7 +316,7 @@ globals:
     restore_value: 'true'
   - id: ph_ml_per_second 
     type: float
-    initial_value: '0.50' #ml die der Dispenser pro Sekunde injeziert, änderbar über Nummernfeld
+    initial_value: '0.7388' #ml die der Dispenser pro Sekunde injeziert, änderbar über Nummernfeld
     restore_value: 'true'
   - id: ph_needed
     type: bool
@@ -2521,7 +2521,7 @@ number:
     optimistic: false
     restore_value: true
     min_value: 5000
-    max_value: 20000
+    max_value: 30000
     step: 500
     set_action:
       - lambda: |-
@@ -2676,7 +2676,7 @@ number:
     restore_value: true
     optimistic: false
     min_value: 200
-    max_value: 4000
+    max_value: 3000
     step: 10
     set_action:
       - lambda: |-
@@ -2695,8 +2695,8 @@ number:
     entity_category: config
     restore_value: true
     optimistic: false
-    min_value: 200
-    max_value: 1500
+    min_value: 100
+    max_value: 1000
     step: 1
     set_action:
       - lambda: |-
@@ -2715,10 +2715,12 @@ number:
     entity_category: config
     restore_value: true
     optimistic: false
-    # Einstellungen laut deinem Wunsch:
+    # SEKO PERC3 gemessen: 2,66l/h ~ 0.7388ml/s
+    # Wird durch Verschleiß weniger und gilt es zu überprüfen
+    # wenn angeschlossen an Kreislauf und Impfventil
     min_value: 1.0
     max_value: 3.5
-    step: 0.1 # 100ml Schritte
+    step: 0.01 # 100ml Schritte
     set_action:
       - lambda: |-
           // 1. Den Wert für die Anzeige im Webserver spiegeln (l/h)
