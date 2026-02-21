@@ -27,16 +27,6 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 > 
 > *Diese Konfiguration gilt nur für: **1-phasiger Input / 1-phasiger Output***
 
----
-
-### Was ich optimiert habe:
-
-* **Listenpunkte:** Die verschiedenen Betriebsmodi sind durch Aufzählungszeichen schneller erfassbar.
-* **Blockquote (`>`):** Damit wird der gesamte Block optisch als zusammenhängender Hinweis hervorgehoben.
-* **Einheitliche Schreibweise:** Ich habe Bindestriche bei "1-phasig" ergänzt, was im technischen Bereich die Lesbarkeit erhöht.
-
-Möchtest du, dass ich diesen Text in eine Tabelle umwandle, um die Unterschiede zwischen Input und Output noch deutlicher darzustellen?
-
 <br>
 
 ---
