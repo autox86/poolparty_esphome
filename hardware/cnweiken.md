@@ -125,6 +125,18 @@ Dieser Modus dient der direkten Diagnose oder manuellen Wartung direkt am Umrich
 <img width="997" height="530" alt="image" src="https://github.com/user-attachments/assets/e7bac217-46e1-4b15-b49c-6cde2cc06269" />
 
 ---
+<br><br>
+
+<img width="997" height="728" alt="image" src="https://github.com/user-attachments/assets/66487942-6fdd-485a-8212-8f1182191ba4" />
+
+## Hardware Modifikation
+
+Da der Lüfter extremst laut war, habe ich diesen gegen einen Noctua NF-A4x10 24V PWM 40x40x10 Lüfter getauscht
+
+Ein Bild vom Innenleben mit altem Lüfter:
+<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/cab2e7f3-5910-49a5-9c3a-756836755386" />
+
+
 
 
 
