@@ -18,6 +18,7 @@ Drücken Sie `PRG` -> wählen Sie `P0` -> `RD/WT` -> nutzen Sie die Pfeiltasten 
 Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Frequency Converter Drives For Single-Phase 220V Motor](https://www.youtube.com/watch?v=KAJoE-C64vI&t=2s)
 
 <br>
+
 ---
 
 ## 📋 Zielsetzung der Konifguration
