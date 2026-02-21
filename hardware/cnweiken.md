@@ -57,6 +57,14 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 | **P7-02** | 1 | Stopp Key in allen Modi aktiv |
 | **P9-08** | 410 | Unbekannter Parameter (von 380 auf 410V) - hilft bei Startproblemen |
 
+<img width="1007" height="1780" alt="image" src="https://github.com/user-attachments/assets/d00a5ccb-ef25-49ae-acfc-2a314f6543eb" />
+<img width="1097" height="196" alt="image" src="https://github.com/user-attachments/assets/16ddd29d-5e99-498b-ad30-5037f5896e42" />
+
+<img width="987" height="1442" alt="image" src="https://github.com/user-attachments/assets/8744bfac-b153-420d-80fd-afd331ee6606" />
+
+<img width="996" height="1204" alt="image" src="https://github.com/user-attachments/assets/0c38c035-ffb3-49e7-b21c-2eed90e6a848" />
+
+<img width="997" height="530" alt="image" src="https://github.com/user-attachments/assets/e7bac217-46e1-4b15-b49c-6cde2cc06269" />
 
 ---
 
@@ -79,42 +87,10 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 
 ---
 
-## 🔌 Port-Konfiguration & Kommunikation
-
-### Aux Ports (Eingänge)
-
-* **P4-02 = 37:** X3 schaltet Modbus/Aux um.
-* **P4-03 = 18:** X4 ändert Frequenzquelle.
-* **P4-04 = 1:** X5 für Start (vorwärts).
-* **P4-05 = 0:** X6 für Stopp.
-
-### Modbus Einstellungen
-
-| Parameter | Wert | Bedeutung |
-| --- | --- | --- |
-| **P0-28** | 0 | Setzen des Modbus Protokolls |
-| **PD-00** | 6005 | Baudrate 9600 |
-| **PD-01** | 0 | Datenformat 8,N,1 |
-| **PD-02** | 005 | Slave ID 0x05 |
-| **PD-03** | 02 | Antwortverzögerung |
-| **PD-04** | 060 | Kommunikationstimeout 60s |
-| **PD-05** | 31 | Standard Modbus Protokoll Einstellung |
-
----
-
-## 🚀 Starteinstellungen
-
-* **P6-00 = 0:** Sofortiger Startmodus.
-* **P6-03 = 10.00:** Startup Frequenz ist auf maximal 10 Hz begrenzt.
-
----
-
-**Soll ich für eines der Kommunikationsprotokolle (Modbus Register) noch eine detailliertere Tabelle erstellen?**
 
 
 
-**Detailierte Informationen zu den möglichen Optionen:**
-[Manual WD600](https://github.com/autox86/poolparty_esphome/blob/main/manuals/WK600-Single-manual.pdf)
+
 
 
 
