@@ -30,7 +30,7 @@ Schalter 2: Aktiviert den Automatik Betrieb (Modbus an)
 3.) Die Bedienung soll vom Bedienfeld erfolgen
 Schalter 1 = Aus
 Schalter 2 = Aus
-**MF. K / REV** wird einmalig gedrpückt
+`MF. K / REV` wird einmalig gedrpückt
 
 
 
