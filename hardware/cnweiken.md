@@ -26,10 +26,6 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 
 *Dieser Konfiguration gilt nur für: **1 Phasig Input / 1 Phasig Output** *
 
----
-
-Möchtest du, dass ich diesen Hinweis direkt in deine Modus-Übersicht von oben integriere?
-
 <br>
 
 ---
