@@ -17,7 +17,10 @@ Drücken Sie `PRG` -> wählen Sie `P0` -> `RD/WT` -> nutzen Sie die Pfeiltasten 
 
 Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Frequency Converter Drives For Single-Phase 220V Motor](https://www.youtube.com/watch?v=KAJoE-C64vI&t=2s)
 
-### 📋 Zielsetzung der Konifguration
+<br>
+---
+
+## 📋 Zielsetzung der Konifguration
 Wenn der Frequenzumrichter an Strom angeschlossen wird:
 1.) Die FU wird durch den externen Schalter bedient
 Schalter 1: Schaltet die Poolpumpe an / aus
