@@ -95,9 +95,9 @@ Dieser Modus dient der direkten Diagnose oder manuellen Wartung direkt am Umrich
 | **P0-19** | 2 | Acceleration/Deceleration Time Unit = 0.01s |
 | **P0-20** | 20 | **Undokumentiert:** Für Single Phase zwingend notwendig! |
 | **P1-00** | 4 | **Undokumentiert:** Single Phase 230V bei max. Frequenz |
-| **P1-01** | 0.75 | Leistungsaufnahme der Pumpe in kW |
+| **P1-01** | 1.1 | Leistungsaufnahme der Pumpe in kW |
 | **P1-02** | 230 | Nennspannung in Volt |
-| **P1-03** | 46027 | Stromaufnahme der Pumpe in Ampere (**Wichtigster Wert!**) |
+| **P1-03** | 5.1 | Stromaufnahme der Pumpe in Ampere (**Wichtigster Wert!**) |
 | **P1-04** | 50.00 | Nennfrequenz in Hz |
 | **P1-05** | 2850 | Nenndrehzahl bei 100% (U/min) |
 | **P3-01** | 6 | Torque Boost (Spannungserhöhung bei kleinen Frequenzen) |
