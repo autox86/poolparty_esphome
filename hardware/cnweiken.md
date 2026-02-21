@@ -19,47 +19,97 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 
 ### 📋 Erforderliche Parameter-Einstellungen
 
-Für den kombinierten Betrieb (Modbus und Handbetrieb) müssen die folgenden Parameter gesetzt werden:
+---
 
-| Parameter | Wert | Beschreibung |
+## 🛠 Grundparameter für die Steuerung
+
+| Parameter | Wert | Bedeutung |
 | --- | --- | --- |
-| **P0-01** | 2 | Betriebsart-Einstellung |
-| **P0-02** | 2 | Auswahl der Kommunikationsquelle |
-| **P0-20** | 20 | Undokumentierter, aber funktionaler Parameter |
-| **P0-03** | 09 | Frequenzvorgabe |
-| **P0-04** | 04 | Frequenzvorgabe |
-| **P0-07** | 2 | Frequency Source Selection |
-| **P0-08** | 25 | Preset-Frequency |
-| **P1-00** | 4 | Steuermodus (4 = Single Phase at 230V at max Frequency) |
-| **P4-00** | 12 | Eingangsanschluss-Einstellung |
-| **P4-01** | 18 | Umschaltfrequenz von X zu Y |
-| **P4-02** | 14 | Eingangsanschluss-Einstellung |
-| **P4-03** | 9 | Eingangsanschluss-Einstellung |
-| **P4-04** | 1 | Eingangsanschluss-Einstellung |
-| **P4-05** | 0 | Eingangsanschluss-Einstellung |
-| **P7-01** | 1 | Anzeige-Parameter |
-| **P0-28** | 0 | Motor-Parameter |
-| **PD-00** | 6005 | Modbus-Baudrate |
-| **PD-01** | 0 | Modbus-Data-Format |
-| **PD-02** | 005 | Modbus-Local-Adress |
-| **PD-03** | 02 | Modbus-Zeitüberschreitung |
-| **PD-04** | 000 | Modbus-Antwortverzögerung |
-| **PD-05** | 31 | Modbus-Protokoll-Typ |
-| **P6-00** | 1 | Start/Stopp Control |
-| **P6-01** | 2 | Start/Stopp Control |
-| **P6-03** | 10.00 | Startup Frequency |
-
-
-### 📋 Ergebnis der Parameter
-
-* **Kommunikation:** Die primäre Kommunikation ist nun Modbus und die SlaveID ist "05".
-* **MF.K / REV:** Stellt den Kommunikationsmode von Modbus auf lokales Panel um
-* **Schalter zwischen X2 und DCOM:** Aktiviert die Frequenzkontrolle am Poti des Panels, statt Modbus
-
-**Fazit:** Somit ist garantiert, dass die Frequenzsteuerung selbst bei Ausfall des Poolcontrollers möglich ist.
+| **P0-01** | 2 | Motor Control Mode to V/F |
+| **P0-02** | 1 | Command Source: Terminal |
+| **P0-03** | 4 | Frequenzeinstellung (Source X) |
+| **P0-04** | 9 | Wählbare Frequenzeinstellung über einen AUX Eingang (Source Y) |
+| **P0-07** | 7 | Frequenzquelle soll entweder Source X oder Source Y sein |
+| **P0-08** | 25 | Voreingestellte Frequenz |
+| **P0-10** | 50 | Maximale Frequenz |
+| **P0-11** | 0 | Source = P0-12 |
+| **P0-17** | 00.20 | Acceleration Time = 0.2s |
+| **P0-18** | 03.00 | Deceleration Time = 3s |
+| **P0-19** | 2 | Acceleration/Deceleration Time Unit = 0.01s |
+| **P0-20** | 20 | **Undokumentiert:** Für Single Phase zwingend notwendig! |
+| **P1-00** | 4 | **Undokumentiert:** Single Phase 230V bei max. Frequenz |
+| **P1-01** | 0.75 | Leistungsaufnahme der Pumpe in kW |
+| **P1-02** | 230 | Nennspannung in Volt |
+| **P1-03** | 46027 | Stromaufnahme der Pumpe in Ampere (**Wichtigster Wert!**) |
+| **P1-04** | 50.00 | Nennfrequenz in Hz |
+| **P1-05** | 2850 | Nenndrehzahl bei 100% (U/min) |
+| **P3-01** | 6 | Torque Boost (Spannungserhöhung bei kleinen Frequenzen) |
+| **P3-02** | 20 | CutOff Torque Boost (Frequenzgrenze für Boost) |
+| **P4-00** | 12 | X1 = Pc-02=75 (entspricht 37,5 Hz) |
+| **P4-01** | 13 | X2 = Pc-02=55 (entspricht 27,5 Hz) |
+| **P4-02** | 37 | X3 = Switch von Modbus zu Aux |
+| **P4-03** | 18 | X4 = Frequenzquelle ändern |
+| **P4-04** | 1 | X5 = Start (forward) / Pc-00=100 (entspricht 50 Hz) |
+| **P4-05** | 0 | X6 = Stopp (reverse) |
+| **P6-00** | 0 | Start Mode: Immer sofort |
+| **P6-03** | 010 | Startup Frequenz max. 10Hz |
+| **P7-01** | 1 | MF.K Key - Wechsel zwischen AUX/Modbus und Bedienfeld |
+| **P7-02** | 1 | Stopp Key in allen Modi aktiv |
+| **P9-08** | 410 | Unbekannter Parameter (von 380 auf 410V) - hilft bei Startproblemen |
 
 
 ---
+
+## 📱 Steuerungslogik & Betriebsmodi
+
+### 1. AUX & Modbus Umschaltung
+
+* **Standard:** AUX ist führend (Poti am Bedienfeld aktiv).
+* **Modbus Aktivierung:** Schalter an **X3 / X4 / DCOM** schaltet Poti/AUX aus und Modbus aktiv.
+* **Manueller Modus:** Die Taste **"MF K"** schaltet auf das Bedienfeld um (Modbus & AUX werden deaktiviert).
+
+
+### 2. Status der "LOC/REM" LED
+
+| LED Status | Modus | Beschreibung |
+| --- | --- | --- |
+| **Leuchtet** | **AUX Aktiv** | Schalter X3/X4 aus. Steuerung über X5 (Start/Stopp) + Poti möglich. |
+| **Blinkt** | **Modbus Aktiv** | Schalter X3+X4 an DCOM an. Steuerung nur über Modbus. Bedienfeld inaktiv (außer Stopp). |
+| **Aus** | **Bedienfeld Aktiv** | Aktiviert durch Taste "MF K. REV". Poti aktiv, Aux/Modbus inaktiv. |
+
+---
+
+## 🔌 Port-Konfiguration & Kommunikation
+
+### Aux Ports (Eingänge)
+
+* **P4-02 = 37:** X3 schaltet Modbus/Aux um.
+* **P4-03 = 18:** X4 ändert Frequenzquelle.
+* **P4-04 = 1:** X5 für Start (vorwärts).
+* **P4-05 = 0:** X6 für Stopp.
+
+### Modbus Einstellungen
+
+| Parameter | Wert | Bedeutung |
+| --- | --- | --- |
+| **P0-28** | 0 | Setzen des Modbus Protokolls |
+| **PD-00** | 6005 | Baudrate 9600 |
+| **PD-01** | 0 | Datenformat 8,N,1 |
+| **PD-02** | 005 | Slave ID 0x05 |
+| **PD-03** | 02 | Antwortverzögerung |
+| **PD-04** | 060 | Kommunikationstimeout 60s |
+| **PD-05** | 31 | Standard Modbus Protokoll Einstellung |
+
+---
+
+## 🚀 Starteinstellungen
+
+* **P6-00 = 0:** Sofortiger Startmodus.
+* **P6-03 = 10.00:** Startup Frequenz ist auf maximal 10 Hz begrenzt.
+
+---
+
+**Soll ich für eines der Kommunikationsprotokolle (Modbus Register) noch eine detailliertere Tabelle erstellen?**
 
 
 
