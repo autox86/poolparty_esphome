@@ -22,22 +22,40 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 ---
 
 ## 📋 Zielsetzung der Konifguration
-Wenn der Frequenzumrichter an Strom angeschlossen wird:
-1.) Die FU wird durch den externen Schalter bedient
-Schalter 1: Schaltet die Poolpumpe an / aus
-(Am Schalter 1 ist X5 und DCOM angeschlossen)
+Hier ist die gewünschte Übersicht der Betriebsmodi für deine Poolsteuerung im Markdown-Format:
 
-2.) Modbus soll die Steuerung übernehmen (Automatik-Betrieb)
-Schalter 2: Aktiviert den Automatik Betrieb (Modbus an)
-(Am Schalter 2 sind X3 + X4 und DCOM angeschlossen)
+### Betriebsmodi des Frequenzumrichters (WK600)
 
-3.) Die Bedienung soll vom Bedienfeld erfolgen
-Schalter 1 = Aus
-Schalter 2 = Aus
-`MF. K / REV` wird einmalig gedrpückt
+---
 
+#### 1. Manueller Betrieb (Externer Schalter)
 
+Dieser Modus wird verwendet, wenn du die Pumpe direkt am Poolhaus steuern möchtest.
 
+* **Voraussetzung:** Schalter 2 ist **EIN** (X3 + X4 gegen DCOM geschlossen).
+* **Funktion:** Die Steuerung wird vom Modbus auf die lokalen Terminals umgeschaltet.
+* **Bedienung:** Mit **Schalter 1 (X5)** schaltest du die Pumpe ein oder aus. Die Drehzahl wird über das externe Poti geregelt.
+
+---
+
+#### 2. Automatik-Betrieb (Modbus / Home Assistant)
+
+Dieser Modus ist für den normalen Alltagsbetrieb über deine Hausautomatisierung vorgesehen.
+
+* **Voraussetzung:** Schalter 2 ist **AUS** (X3 + X4 offen).
+* **Funktion:** Der Umrichter akzeptiert Befehle und Frequenzvorgaben über die **Modbus-Schnittstelle**.
+* **Bedienung:** Die Pumpe wird über Home Assistant (ESPHome) gesteuert. Schalter 1 hat in diesem Zustand keine Funktion.
+
+---
+
+#### 3. Lokal-Betrieb (Bedienfeld am Gerät)
+
+Dieser Modus dient der direkten Diagnose oder manuellen Wartung direkt am Umrichter.
+
+* **Voraussetzung:** Schalter 1 und Schalter 2 sind **AUS**.
+* **Aktivierung:** Drücke einmalig die Taste **`MF. K / REV`**.
+* **Funktion:** Der Umrichter wechselt in den "Local"-Modus (erkennbar an der LED am Display).
+* **Bedienung:** Die Pumpe wird nun über die grünen **RUN** und roten **STOP** Tasten am Bedienfeld gestartet und gestoppt.
 
 ---
 
