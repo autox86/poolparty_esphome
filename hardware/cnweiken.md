@@ -19,6 +19,19 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 
 <br>
 
+* **Hinweis:** Der WD600k ist in der Lage wie folgt betrieben zu werden:
+1 Phasig Input / 1 Phasig Output
+1 Phasig Input / 3 Phasig Output
+3 Phasig Input / 3 Phasig Output (Warte auf Bestätigung des Herstellers, dass es keine Hardware Änderungen gibt)*
+
+*Dieser Konfiguration gilt nur für: **1 Phasig Input / 1 Phasig Output** *
+
+---
+
+Möchtest du, dass ich diesen Hinweis direkt in deine Modus-Übersicht von oben integriere?
+
+<br>
+
 ---
 
 ## 📋 Zielsetzung der Konifguration
