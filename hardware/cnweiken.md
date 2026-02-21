@@ -19,12 +19,27 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 
 <br>
 
-_ **Hinweis:** Der WD600k ist in der Lage wie folgt betrieben zu werden:_
-_1 Phasig Input / 1 Phasig Output_
-_1 Phasig Input / 3 Phasig Output_
-_3 Phasig Input / 3 Phasig Output (Warte auf Bestätigung des Herstellers, dass es keine Hardware Änderungen gibt)_
+Hier ist der Text in sauberem Markdown formatiert. Ich habe die Struktur durch eine Liste und eine Hinweisbox (Blockquote) etwas übersichtlicher gestaltet:
 
-_Dieser Konfiguration gilt nur für: **1 Phasig Input / 1 Phasig Output** _
+---
+
+> ***Hinweis:** Der WD600k ist in der Lage, wie folgt betrieben zu werden:*
+> * **1-phasiger Input / 1-phasiger Output**
+> * **1-phasiger Input / 3-phasiger Output**
+> * **3-phasiger Input / 3-phasiger Output** *(Warte auf Bestätigung des Herstellers, dass keine Hardware-Änderungen erforderlich sind)*
+> 
+> 
+> *Diese Konfiguration gilt nur für: **1-phasiger Input / 1-phasiger Output***
+
+---
+
+### Was ich optimiert habe:
+
+* **Listenpunkte:** Die verschiedenen Betriebsmodi sind durch Aufzählungszeichen schneller erfassbar.
+* **Blockquote (`>`):** Damit wird der gesamte Block optisch als zusammenhängender Hinweis hervorgehoben.
+* **Einheitliche Schreibweise:** Ich habe Bindestriche bei "1-phasig" ergänzt, was im technischen Bereich die Lesbarkeit erhöht.
+
+Möchtest du, dass ich diesen Text in eine Tabelle umwandle, um die Unterschiede zwischen Input und Output noch deutlicher darzustellen?
 
 <br>
 
