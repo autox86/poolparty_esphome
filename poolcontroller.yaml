@@ -2303,7 +2303,7 @@ sensor:
       - delta: 0.05
       # ODER: Sende spätestens alle 60 Sekunden einen Wert an HA auch wenn er gleich blieb.
       - heartbeat: 10s
-      - throttle: 300s  # Nur alle 300s einen Wert ausgeben
+      - throttle: 30s  # Nur alle 300s einen Wert ausgeben
 
   - platform: modbus_controller
     modbus_controller_id: pzem_hub
@@ -2325,7 +2325,7 @@ sensor:
       - delta: 3.0
       # ODER: Sende spätestens alle 60 Sekunden einen Wert an HA auch wenn er gleich blieb.
       - heartbeat: 10s
-      - throttle: 300s  # Nur alle 300s einen Wert ausgeben
+      - throttle: 30s  # Nur alle 300s einen Wert ausgeben
 
   - platform: total_daily_energy
     name: "${friendly_name_entity} ${name_pzem17} Energie Heute"
@@ -2342,7 +2342,7 @@ sensor:
     filters:
       # Umrechnung von Wattstunden (Wh) in Kilowattstunden (kWh)
       - multiply: 0.001
-      - throttle: 300s  # Nur alle 300s einen Wert ausgeben
+      - throttle: 30s  # Nur alle 300s einen Wert ausgeben
 
 select:
   - platform: template
