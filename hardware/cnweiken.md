@@ -27,6 +27,16 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 
 ---
 
+#### 0. Status der "LOC/REM" LED
+
+| LED Status | Modus | Beschreibung |
+| --- | --- | --- |
+| **Leuchtet** | **AUX Aktiv** | Schalter X3/X4 aus. Steuerung über X5 (Start/Stopp) + Poti möglich. |
+| **Blinkt** | **Modbus Aktiv** | Schalter X3+X4 an DCOM an. Steuerung nur über Modbus. Bedienfeld inaktiv (außer Stopp). |
+| **Aus** | **Bedienfeld Aktiv** | Aktiviert durch Taste `MF. K / REV`. Poti aktiv, Aux/Modbus inaktiv. |
+
+
+
 #### 1. Manueller Betrieb (Externer Schalter)
 
 Dieser Modus wird verwendet, wenn du die Pumpe direkt am Poolhaus steuern möchtest.
@@ -103,25 +113,6 @@ Dieser Modus dient der direkten Diagnose oder manuellen Wartung direkt am Umrich
 <img width="996" height="1204" alt="image" src="https://github.com/user-attachments/assets/0c38c035-ffb3-49e7-b21c-2eed90e6a848" />
 
 <img width="997" height="530" alt="image" src="https://github.com/user-attachments/assets/e7bac217-46e1-4b15-b49c-6cde2cc06269" />
-
----
-
-## 📱 Steuerungslogik & Betriebsmodi
-
-### 1. AUX & Modbus Umschaltung
-
-* **Standard:** AUX ist führend (Poti am Bedienfeld aktiv).
-* **Modbus Aktivierung:** Schalter an **X3 / X4 / DCOM** schaltet Poti/AUX aus und Modbus aktiv.
-* **Manueller Modus:** Die Taste **"MF K"** schaltet auf das Bedienfeld um (Modbus & AUX werden deaktiviert).
-
-
-### 2. Status der "LOC/REM" LED
-
-| LED Status | Modus | Beschreibung |
-| --- | --- | --- |
-| **Leuchtet** | **AUX Aktiv** | Schalter X3/X4 aus. Steuerung über X5 (Start/Stopp) + Poti möglich. |
-| **Blinkt** | **Modbus Aktiv** | Schalter X3+X4 an DCOM an. Steuerung nur über Modbus. Bedienfeld inaktiv (außer Stopp). |
-| **Aus** | **Bedienfeld Aktiv** | Aktiviert durch Taste "MF K. REV". Poti aktiv, Aux/Modbus inaktiv. |
 
 ---
 
