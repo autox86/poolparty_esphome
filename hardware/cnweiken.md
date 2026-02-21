@@ -22,7 +22,6 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 ---
 
 ## 📋 Zielsetzung der Konifguration
-Hier ist die gewünschte Übersicht der Betriebsmodi für deine Poolsteuerung im Markdown-Format:
 
 ### Betriebsmodi des Frequenzumrichters (WK600)
 
