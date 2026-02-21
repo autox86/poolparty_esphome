@@ -19,10 +19,6 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 
 <br>
 
-Hier ist der Text in sauberem Markdown formatiert. Ich habe die Struktur durch eine Liste und eine Hinweisbox (Blockquote) etwas übersichtlicher gestaltet:
-
----
-
 > ***Hinweis:** Der WD600k ist in der Lage, wie folgt betrieben zu werden:*
 > * **1-phasiger Input / 1-phasiger Output**
 > * **1-phasiger Input / 3-phasiger Output**
