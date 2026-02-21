@@ -17,7 +17,23 @@ Drücken Sie `PRG` -> wählen Sie `P0` -> `RD/WT` -> nutzen Sie die Pfeiltasten 
 
 Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Frequency Converter Drives For Single-Phase 220V Motor](https://www.youtube.com/watch?v=KAJoE-C64vI&t=2s)
 
-### 📋 Erforderliche Parameter-Einstellungen
+### 📋 Zielsetzung der Konifguration
+Wenn der Frequenzumrichter an Strom angeschlossen wird:
+1.) Die FU wird durch den externen Schalter bedient
+Schalter 1: Schaltet die Poolpumpe an / aus
+(Am Schalter 1 ist X5 und DCOM angeschlossen)
+
+2.) Modbus soll die Steuerung übernehmen (Automatik-Betrieb)
+Schalter 2: Aktiviert den Automatik Betrieb (Modbus an)
+(Am Schalter 2 sind X3 + X4 und DCOM angeschlossen)
+
+3.) Die Bedienung soll vom Bedienfeld erfolgen
+Schalter 1 = Aus
+Schalter 2 = Aus
+**MF. K / REV** wird einmalig gedrpückt
+
+
+
 
 ---
 
@@ -58,6 +74,7 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 | **P9-08** | 410 | Unbekannter Parameter (von 380 auf 410V) - hilft bei Startproblemen |
 
 <img width="1007" height="1780" alt="image" src="https://github.com/user-attachments/assets/d00a5ccb-ef25-49ae-acfc-2a314f6543eb" />
+
 <img width="1097" height="196" alt="image" src="https://github.com/user-attachments/assets/16ddd29d-5e99-498b-ad30-5037f5896e42" />
 
 <img width="987" height="1442" alt="image" src="https://github.com/user-attachments/assets/8744bfac-b153-420d-80fd-afd331ee6606" />
