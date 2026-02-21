@@ -31,9 +31,9 @@ Hier auch ein Video des Herstellers: [VFD Single Phase 220V Input and Output Fre
 
 Dieser Modus wird verwendet, wenn du die Pumpe direkt am Poolhaus steuern möchtest.
 
-* **Voraussetzung:** Schalter 2 ist **EIN** (X3 + X4 gegen DCOM geschlossen).
-* **Funktion:** Die Steuerung wird vom Modbus auf die lokalen Terminals umgeschaltet.
-* **Bedienung:** Mit **Schalter 1 (X5)** schaltest du die Pumpe ein oder aus. Die Drehzahl wird über das externe Poti geregelt.
+* **Voraussetzung:** **Schalter 1 (Automatik Modus)** ist **AUS** (X3 + X4 gegen DCOM geschlossen).
+* **Funktion:** Die Steuerung wird vom Modbus auf die lokalen Terminals gelegt.
+* **Bedienung:** Mit **Schalter 2 (X5)** schaltest du die Pumpe ein oder aus. Die Drehzahl wird über das Poti am Bedienfeld gesteuert, sollte aber ganze rechts sein und damit auf 50hz.
 
 ---
 
@@ -41,9 +41,9 @@ Dieser Modus wird verwendet, wenn du die Pumpe direkt am Poolhaus steuern möcht
 
 Dieser Modus ist für den normalen Alltagsbetrieb über deine Hausautomatisierung vorgesehen.
 
-* **Voraussetzung:** Schalter 2 ist **AUS** (X3 + X4 offen).
+* **Voraussetzung:** **Schalter 1 (Automatik Modus)** ist **AN** (X3 + X4 offen).
 * **Funktion:** Der Umrichter akzeptiert Befehle und Frequenzvorgaben über die **Modbus-Schnittstelle**.
-* **Bedienung:** Die Pumpe wird über Home Assistant (ESPHome) gesteuert. Schalter 1 hat in diesem Zustand keine Funktion.
+* **Bedienung:** Die Pumpe wird über Home Assistant (ESPHome) gesteuert. Schalter 2 hat in diesem Zustand keine Funktion.
 
 ---
 
