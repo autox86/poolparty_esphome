@@ -69,7 +69,7 @@ Dieser Modus ist für den normalen Alltagsbetrieb über deine Hausautomatisierun
 
 #### 3. Lokal-Betrieb (Bedienfeld am Gerät)
 
-Dieser Modus dient der direkten Diagnose oder manuellen Wartung direkt am Umrichter.
+Dieser Modus ist zum steuern am Bedienteil vorgesehen, z.B. wenn man keine externen Schalter braucht.
 
 * **Voraussetzung:** Schalter 1 und Schalter 2 sind **AUS**.
 * **Aktivierung:** Drücke einmalig die Taste **`MF. K / REV`**.
