@@ -113,6 +113,15 @@ Dieser Modus ist zum steuern am Bedienteil vorgesehen, z.B. wenn man keine exter
 | **P7-01** | 1 | MF.K Key - Wechsel zwischen AUX/Modbus und Bedienfeld |
 | **P7-02** | 1 | Stopp Key in allen Modi aktiv |
 | **P9-08** | 410 | Unbekannter Parameter (von 380 auf 410V) - hilft bei Startproblemen |
+| **PD-00** | 6005 | Setzen der Baudrate auf 9600 |
+| **PD-01** | 0 | Setzen des Datenformats auf 8,N,1 |
+| **PD-02** | 005 | Setzen der Slave ID auf 0x05 |
+| **PD-03** | 02 | Einstellen einer Antwortverzögerung |
+| **PD-04** | 060 | Setzen eines Kommunikationstimeout von 60s |
+| **PD-05** | 31 | Standard Modbus Protokoll Einstellung |
+| **PD-06** | 0 | Default |
+| **PD-08** | 0 | Default (wird nicht gebraucht) |
+
 
 <img width="1007" height="1780" alt="image" src="https://github.com/user-attachments/assets/d00a5ccb-ef25-49ae-acfc-2a314f6543eb" />
 
