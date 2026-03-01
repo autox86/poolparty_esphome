@@ -86,8 +86,8 @@ Dieser Modus ist zum steuern am Bedienteil vorgesehen, z.B. wenn man keine exter
 | **P0-02** | 1 | Command Source: Terminal |
 | **P0-03** | 4 | Frequenzeinstellung (Source X) |
 | **P0-04** | 9 | Wählbare Frequenzeinstellung über einen AUX Eingang (Source Y) |
-| **P0-07** | 7 | Frequenzquelle soll entweder Source X oder Source Y sein |
-| **P0-08** | 25 | Voreingestellte Frequenz |
+| **P0-07** | 2 | Frequenzquelle soll entweder Source X oder Source Y sein |
+| **P0-08** | 50 | Voreingestellte Frequenz |
 | **P0-10** | 50 | Maximale Frequenz |
 | **P0-11** | 0 | Source = P0-12 |
 | **P0-17** | 00.20 | Acceleration Time = 0.2s |
@@ -104,7 +104,7 @@ Dieser Modus ist zum steuern am Bedienteil vorgesehen, z.B. wenn man keine exter
 | **P3-02** | 20 | CutOff Torque Boost (Frequenzgrenze für Boost) |
 | **P4-00** | 12 | X1 = Pc-02=75 (entspricht 37,5 Hz) |
 | **P4-01** | 13 | X2 = Pc-02=55 (entspricht 27,5 Hz) |
-| **P4-02** | 37 | X3 = Switch von Modbus zu Aux |
+| **P4-02** | 37 | X3 = Switch von Aux zu Modbus |
 | **P4-03** | 18 | X4 = Frequenzquelle ändern |
 | **P4-04** | 1 | X5 = Start (forward) / Pc-00=100 (entspricht 50 Hz) |
 | **P4-05** | 0 | X6 = Stopp (reverse) |
