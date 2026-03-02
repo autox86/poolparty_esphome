@@ -593,8 +593,7 @@ interval:
             # (Wir erweitern die Bedingung: ...oder wenn Frostschutz noch aktiv ist)
             - lambda: |-
                 return (id(switch_chlor_run_gpio).state || id(switch_relay2_ph).state) || 
-                       (!id(bs_timer_allows_run).state && (id(inv_running).state == 1)) ||
-                       id(glo_frost_active);
+                       !id(bs_timer_allows_run).state || id(glo_frost_active);
           then:
             - lambda: |-
                 // --- 0. FROSTSCHUTZ LOGIK  ---
