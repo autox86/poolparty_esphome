@@ -117,7 +117,7 @@ Dieser Modus ist zum steuern am Bedienteil vorgesehen, z.B. wenn man keine exter
 | **PD-01** | 0 | Setzen des Datenformats auf 8,N,1 |
 | **PD-02** | 005 | Setzen der Slave ID auf 0x05 |
 | **PD-03** | 02 | Einstellen einer Antwortverzögerung |
-| **PD-04** | 060 | Setzen eines Kommunikationstimeout von 60s |
+| **PD-04** | 000 | Setzen eines Kommunikationstimeout von 0s sonst funktioniert die FU nicht mehr sobald das Modbus Signal fehlt. |
 | **PD-05** | 31 | Standard Modbus Protokoll Einstellung |
 | **PD-06** | 0 | Default |
 | **PD-08** | 0 | Default (wird nicht gebraucht) |
