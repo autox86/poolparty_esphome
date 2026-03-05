@@ -1,7 +1,6 @@
 substitutions:
   device_name: "poolcontroller"
   friendly_name: "pool"
-  friendly_name_entity: "#"
 
   #wifi domain to use, standard =  .local
   domain: .local
@@ -91,7 +90,7 @@ substitutions:
   checkIntervalPH: "15 min" #Angabe nach der Zahl ist wichtig!!
 
 esphome:
-  name: "${device_name}"
+  name: "${friendly_name}"
   project:
     name: "autox86.poolparty"
     version: "1.0.1"
@@ -162,6 +161,17 @@ safe_mode:
 
 globals:
 
+  - id: glo_flow_meter_min
+    type: float
+    initial_value: '200.0' #Minimum was an Durchfluss des Meter herrscht, sonst beendet die Pumpe
+  - id: glo_flow_pump_min
+    type: float
+    initial_value: '200.0' #Minimum was an Durchfluss der Pumpe herrscht, sonst beendet die Pumpe
+    restore_value: 'true'
+  - id: glo_pzem_min
+    type: float
+    initial_value: '1.5' #Minimum was an Strom fließen muss, sonst beendet die Elektrolyse ()
+    restore_value: 'true'
   - id: glo_chlor_fail_count
     type: int
     initial_value: '0' # Variable für die Fehlerfall Elektrolyse
@@ -499,7 +509,7 @@ interval:
             - lambda: return !id(switch_relay2_ph).state;
             - lambda: |-
                 if (id(use_flow_dn40)) {
-                  return (id(flow_pump).state > 200.0 && (id(inv_running).state == 1));
+                  return (id(flow_pump).state > id(glo_flow_pump_min) && (id(inv_running).state == 1));
                 }else{
                   return (id(inv_running).state == 1);
                 }
@@ -559,9 +569,9 @@ interval:
             - lambda: |-
                 bool flow_ok = true;
                 // Prüfe DN40 falls aktiviert
-                if (id(use_flow_dn40) && id(flow_pump).state <= 200.0) flow_ok = false;
+                if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_min)) flow_ok = false;
                 // Prüfe S201 falls aktiviert
-                if (id(use_flow_s201) && id(flow_meter).state <= 200.0) flow_ok = false;
+                if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min)) flow_ok = false;
                 
                 // Pumpe muss laufen UND (wenn Sensoren aktiv) muss Flow da sein
                 return (id(inv_running).state == 1) && flow_ok;
@@ -587,9 +597,9 @@ interval:
                           reason = "IntervalORP - kein Chlor Bedarf (ORP ok)";
                         } else if (id(chlorinator_max_reached)) {
                           reason = "IntervalORP - tägliche ORP-Laufzeit erreicht";
-                        } else if (id(use_flow_dn40) && id(flow_pump).state <= 200.0) {
+                        } else if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_min)) {
                           reason = "YF-DN40 - kein Durchfluss!";
-                        } else if (id(use_flow_s201) && id(flow_meter).state <= 200.0) {
+                        } else if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min)) {
                           reason = "YF-S201 - kein Durchfluss!";
                         } else {
                           reason = "IntervalORP - Unbekannte Blockade (ggf. glo_ph_allowed)";
@@ -626,7 +636,7 @@ interval:
                   }
                 }
                 // --- A. GEMEINSAME SICHERHEIT ---
-                if (id(inv_running).state != 1 || (id(use_flow_dn40) && id(flow_pump).state <= 200.0) || (id(use_flow_s201) && id(flow_meter).state <= 200.0)) {
+                if (id(inv_running).state != 1 || (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_min)) || (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min))) {
                   ESP_LOGW("safety-interval", "Pumpe aus oder kein Durchfluss YF-DN40 / S201 --> STOPP -> Alles aus.");
                   id(script_stopp_all).execute();
                   return;
@@ -666,11 +676,11 @@ interval:
                     id(switch_chlorinator).turn_off();
                     id(chlorinator_remaining_seconds) = 0;
                   }
-                  // --- NEU: Stromfluss-Überwachung im Betrieb --- --> Doppelte Sicherheit, da wir auch beim Einschalten bereits testen!!!
+                  // --- NEU: Stromfluss-Überwachung im Betrieb
                   if (!id(switch_chlor_debug).state) {
                     
-                    // Wenn der Strom unter 0.5A liegt ODER der PZEM gar nicht online ist
-                    if (!id(bs_pzem_online).state || id(pzem_dc_current).state < 0.5) {
+                    // Wenn der Strom unter e.g. 1.5A liegt ODER der PZEM gar nicht online ist
+                    if (!id(bs_pzem_online).state || id(pzem_dc_current).state < id(glo_pzem_min)) {
                         id(glo_chlor_fail_count)++;
                         if (id(glo_chlor_fail_count) >= 2) {
                           id(glo_chlor_error_lockout) = true;
@@ -1216,7 +1226,7 @@ script:
       # 4) Poolpumpe ausschalten
       - if:
           condition:
-            - lambda: return id(inv_running).state == 1 || (id(use_flow_dn40) && id(flow_pump).state >= 200.0);
+            - lambda: return id(inv_running).state == 1 || (id(use_flow_dn40) && id(flow_pump).state >= id(glo_flow_pump_min));
           then:
             - lambda: |-
                 ESP_LOGI("script_stopp_all", "Poolpumpe wird ausgeschaltet");
@@ -1284,7 +1294,7 @@ script:
                       condition:
                         - lambda: |-
                             if (id(use_flow_dn40)) {
-                              return id(flow_pump).state > 200.0;
+                              return id(flow_pump).state > id(glo_flow_pump_min);
                             } else {
                               return true;
                             }
@@ -2021,7 +2031,7 @@ tuya:
 text_sensor:
   # Zeigt den Grund des letzten Restarts!
   - platform: template
-    name: "${friendly_name_entity} Letzter Restart Grund"
+    name: "Letzter Restart Grund"
     id: last_reset_reason_sensor
     icon: "mdi:history"
     web_server:
@@ -2032,7 +2042,7 @@ text_sensor:
       return id(glo_last_reset_reason);
 
   - platform: template
-    name: "${friendly_name_entity} Betriebszeit seit Boot"
+    name: "Betriebszeit seit Boot"
     id: uptime_human
     icon: mdi:clock-start
     web_server:
@@ -2063,14 +2073,14 @@ text_sensor:
 
   - platform: wifi_info
     ip_address:
-      name: "${friendly_name_entity} WiFi IP"
+      name: "WiFi IP"
       id: wifi_sta_ip
       icon: "mdi:ip-network"
       web_server:
         sorting_group_id: grp_system
       entity_category: diagnostic
     ssid:
-      name: "${friendly_name_entity} WiFi SSID"
+      name: "WiFi SSID"
       id: wifi_sta_ssid
       icon: "mdi:wifi-settings"
       web_server:
@@ -2078,7 +2088,7 @@ text_sensor:
       entity_category: diagnostic
   
   - platform: template
-    name: "${friendly_name_entity} Chlor Polarität"
+    name: "Chlor Polarität"
     id: txt_chlor_pol
     icon: "mdi:swap-horizontal"
     web_server:
@@ -2086,7 +2096,7 @@ text_sensor:
       sorting_weight: 13
 
   - platform: template
-    name: "${friendly_name_entity} Chlor Restlaufzeit"
+    name: "Chlor Restlaufzeit"
     id: txt_chlor_rest
     icon: "mdi:timer-sand"
     web_server:
@@ -2094,7 +2104,7 @@ text_sensor:
       sorting_weight: 14
 
   - platform: template
-    name: "${friendly_name_entity} Chlor Laufzeit Heute"
+    name: "Chlor Laufzeit Heute"
     id: txt_chlor_today
     icon: "mdi:calendar-clock"
     web_server:
@@ -2102,7 +2112,7 @@ text_sensor:
       sorting_weight: 15
 
   - platform: template
-    name: "${friendly_name_entity} Status Meldungen"
+    name: "Status Meldungen"
     id: txt_sens_status
     icon: "mdi:message-text-outline"
     web_server:
@@ -2111,7 +2121,7 @@ text_sensor:
     #initial_value: "Bereit"
 
   - platform: template
-    name: "${friendly_name_entity} PH Restlaufzeit"
+    name: "PH Restlaufzeit"
     id: txt_ph_countdown
     icon: "mdi:clock-outline"
     web_server:
@@ -2119,7 +2129,7 @@ text_sensor:
       sorting_weight: 16
 
   - platform: template
-    name: "${friendly_name_entity} PH Laufzeit Heute"
+    name: "PH Laufzeit Heute"
     id: txt_ph_runtime
     icon: "mdi:clock-outline"
     web_server:
@@ -2127,7 +2137,7 @@ text_sensor:
       sorting_weight: 17
 
   - platform: template
-    name: "${friendly_name_entity} PH Heute"
+    name: "PH Heute"
     id: txt_sens_ph_today
     icon: "mdi:pump"
     web_server:
@@ -2136,7 +2146,7 @@ text_sensor:
     entity_category: diagnostic
 
   - platform: template
-    name: "${friendly_name_entity} PH letzter Zyklus (ml)"
+    name: "PH letzter Zyklus (ml)"
     id: txt_sens_ph_last_cycle
     icon: "mdi:pump"
     web_server:
@@ -2149,11 +2159,11 @@ sensor:
     id: uptime_raw
     name: "uptime raw"
     internal: true
-    update_interval: 60s
+    update_interval: 30s
     entity_category: diagnostic
 
   - platform: wifi_signal
-    name: "${friendly_name_entity} WiFi Signal "
+    name: "WiFi Signal "
     update_interval: 300s
     web_server:
       sorting_group_id: grp_system
@@ -2164,7 +2174,7 @@ sensor:
 
   - platform: dallas_temp
     id: sensor_outdoor_temp
-    name: "${friendly_name_entity} Außentemperatur °C"
+    name: "Außentemperatur °C"
     # adress ist im Log, für ersten Start 
     # address auskommentieren und nur den "neuen" Dallas anschließen
     address: 0x843c01b556227b28
@@ -2176,7 +2186,7 @@ sensor:
 
   - platform: dallas_temp
     id: sensor_water_temp
-    name: "${friendly_name_entity} Wasser Temperatur"
+    name: "Wasser Temperatur"
     # address ist im Log, für ersten Start 
     # address auskommentieren und nur den "neuen" Dallas anschließen
     #address: 0x843c01b556227b28
@@ -2186,7 +2196,7 @@ sensor:
       sorting_weight: 47
 
   - platform: template
-    name: "${friendly_name_entity} Poolpumpe Vorlaufzeit Timer"
+    name: "Poolpumpe Vorlaufzeit Timer"
     unit_of_measurement: "min"
     update_interval: 10s
     web_server:
@@ -2208,7 +2218,7 @@ sensor:
       return elapsed;
 
   - platform: template
-    name: "${friendly_name_entity} PH Tank Restinhalt"
+    name: "PH Tank Restinhalt"
     id: ph_tank_sensor
     unit_of_measurement: "L"
     accuracy_decimals: 2
@@ -2224,7 +2234,7 @@ sensor:
 
   #Reading tuya W2839 Pool ORP / PH / Temp
   - platform: "tuya"
-    name: "${friendly_name_entity} Temperatur Pool Controller"
+    name: "Temperatur Pool Controller"
     internal: false
     id: tuya_temp
     sensor_datapoint: 8
@@ -2251,7 +2261,7 @@ sensor:
             }
 
   - platform: "tuya"
-    name: "${friendly_name_entity} Aktueller PH Wert"
+    name: "Aktueller PH Wert"
     id: ph_measvalue
     sensor_datapoint: 106
     web_server:
@@ -2266,7 +2276,7 @@ sensor:
         - throttle: 30s
 
   - platform: "tuya"
-    name: "${friendly_name_entity} Aktueller ORP Wert"
+    name: "Aktueller ORP Wert"
     id: orp_measvalue
     sensor_datapoint: 131
     web_server:
@@ -2284,7 +2294,7 @@ sensor:
   - platform: pulse_counter
     id: flow_pump
     pin: ${yfdn40}
-    name: "${friendly_name_entity} Durchfluss Pumpe L-Std."
+    name: "Durchfluss Pumpe L-Std."
     update_interval: 5s
     web_server:
       sorting_group_id: grp_sensors
@@ -2301,7 +2311,7 @@ sensor:
           return (x / 27.0) * 60.0;  // L/Std.
       - throttle: 10s  # nur alle 10s an HA senden
     total:
-      name: "${friendly_name_entity} Durchfluss Pumpe Tag"
+      name: "Durchfluss Pumpe Tag"
       unit_of_measurement: "L"
       device_class: water
       state_class: total_increasing
@@ -2320,7 +2330,7 @@ sensor:
   - platform: pulse_counter
     id: flow_meter
     pin: ${yfs201}
-    name: "${friendly_name_entity} Durchfluss Messzelle L-Std."
+    name: "Durchfluss Messzelle L-Std."
     update_interval: 5s
     web_server:
       sorting_group_id: grp_sensors
@@ -2336,7 +2346,7 @@ sensor:
           return (x / 450.0) * 60.0;  // l/Std.
       - throttle: 10s  # nur alle 10s an HA senden
     total:
-      name: "${friendly_name_entity} Durchfluss Messzelle Tag"
+      name: "Durchfluss Messzelle Tag"
       unit_of_measurement: "L"
       device_class: water
       state_class: total_increasing
@@ -2352,7 +2362,7 @@ sensor:
 #Working config - Frequenzumrichter von Mr WU
   - platform: modbus_controller
     modbus_controller_id: modbus_freq_inv
-    name: "${friendly_name_entity} INV:Derzeitige Frequenz in Hz"
+    name: "INV:Derzeitige Frequenz in Hz"
     id: inv_frequency
     register_type: holding
     address: 0x1001
@@ -2372,7 +2382,7 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: modbus_freq_inv 
-    #name: "${friendly_name_entity} INV:Spannung des Bus"
+    #name: "INV:Spannung des Bus"
     id: inv_voltage_bus
     register_type: holding
     address: 0x1002
@@ -2392,7 +2402,7 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: modbus_freq_inv 
-    name: "${friendly_name_entity} INV:Ausgangsspannung in V"
+    name: "INV:Ausgangsspannung in V"
     id: inv_voltage_out
     register_type: holding
     address: 0x1003
@@ -2411,7 +2421,7 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: modbus_freq_inv 
-    name: "${friendly_name_entity} INV:Ausgangsstrom in A"
+    name: "INV:Ausgangsstrom in A"
     id: inv_current_out
     register_type: holding
     address: 0x1005
@@ -2430,7 +2440,7 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: modbus_freq_inv 
-    name: "${friendly_name_entity} INV:Ausgangsdrehmoment Nm"
+    name: "INV:Ausgangsdrehmoment Nm"
     id: inv_torque_out
     register_type: holding
     address: 0x1006
@@ -2448,7 +2458,7 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: modbus_freq_inv 
-    name: "${friendly_name_entity} INV:Derzeitige Geschwindigkeit U-min"
+    name: "INV:Derzeitige Geschwindigkeit U-min"
     id: inv_speed
     register_type: holding
     address: 0x1007
@@ -2467,7 +2477,7 @@ sensor:
 #when VFD is running state=1, when VFD is not running state=3
   - platform: modbus_controller
     modbus_controller_id: modbus_freq_inv
-    name: "${friendly_name_entity} INV: Running Status"
+    name: "INV: Running Status"
     internal: true
     id: inv_running
     address: 0x3000
@@ -2491,7 +2501,7 @@ sensor:
 #PZEMDC über Modbus
   - platform: modbus_controller
     modbus_controller_id: pzem_hub
-    name: "${friendly_name_entity} ${name_pzem17} Spannung"
+    name: "${name_pzem17} Spannung"
     id: pzem_dc_voltage
     icon: "mdi:flash"
     register_type: read
@@ -2508,7 +2518,7 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: pzem_hub
-    name: "${friendly_name_entity} ${name_pzem17} Stromstärke"
+    name: "${name_pzem17} Stromstärke"
     id: pzem_dc_current
     icon: "mdi:current-dc"
     register_type: read
@@ -2529,7 +2539,7 @@ sensor:
       - throttle: 30s  # Nur alle 300s einen Wert ausgeben
 
   - platform: template
-    name: "${friendly_name_entity} ${name_pzem17} Leistung Wirkrichtung"
+    name: "${name_pzem17} Leistung Wirkrichtung"
     id: pzem_dc_power
     unit_of_measurement: "W"
     web_server:
@@ -2570,7 +2580,7 @@ sensor:
 
 
   - platform: total_daily_energy
-    name: "${friendly_name_entity} ${name_pzem17} Energie Heute"
+    name: "${name_pzem17} Energie Heute"
     id: pzem_dc_energy_daily
     icon: "mdi:counter"
     power_id: pzem_dc_power_raw
@@ -2587,7 +2597,7 @@ sensor:
 
 select:
   - platform: template
-    name: "${friendly_name_entity} Durchflussmesser installiert?"
+    name: "Durchflussmesser installiert?"
     id: select_flowsensor
     icon: "mdi:gauge-full"
     web_server:
@@ -2635,7 +2645,7 @@ select:
 
 # === Select für Pumpenmodus / Frequenz ===
   - platform: template
-    name: "${friendly_name_entity} Pumpenmodus"
+    name: "Pumpenmodus"
     id: select_work_mode
     icon: "mdi:cog-sync"
     web_server:
@@ -2704,7 +2714,7 @@ select:
 #Working - Number Input for Modbus Value
 number:
   - platform: modbus_controller
-    name: "${friendly_name_entity} INV: Setze Zielfrequenz in %"
+    name: "INV: Setze Zielfrequenz in %"
     modbus_controller_id: modbus_freq_inv
     id: number_target_frequency
     icon: "mdi:speedometer"
@@ -2732,7 +2742,7 @@ number:
 
   # Durchfluss Poolpumpe bei 100%
   - platform: template
-    name: "${friendly_name_entity} Durchfluss PoolPumpe 100%"
+    name: "Durchfluss PoolPumpe 100%"
     id: poolpump_flow_max_setter
     icon: "mdi:gauge-full"
     web_server:
@@ -2755,7 +2765,7 @@ number:
 
   # PH Kanister Größe (ml)
   - platform: template
-    name: "${friendly_name_entity} PH Kanister Größe"
+    name: "PH Kanister Größe"
     id: ph_tank_capacity_setter
     icon: "mdi:barrel"
     web_server:
@@ -2787,7 +2797,7 @@ number:
 
   # PH Max Wert Wasser
   - platform: template
-    name: "${friendly_name_entity} PH Max Wert Wasser"
+    name: "PH Max Wert Wasser"
     id: ph_max_setter
     icon: "mdi:ph"
     web_server:
@@ -2811,7 +2821,7 @@ number:
 
   # PH Min Wert Wasser
   - platform: template
-    name: "${friendly_name_entity} PH Min Wert Wasser"
+    name: "PH Min Wert Wasser"
     id: ph_min_setter
     web_server:
       sorting_group_id: grp_config
@@ -2835,7 +2845,7 @@ number:
 
   # ORP Max Wert Wasser
   - platform: template
-    name: "${friendly_name_entity} ORP Max Wert Wasser"
+    name: "ORP Max Wert Wasser"
     id: orp_max_setter
     icon: "mdi:water-percent"
     web_server:
@@ -2860,7 +2870,7 @@ number:
 
   # ORP Min Wert Wasser
   - platform: template
-    name: "${friendly_name_entity} ORP Min Wert Wasser"
+    name: "ORP Min Wert Wasser"
     id: orp_min_setter
     icon: "mdi:water-percent"
     web_server:
@@ -2885,7 +2895,7 @@ number:
 
   # ORP Zielwert Wasser
   - platform: template
-    name: "${friendly_name_entity} ORP Zielwert Wasser"
+    name: "ORP Zielwert Wasser"
     id: num_orp_target_setter
     icon: "mdi:water-percent"
     web_server:
@@ -2910,7 +2920,7 @@ number:
 
   # PH Max pro Tag (ml)
   - platform: template
-    name: "${friendly_name_entity} PH max pro Tag"
+    name: "PH max pro Tag"
     id: ph_max_day_setter
     icon: "mdi:clock-check-outline"
     web_server:
@@ -2930,7 +2940,7 @@ number:
 
   # PH Max pro Zyklus (ml)
   - platform: template
-    name: "${friendly_name_entity} PH max pro Zyklus"
+    name: "PH max pro Zyklus"
     id: ph_max_cycle_setter
     icon: "mdi:clock-check-outline"
     web_server:
@@ -2950,7 +2960,7 @@ number:
 
   # PH Förderleistung (Einstellung in l/h, Speicherung in ml/s)
   - platform: template
-    name: "${friendly_name_entity} PH Förderleistung (l-h)"
+    name: "PH Förderleistung (l-h)"
     id: ph_pump_setter
     icon: "mdi:pump"
     web_server:
@@ -2980,7 +2990,7 @@ number:
 
   # LowSalt Meldung (Schwellwert für Amperemessung)
   - platform: template
-    name: "${friendly_name_entity} LowSalt Limit"
+    name: "LowSalt Limit"
     id: num_low_salt_limit
     icon: "mdi:shaker-outline" # Passendes Salz-Symbol
     unit_of_measurement: "A"
@@ -3001,7 +3011,7 @@ number:
 
   # Chlorinator max Laufzeit Tag(min)
   - platform: template
-    name: "${friendly_name_entity} Chlorinator max Laufzeit Tag"
+    name: "Chlorinator max Laufzeit Tag"
     id: chlor_run_time_max_day_setter
     web_server:
       sorting_group_id: grp_config
@@ -3021,7 +3031,7 @@ number:
 
   # Chlorinator max Laufzeit Zyklus(min)
   - platform: template
-    name: "${friendly_name_entity} Chlorinator max Laufzeit Zyklus(min)"
+    name: "Chlorinator max Laufzeit Zyklus(min)"
     id: chlor_run_time_max_cycle_setter
     icon: "mdi:clock-check-outline"
     web_server:
@@ -3041,7 +3051,7 @@ number:
 
   # Poolpumpe Vorlaufzeit (min)
   - platform: template
-    name: "${friendly_name_entity} Poolpumpe Vorlaufzeit (min)"
+    name: "Poolpumpe Vorlaufzeit (min)"
     id: pump_prerun_time_setter
     icon: "mdi:play-circle-outline"
     web_server:
@@ -3062,7 +3072,7 @@ number:
 
   #Dynamic Timer Komponente - Start
   - platform: template
-    name: "${friendly_name_entity} Timer: An zur Stunde"
+    name: "Timer: An zur Stunde"
     id: number_timer_hour_on
     internal: true #internal da über Text: schöner abgedeckt
     icon: "mdi:clock-start"
@@ -3078,7 +3088,7 @@ number:
     mode: box
   #Dynamic Timer Komponente - Start
   - platform: template
-    name: "${friendly_name_entity} Timer: An zur Minute"
+    name: "Timer: An zur Minute"
     id: number_timer_minute_on
     internal: true #internal da über Text: schöner abgedeckt
     icon: "mdi:clock-start"
@@ -3095,7 +3105,7 @@ number:
 
   #Dynamic Timer Komponente - Stopp
   - platform: template
-    name: "${friendly_name_entity} Timer: Aus zur Stunde"
+    name: "Timer: Aus zur Stunde"
     id: number_timer_hour_off
     internal: true #internal da über Text: schöner abgedeckt
     icon: "mdi:clock-end"
@@ -3111,7 +3121,7 @@ number:
     mode: box
   #Dynamic Timer Komponente - Stopp
   - platform: template
-    name: "${friendly_name_entity} Timer: Aus zur Minute"
+    name: "Timer: Aus zur Minute"
     id: number_timer_minute_off
     internal: true #internal da über Text: schöner abgedeckt
     icon: "mdi:clock-end"
@@ -3229,7 +3239,7 @@ switch:
 #     address: 0x2000
 #     register_type: holding
 #     id: switch_poolpump
-#     name: "${friendly_name_entity} INV:An - Aus"
+#     name: "INV:An - Aus"
 #     #internal: true #Make this switch internal and never trigger it from here?
 #     restore_mode: ALWAYS_OFF   # important against reboot effects
 #     icon: "mdi:pump"
@@ -3277,7 +3287,7 @@ switch:
 
 #Use template switch Component in ESPHome with Modbus Lambda
   - platform: template
-    name: "${friendly_name_entity} INV:An - Aus"
+    name: "INV:An - Aus"
     id: switch_poolpump
     icon: "mdi:pump"
     optimistic: true
@@ -3318,7 +3328,7 @@ switch:
 #Schalter für den Chlorinator - Minimale Bedingungen um manuell schalten zu können
 #Nicht für den Betrieb geeignet - Testing Only!
   - platform: template
-    name: "${friendly_name_entity} 1_Chlorinator"
+    name: "1_Chlorinator"
     id: switch_chlorinator
     restore_mode: DISABLED
     optimistic: false
@@ -3369,7 +3379,7 @@ switch:
 # #Schalter für die PH Dosierpumpe - Minimale Bedingungen um manuell schalten zu können
 # #Nicht für den Betrieb geeignet - Testing Only!
   - platform: template
-    name: "${friendly_name_entity} 2_PH Dosierpumpe"
+    name: "2_PH Dosierpumpe"
     id: switch_phdosierpumpe
     restore_mode: ALWAYS_OFF
     optimistic: false
@@ -3485,7 +3495,7 @@ switch:
 
   #Switch to restart the device
   - platform: restart
-    name: "${friendly_name_entity} Neustart (Normal)"
+    name: "Neustart (Normal)"
     id: restart_switch
     web_server:
       sorting_group_id: grp_system
@@ -3493,7 +3503,7 @@ switch:
     icon: "mdi:restart"
 
   - platform: safe_mode
-    name: "${friendly_name_entity} Neustart (Safe Mode)"
+    name: "Neustart (Safe Mode)"
     id: restart_safe
     disabled_by_default: true 
     web_server:
@@ -3503,7 +3513,7 @@ switch:
 
   #The factory_reset component allows you to invalidate (reset) all ESPHome preferences stored in flash memory and reboot your node
   - platform: factory_reset
-    name: "${friendly_name_entity} Reset Konfig"
+    name: "Reset Konfig"
     entity_category: Diagnostic
     disabled_by_default: true 
     web_server:
@@ -3511,7 +3521,7 @@ switch:
     icon: "mdi:factory"
 
   - platform: template
-    name: "${friendly_name_entity} Chlorinator Debug Mode "
+    name: "Chlor kein Hardware Defekt Check"
     id: switch_chlor_debug
     icon: "mdi:shield-check"
     disabled_by_default: true 
@@ -3525,7 +3535,7 @@ switch:
   - platform: template
     id: switch_timer_mon
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Timer Montag"
+    name: "Timer Montag"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     web_server:
@@ -3535,7 +3545,7 @@ switch:
   - platform: template
     id: switch_timer_tue
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Timer Dienstag"
+    name: "Timer Dienstag"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     web_server:
@@ -3545,7 +3555,7 @@ switch:
   - platform: template
     id: switch_timer_wed
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Timer Mittwoch"
+    name: "Timer Mittwoch"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     web_server:
@@ -3555,7 +3565,7 @@ switch:
   - platform: template
     id: switch_timer_thu
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Timer Donnerstag"
+    name: "Timer Donnerstag"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     web_server:
@@ -3565,7 +3575,7 @@ switch:
   - platform: template
     id: switch_timer_fri
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Timer Freitag"
+    name: "Timer Freitag"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     web_server:
@@ -3575,7 +3585,7 @@ switch:
   - platform: template
     id: switch_timer_sat
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Timer Samstag"
+    name: "Timer Samstag"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     web_server:
@@ -3585,7 +3595,7 @@ switch:
   - platform: template
     id: switch_timer_sun
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Timer Sonntag"
+    name: "Timer Sonntag"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     web_server:
@@ -3595,7 +3605,7 @@ switch:
   - platform: template
     id: switch_timer_disabled
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Timer deaktiviert"
+    name: "Timer deaktiviert"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     web_server:
@@ -3606,7 +3616,7 @@ switch:
   - platform: template
     id: switch_no_pump_restart
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Poolpumpe kein Autostart"
+    name: "Poolpumpe kein Autostart"
     optimistic: true
     restore_mode: ALWAYS_OFF
     disabled_by_default: true 
@@ -3623,7 +3633,7 @@ switch:
   - platform: template
     id: switch_maintenance
     icon: "mdi:calendar-check"
-    name: "${friendly_name_entity} Wartungsmodus"
+    name: "Wartungsmodus"
     optimistic: true
     restore_mode: ALWAYS_OFF
     disabled_by_default: true 
@@ -3666,7 +3676,7 @@ button:
             #data: [0x04, 0x06, 0x00, 0x02, 0x00, 0x01, 0x28, 0x09]
   
   - platform: template
-    name: "${friendly_name_entity} Chlorinator Fehler Reset"
+    name: "Chlorinator Fehler Reset"
     icon: "mdi:sync-alert"
     web_server:
       sorting_group_id: grp_error
@@ -3680,7 +3690,7 @@ button:
             ESP_LOGI("chlor_watchdog", "Sperre manuell aufgehoben.");
 
   - platform: template
-    name: "${friendly_name_entity} Tuya Fehler Reset"
+    name: "Tuya Fehler Reset"
     icon: "mdi:sync-alert"
     web_server:
       sorting_group_id: grp_error
@@ -3695,7 +3705,7 @@ button:
             ESP_LOGI("tuya_watchdog", "Sperre wurde manuell aufgehoben.");
 
   - platform: template
-    name: "${friendly_name_entity} PH Tank Reset"
+    name: "PH Tank Reset"
     id: bt_ph_tank_reset_web
     icon: "mdi:sync-off"
     entity_category: config
@@ -3712,7 +3722,7 @@ button:
         - rtttl.play: 'two_short:d=4,o=5,b=100:16e6,16e6'
 
   - platform: template
-    name: "${friendly_name_entity} PH Heute (ml) Reset"
+    name: "PH Heute (ml) Reset"
     id: ph_today_reset_web
     icon: "mdi:sync-off"
     entity_category: config
@@ -3730,7 +3740,7 @@ button:
 
 binary_sensor:
   - platform: template
-    name: "${friendly_name_entity} Chlorinator Hardware defekt?"
+    name: "Chlorinator Hardware defekt?"
     id: bs_chlor_lockout
     device_class: problem
     icon: "mdi:alert-octagon"
@@ -3739,7 +3749,7 @@ binary_sensor:
       sorting_weight: 97
 
   - platform: template
-    name: "${friendly_name_entity} Tuya Hardware defekt?"
+    name: "Tuya Hardware defekt?"
     id: bs_tuya_lockout
     device_class: problem
     icon: "mdi:alert-octagon"
@@ -3748,7 +3758,7 @@ binary_sensor:
       sorting_weight: 99
   
   - platform: template
-    name: "${friendly_name_entity} Low Salt Meldung?"
+    name: "Low Salt Meldung?"
     id: bin_low_salt_warning
     device_class: problem
     icon: "mdi:shaker-outline"
@@ -3758,7 +3768,7 @@ binary_sensor:
   
   # Zeigt den Online Status vom Inverter (Poolpumpe) Modul
   - platform: template
-    name: "${friendly_name_entity} Frequenzsteuerung Online"
+    name: "Frequenzsteuerung Online"
     id: bs_inv_online
     icon: "mdi:toggle-switch"
     web_server:
@@ -3768,7 +3778,7 @@ binary_sensor:
 
   # Zeigt RUN Status vom Inverter (Poolpumpe) Modul
   - platform: template
-    name: "${friendly_name_entity} Frequenzsteuerung Running?"
+    name: "Frequenzsteuerung Running?"
     id: bs_inv_running
     icon: "mdi:toggle-switch"
     web_server:
@@ -3778,7 +3788,7 @@ binary_sensor:
 
   # Zeigt den Status des Tuya W2839 an
   - platform: template
-    name: "${friendly_name_entity} Tuya W2839 Online"
+    name: "Tuya W2839 Online"
     id: bs_tuya_online
     icon: "mdi:toggle-switch"
     web_server:
@@ -3788,7 +3798,7 @@ binary_sensor:
 
   # Zeigt den Status vom PZEM Modul
   - platform: template
-    name: "${friendly_name_entity} Chlorinator 24V Online"
+    name: "Chlorinator 24V Online"
     id: bs_pzem_online
     icon: "mdi:toggle-switch"
     web_server:
@@ -3798,7 +3808,7 @@ binary_sensor:
 
   # Zeigt den Status von der Wärmepumpe
   - platform: template
-    name: "${friendly_name_entity} Wärmepumpe Online"
+    name: "Wärmepumpe Online"
     id: bs_hp_online
     icon: "mdi:toggle-switch"
     web_server:
@@ -3808,7 +3818,7 @@ binary_sensor:
 
   # Zeigt den Status des Stromzählers für PV
   - platform: template
-    name: "${friendly_name_entity} PV Zähler Online"
+    name: "PV Zähler Online"
     id: bs_energy_meter_online
     icon: "mdi:toggle-switch"
     web_server:
@@ -3846,7 +3856,7 @@ binary_sensor:
 
   # Wird benötigt für den automatischen Restart der Pumpe nach einem Ausfall/Reboot des ESP
   - platform: template
-    name: "${friendly_name_entity} Lauf über Timer erlaubt?"
+    name: "Lauf über Timer erlaubt?"
     id: bs_timer_allows_run
     icon: "mdi:clock-check"
     web_server:
@@ -3926,7 +3936,7 @@ dynamic_on_time:
 
 text:
   - platform: template
-    name: "${friendly_name_entity} Timer: Startzeit"
+    name: "Timer: Startzeit"
     id: text_timer_start
     optimistic: true
     icon: "mdi:clock-start"
@@ -3965,7 +3975,7 @@ text:
             }
 
   - platform: template
-    name: "${friendly_name_entity} Timer: Stoppzeit"
+    name: "Timer: Stoppzeit"
     id: text_timer_stopp
     optimistic: true
     restore_value: true
