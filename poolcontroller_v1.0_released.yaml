@@ -1,7 +1,7 @@
 substitutions:
   device_name: "poolcontroller"
   friendly_name: "pool"
-  friendly_name_entity: "#"
+  friendly_name_entity: "#1"
 
   #wifi domain to use, standard =  .local
   domain: .local
