@@ -1,0 +1,518 @@
+
+#Working - Number Input for Modbus Value
+number:
+  - platform: modbus_controller
+    name: "INV: Setze Zielfrequenz in %"
+    modbus_controller_id: modbus_freq_inv
+    id: number_target_frequency
+    icon: "mdi:speedometer"
+    disabled_by_default: true 
+    web_server:
+      sorting_group_id: grp_debug
+    entity_category: config
+    unit_of_measurement: "%"
+    min_value: 50
+    max_value: 100
+    multiply: 100
+    address: 0x1000
+    step: 1
+    
+    # Darf hier nicht gesetzt werden, weil das sonst zu Problemen führt mit der 100% Anlaufphase in script_pumpstart
+    # on_value:
+    #   - lambda: |-
+    #       id(glo_set_frequency) = x;
+
+# ###########################################
+# # Template Numbers / Setter für ESPHome   #
+# # Steuern PH, ORP, Chlorinator, Pumpen    #
+# # Mit HA-Push und Kommentaren             #
+# ###########################################
+
+  # Durchfluss Poolpumpe bei 100%
+  - platform: template
+    name: "Durchfluss PoolPumpe 100%"
+    id: poolpump_flow_max_setter
+    icon: "mdi:gauge-full"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 90
+    unit_of_measurement: "m3/h"
+    entity_category: config
+    optimistic: false
+    restore_value: true
+    min_value: 6.0
+    max_value: 16.0
+    step: 0.5
+    set_action:
+      - lambda: |-
+          // Globale Variabel setzen
+          id(poolpump_flow_max) = x;
+          // HA informieren
+          id(poolpump_flow_max_setter).publish_state(x);
+
+
+  # PH Kanister Größe (ml)
+  - platform: template
+    name: "PH Kanister Größe"
+    id: ph_tank_capacity_setter
+    icon: "mdi:barrel"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 69
+    unit_of_measurement: "ml"
+    entity_category: config
+    optimistic: false
+    restore_value: true
+    min_value: 5000
+    max_value: 30000
+    step: 500
+    set_action:
+      - lambda: |-
+          // PH-Tankgröße setzen
+          id(ph_tank_capacity_ml) = x;
+
+          // Wenn aktueller Tankinhalt größer als neue Kapazität -> anpassen
+          if (id(ph_tank_remaining) > x) {
+            id(ph_tank_remaining) = x;
+          }
+
+          // HA informieren
+          id(ph_tank_capacity_setter).publish_state(x);
+      - logger.log:
+          format: "PH Kanistergröße auf %.0f ml gesetzt"
+          args: ['x']
+          level: INFO
+
+  # PH Max Wert Wasser
+  - platform: template
+    name: "PH Max Wert Wasser"
+    id: ph_max_setter
+    icon: "mdi:ph"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 81
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    min_value: 6.0
+    max_value: 8.5
+    step: 0.1
+    set_action:
+      - lambda: |-
+          if (x <= id(ph_min)) {
+            ESP_LOGW("PH", "PH Max muss größer als PH Min sein");
+            id(ph_max_setter).publish_state(id(ph_max));
+            return;
+          }
+          id(ph_max) = x;
+          id(ph_max_setter).publish_state(x);
+
+  # PH Min Wert Wasser
+  - platform: template
+    name: "PH Min Wert Wasser"
+    id: ph_min_setter
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 84
+    entity_category: config
+    icon: "mdi:ph"
+    restore_value: true
+    optimistic: false
+    min_value: 6.0
+    max_value: 8.5
+    step: 0.1
+    set_action:
+      - lambda: |-
+          if (x >= id(ph_max)) {
+            ESP_LOGW("PH", "PH Min muss kleiner als PH Max sein");
+            id(ph_min_setter).publish_state(id(ph_min));
+            return;
+          }
+          id(ph_min) = x;
+          id(ph_min_setter).publish_state(x);
+
+  # ORP Max Wert Wasser
+  - platform: template
+    name: "ORP Max Wert Wasser"
+    id: orp_max_setter
+    icon: "mdi:water-percent"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 63
+    unit_of_measurement: "mV"
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    min_value: 400
+    max_value: 900
+    step: 1
+    set_action:
+      - lambda: |-
+          if (x <= id(glo_orp_min)) {
+            ESP_LOGW("ORP", "ORP Max muss größer als ORP Min sein");
+            id(orp_max_setter).publish_state(id(glo_orp_max));
+            return;
+          }
+          id(glo_orp_max) = x;
+          id(orp_max_setter).publish_state(x);
+
+  # ORP Min Wert Wasser
+  - platform: template
+    name: "ORP Min Wert Wasser"
+    id: orp_min_setter
+    icon: "mdi:water-percent"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 66
+    unit_of_measurement: "mV"
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    min_value: 400
+    max_value: 900
+    step: 1
+    set_action:
+      - lambda: |-
+          if (x >= id(glo_orp_max)) {
+            ESP_LOGW("ORP", "ORP Min muss kleiner als ORP Max sein");
+            id(orp_min_setter).publish_state(id(glo_orp_min));
+            return;
+          }
+          id(glo_orp_min) = x;
+          id(orp_min_setter).publish_state(x);
+
+  # ORP Zielwert Wasser
+  - platform: template
+    name: "ORP Zielwert Wasser"
+    id: num_orp_target_setter
+    icon: "mdi:water-percent"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 60
+    unit_of_measurement: "mV"
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    min_value: 400
+    max_value: 900
+    step: 1
+    set_action:
+      - lambda: |-
+          if (x >= id(glo_orp_max) || x <= id(glo_orp_min) ) {
+            ESP_LOGW("ORP", "ORP Target muss kleiner als ORP Max und größer als ORP Min sein");
+            id(num_orp_target_setter).publish_state(id(glo_orp_target));
+            return;
+          }
+          id(glo_orp_target) = x;
+          id(num_orp_target_setter).publish_state(x);
+
+  # PH Max pro Tag (ml)
+  - platform: template
+    name: "PH max pro Tag"
+    id: ph_max_day_setter
+    icon: "mdi:clock-check-outline"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 78
+    unit_of_measurement: "ml"
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    min_value: 200
+    max_value: 3000
+    step: 10
+    set_action:
+      - lambda: |-
+          id(max_ph_ml_per_day) = x;
+          id(ph_max_day_setter).publish_state(x);
+
+  # PH Max pro Zyklus (ml)
+  - platform: template
+    name: "PH max pro Zyklus"
+    id: ph_max_cycle_setter
+    icon: "mdi:clock-check-outline"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 75
+    unit_of_measurement: "ml"
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    min_value: 100
+    max_value: 1000
+    step: 1
+    set_action:
+      - lambda: |-
+          id(max_ph_ml_per_cycle) = x;
+          id(ph_max_cycle_setter).publish_state(x);
+
+  # PH Förderleistung (Einstellung in l/h, Speicherung in ml/s)
+  - platform: template
+    name: "PH Förderleistung (l-h)"
+    id: ph_pump_setter
+    icon: "mdi:pump"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 72
+    unit_of_measurement: "l/h"
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    # SEKO PERC3 gemessen: 2,66l/h ~ 0.7388ml/s
+    # Wird durch Verschleiß weniger und gilt es zu überprüfen
+    # wenn angeschlossen an Kreislauf und Impfventil
+    min_value: 1.0
+    max_value: 3.5
+    step: 0.01 # 100ml Schritte
+    set_action:
+      - lambda: |-
+          // 1. Den Wert für die Anzeige im Webserver spiegeln (l/h)
+          id(ph_pump_setter).publish_state(x);
+          
+          // 2. Umrechnung für die interne Variable (l/h -> ml/s)
+          // Formel: (x * 1000) / 3600  => x / 3.6
+          id(ph_ml_per_second) = x / 3.6;
+          
+          ESP_LOGI("ph_pump_setter", "PH Förderleistung angepasst: %.2f l/h (entspricht %.4f ml/s)", x, id(ph_ml_per_second));
+
+
+  # LowSalt Meldung (Schwellwert für Amperemessung)
+  - platform: template
+    name: "LowSalt Limit"
+    id: num_low_salt_limit
+    icon: "mdi:shaker-outline" # Passendes Salz-Symbol
+    unit_of_measurement: "A"
+    entity_category: config
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 56
+    restore_value: true
+    optimistic: false  # Auf true gesetzt, damit der Wert im UI sofort springt
+    min_value: 6
+    max_value: 9
+    step: 0.5
+    set_action:
+      - lambda: |-
+          id(glo_low_salt_limit) = x;
+          id(num_low_salt_limit).publish_state(x);
+    #mode: box
+
+  # Chlorinator max Laufzeit Tag(min)
+  - platform: template
+    name: "Chlorinator max Laufzeit Tag"
+    id: chlor_run_time_max_day_setter
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 57
+    unit_of_measurement: "min"
+    icon: "mdi:clock-check-outline"
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    min_value: 30
+    max_value: 540
+    step: 10
+    set_action:
+      - lambda: |-
+          id(chlor_run_time_max_day) = (int)x;
+          id(chlor_run_time_max_day_setter).publish_state(x);
+
+  # Chlorinator max Laufzeit Zyklus(min)
+  - platform: template
+    name: "Chlorinator max Laufzeit Zyklus(min)"
+    id: chlor_run_time_max_cycle_setter
+    icon: "mdi:clock-check-outline"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 54
+    unit_of_measurement: "min"
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    min_value: 30
+    max_value: 480
+    step: 10
+    set_action:
+      - lambda: |-
+          id(chlor_run_time_max_cycle) = (int)x;
+          id(chlor_run_time_max_cycle_setter).publish_state(x);
+
+  # Poolpumpe Vorlaufzeit (min)
+  - platform: template
+    name: "Poolpumpe Vorlaufzeit (min)"
+    id: pump_prerun_time_setter
+    icon: "mdi:play-circle-outline"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 87
+    unit_of_measurement: "min"
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    min_value: 1
+    max_value: 30
+    step: 1
+    set_action:
+      - lambda: |-
+          id(PumpPreRunTime) = (int)x;
+          id(pump_prerun_time_setter).publish_state(x);
+
+
+  #Dynamic Timer Komponente - Start
+  - platform: template
+    name: "Timer: An zur Stunde"
+    id: number_timer_hour_on
+    internal: true #internal da über Text: schöner abgedeckt
+    icon: "mdi:clock-start"
+    web_server:
+      sorting_group_id: grp_timer
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: 0
+    min_value: 0
+    max_value: 23
+    step: 1
+    mode: box
+  #Dynamic Timer Komponente - Start
+  - platform: template
+    name: "Timer: An zur Minute"
+    id: number_timer_minute_on
+    internal: true #internal da über Text: schöner abgedeckt
+    icon: "mdi:clock-start"
+    web_server:
+      sorting_group_id: grp_timer
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: 0
+    min_value: 0
+    max_value: 59
+    step: 1
+    mode: box
+
+  #Dynamic Timer Komponente - Stopp
+  - platform: template
+    name: "Timer: Aus zur Stunde"
+    id: number_timer_hour_off
+    internal: true #internal da über Text: schöner abgedeckt
+    icon: "mdi:clock-end"
+    web_server:
+      sorting_group_id: grp_timer
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: 0
+    min_value: 0
+    max_value: 23
+    step: 1
+    mode: box
+  #Dynamic Timer Komponente - Stopp
+  - platform: template
+    name: "Timer: Aus zur Minute"
+    id: number_timer_minute_off
+    internal: true #internal da über Text: schöner abgedeckt
+    icon: "mdi:clock-end"
+    web_server:
+      sorting_group_id: grp_timer
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: 0
+    min_value: 0
+    max_value: 59
+    step: 1
+    mode: box
+    
+
+#!One Time required only!
+#Leaving in for documentation
+
+  # # ORP -2000 2000
+  # - platform: "tuya"
+  #   id: num_orp_low_tuya
+  #   name: "W2839_ORP_LOW_LIMIT"
+  #   number_datapoint: 133
+  #   unit_of_measurement: "mV"
+  #   min_value: -2000
+  #   max_value: 2000
+  #   step: 1
+  #   multiply: 1
+  #   datapoint_hidden:
+  #     datapoint_type: int
+  #     initial_value: -2000
+  #     restore_value: yes
+
+  # - platform: "tuya"
+  #   id: num_orp_high_tuya
+  #   name: "W2839_ORP_HIGH_LIMIT"
+  #   number_datapoint: 132
+  #   unit_of_measurement: "mV"
+  #   min_value: -2000
+  #   max_value: 2000
+  #   step: 1
+  #   multiply: 1
+  #   datapoint_hidden:
+  #     datapoint_type: int
+  #     initial_value: 2000
+  #     restore_value: yes
+
+  # # PH 0 15
+  # - platform: "tuya"
+  #   id: num_ph_low_tuya
+  #   name: "W2839_PH_LOW_LIMIT"
+  #   number_datapoint: 108
+  #   device_class: "pH"
+  #   min_value: 0
+  #   max_value: 15
+  #   step: 0.01
+  #   multiply: 100
+  #   datapoint_hidden:
+  #     datapoint_type: int
+  #     initial_value: 0
+  #     restore_value: yes
+
+  # - platform: "tuya"
+  #   id: num_ph_high_tuya
+  #   name: "W2839_PH_HIGH_LIMIT"
+  #   number_datapoint: 107
+  #   device_class: "pH"
+  #   min_value: 0
+  #   max_value: 15
+  #   step: 0.01
+  #   multiply: 100
+  #   datapoint_hidden:
+  #     datapoint_type: int
+  #     initial_value: 15
+  #     restore_value: yes
+
+  # # Temp -10 110 °C
+  # - platform: "tuya"
+  #   id: num_temp_low_tuya
+  #   name: "W2839_TEMP_LOW_LIMIT"
+  #   number_datapoint: 103
+  #   unit_of_measurement: "°C"
+  #   device_class: "temperature"
+  #   min_value: -10.0
+  #   max_value: 110.0
+  #   step: 0.1
+  #   multiply: 10
+  #   datapoint_hidden:
+  #     datapoint_type: int
+  #     initial_value: -10.0
+  #     restore_value: yes
+
+  # - platform: "tuya"
+  #   id: num_temp_high_tuya
+  #   name: "W2839_TEMP_HIGH_LIMIT"
+  #   number_datapoint: 102
+  #   unit_of_measurement: "°C"
+  #   device_class: "temperature"
+  #   min_value: -10.0
+  #   max_value: 110.0
+  #   step: 0.1
+  #   multiply: 10
+  #   datapoint_hidden:
+  #     datapoint_type: int
+  #     initial_value: 110.0
+  #     restore_value: yes

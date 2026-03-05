@@ -1,0 +1,125 @@
+text_sensor:
+  # Zeigt den Grund des letzten Restarts!
+  - platform: template
+    name: "Letzter Restart Grund"
+    id: last_reset_reason_sensor
+    icon: "mdi:history"
+    web_server:
+      sorting_group_id: grp_system
+    entity_category: diagnostic
+    # Der Sensor zeigt beim Starten sofort den gespeicherten Wert
+    lambda: |-
+      return id(glo_last_reset_reason);
+
+  - platform: template
+    name: "Betriebszeit seit Boot"
+    id: uptime_human
+    icon: mdi:clock-start
+    web_server:
+      sorting_group_id: grp_system
+    entity_category: diagnostic
+    update_interval: 60s
+    lambda: |-
+      // Zeit berechnen
+      uint32_t total_seconds = id(uptime_raw).state; // Verweist auf deinen sensor: uptime
+      uint32_t days = total_seconds / 86400;
+      uint32_t hours = (total_seconds % 86400) / 3600;
+      uint32_t minutes = (total_seconds % 3600) / 60;
+      uint32_t seconds = total_seconds % 60;
+
+      if (days > 3650) {
+        return {"Wird gestartet..."};
+      }
+      
+      if (days > 0) {
+        return {esphome::str_sprintf("%dd %dh %dm %ds", days, hours, minutes, seconds)};
+      } else if (hours > 0) {
+        return {esphome::str_sprintf("%dh %dm %ds", hours, minutes, seconds)};
+      } else if (minutes > 0) {
+        return {esphome::str_sprintf("%dm %ds", minutes, seconds)};
+      } else {
+        return {esphome::str_sprintf("%ds", seconds)};
+      }
+
+  - platform: wifi_info
+    ip_address:
+      name: "WiFi IP"
+      id: wifi_sta_ip
+      icon: "mdi:ip-network"
+      web_server:
+        sorting_group_id: grp_system
+      entity_category: diagnostic
+    ssid:
+      name: "WiFi SSID"
+      id: wifi_sta_ssid
+      icon: "mdi:wifi-settings"
+      web_server:
+        sorting_group_id: grp_system
+      entity_category: diagnostic
+  
+  - platform: template
+    name: "Chlor Polarität"
+    id: txt_chlor_pol
+    icon: "mdi:swap-horizontal"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 13
+
+  - platform: template
+    name: "Chlor Restlaufzeit"
+    id: txt_chlor_rest
+    icon: "mdi:timer-sand"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 14
+
+  - platform: template
+    name: "Chlor Laufzeit Heute"
+    id: txt_chlor_today
+    icon: "mdi:calendar-clock"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 15
+
+  - platform: template
+    name: "Status Meldungen"
+    id: txt_sens_status
+    icon: "mdi:message-text-outline"
+    web_server:
+        sorting_group_id: grp_system
+    entity_category: diagnostic
+    #initial_value: "Bereit"
+
+  - platform: template
+    name: "PH Restlaufzeit"
+    id: txt_ph_countdown
+    icon: "mdi:clock-outline"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 16
+
+  - platform: template
+    name: "PH Laufzeit Heute"
+    id: txt_ph_runtime
+    icon: "mdi:clock-outline"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 17
+
+  - platform: template
+    name: "PH Heute"
+    id: txt_sens_ph_today
+    icon: "mdi:pump"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 29
+    entity_category: diagnostic
+
+  - platform: template
+    name: "PH letzter Zyklus (ml)"
+    id: txt_sens_ph_last_cycle
+    icon: "mdi:pump"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 28
+    entity_category: diagnostic

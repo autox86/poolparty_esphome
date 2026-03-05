@@ -1,0 +1,423 @@
+switch:
+
+#######################Modbus Switch mit Prüfung################################
+################################################################################
+# #Erste Idee - Funktioniert! - Start#
+#   - platform: modbus_controller
+#     modbus_controller_id: modbus_freq_inv
+#     address: 0x2000
+#     register_type: holding
+#     id: switch_poolpump
+#     name: "INV:An - Aus"
+#     #internal: true #Make this switch internal and never trigger it from here?
+#     restore_mode: ALWAYS_OFF   # important against reboot effects
+#     icon: "mdi:pump"
+
+#     write_lambda: |-
+#       ESP_LOGI("modbus_inverter", "Switch request state = %f", x);
+
+#       // ========== START ==========
+#       if (x == 1) {
+#         if (id(inv_running).state == 1) {
+#           ESP_LOGW("modbus_inverter", "FU läuft bereits – Startbefehl unterdrückt");
+#           return false;  // !Modbus will not be sent!
+#         }
+
+#         ESP_LOGI("modbus_inverter", "FU wird gestartet");
+
+#         payload.push_back(0x05);  // Slave
+#         payload.push_back(0x06);  // Write Single Register
+#         payload.push_back(0x20);  // Addr High
+#         payload.push_back(0x00);  // Addr Low
+#         payload.push_back(0x00);
+#         payload.push_back(0x01);  // START Bit on the register
+
+#         return true;
+#       }
+
+#       // ========== STOP ==========
+#       if (id(inv_running).state != 1) {
+#         ESP_LOGW("modbus_inverter", "FU steht bereits - Stopbefehl unterdrückt");
+#         return false;  // !Modbus will not be sent!
+#       }
+
+#       ESP_LOGI("modbus_inverter", "FU wird gestoppt");
+
+#       payload.push_back(0x05);
+#       payload.push_back(0x06);
+#       payload.push_back(0x20);
+#       payload.push_back(0x00);
+#       payload.push_back(0x00);
+#       payload.push_back(0x05);  // STOP Bit on the register
+
+#       return true;
+# #Erste Idee - Funktioniert! - Ende#
+
+
+#Use template switch Component in ESPHome with Modbus Lambda
+  - platform: template
+    name: "INV:An - Aus"
+    id: switch_poolpump
+    icon: "mdi:pump"
+    optimistic: true
+    disabled_by_default: true 
+    web_server:
+      sorting_group_id: grp_debug
+    lambda: |-
+      // Wenn seit dem letzten Klick weniger als 5000ms vergangen sind...
+      if (millis() - id(last_switch_action) < 5000) {
+        // ...vertrauen wir der letzten Benutzereingabe (dem Schalterzustand)
+        return id(switch_poolpump).state;
+      }
+      // Ansonsten nehmen wir wieder den echten Sensorwert
+      return id(inv_running).state == 1;
+    
+    turn_on_action:
+      - lambda: |-
+          // Erstelle den Befehl über die statische Methode der Klasse ModbusCommandItem
+          auto start_cmd = esphome::modbus_controller::ModbusCommandItem::create_write_single_command(
+              id(modbus_freq_inv), 
+              0x2000, 
+              1
+          );
+          id(modbus_freq_inv).queue_command(start_cmd);
+          ESP_LOGI("modbus_lambda", "Start-Befehl (1) an 0x2000 gesendet");
+
+    turn_off_action:
+      - lambda: |-
+          auto stop_cmd = esphome::modbus_controller::ModbusCommandItem::create_write_single_command(
+              id(modbus_freq_inv), 
+              0x2000, 
+              5
+          );
+          id(modbus_freq_inv).queue_command(stop_cmd);
+          ESP_LOGI("modbus_lambda", "Stop-Befehl (5) an 0x2000 gesendet");
+
+#Working CONF but Switch remains active on WebServer #https://github.com/esphome/esphome-webserver/issues/190
+#Schalter für den Chlorinator - Minimale Bedingungen um manuell schalten zu können
+#Nicht für den Betrieb geeignet - Testing Only!
+  - platform: template
+    name: "1_Chlorinator"
+    id: switch_chlorinator
+    restore_mode: DISABLED
+    optimistic: false
+    icon: "mdi:flask-plus"
+    web_server:
+      sorting_group_id: grp_debug
+    disabled_by_default: true 
+    # lambda: |-
+    #   return id(switch_chlor_run_gpio).state;
+    turn_on_action:
+      then:
+        - if:
+            condition:
+              - lambda: return id(poolpump_ok) && id(glo_orp_allowed);
+            then:
+              # Schritt 1: Lauzeit kalkulieren
+              - script.execute: script_chlorinator_by_interval
+            else:
+              - lambda: |-
+                  std::string reason;
+                  if (!id(poolpump_ok)) reason = "Vorlaufzeitpumpe nicht erreicht";
+                  else if (!id(glo_orp_allowed)) reason = "Wartungsmodus!";
+                  ESP_LOGW("switch_chlorinator", "Chlorinator kann nicht eingeschaltet werden weil: %s", reason.c_str());
+              - rtttl.play: 'error:d=8,o=5,b=100:4e6' # Kurzer Piep für Fehler!
+              - switch.turn_off: switch_chlorinator
+
+    turn_off_action:
+      then:
+        - lambda: |-
+            id(switch_chlorinator).publish_state(false);
+            ESP_LOGI("switch_chlorinator", "Turn_off_action: Stopp Chlorinator");
+            ESP_LOGI("switch_chlorinator", "Stoppe Strom auf Zelle - H-BrückePWMH GPIO = 0V");
+            ESP_LOGI("switch_chlorinator", "Schalte Richtung aus (Ziel: Rechts) - H-BrückePhase GPIO = 0V");
+            ESP_LOGI("switch_chlorinator", "Falls 24V Netzteil noch läuft - aus!");
+        - switch.turn_off: switch_chlor_run_gpio #H-Brücke auschalten
+        - delay: 1s
+        - switch.turn_off: switch_chlor_direction_gpio #H-Brücke Richtung ausschalten
+        
+        # 24V ausschalten, falls diese eingeschaltet ist
+        - if:
+            condition:
+              - lambda: 'return id(bs_pzem_online).state;'
+            then:
+              # Netzteil ausschalten über Impuls an Eltako, darum switch.turn_on zum "togglen"
+              - switch.turn_on: switch_relay4_power24v 
+
+#Working CONF but Switch remains active on WebServer #https://github.com/esphome/esphome-webserver/issues/190
+# #Schalter für die PH Dosierpumpe - Minimale Bedingungen um manuell schalten zu können
+# #Nicht für den Betrieb geeignet - Testing Only!
+  - platform: template
+    name: "2_PH Dosierpumpe"
+    id: switch_phdosierpumpe
+    restore_mode: ALWAYS_OFF
+    optimistic: false
+    icon: "mdi:eyedropper-plus"
+    web_server:
+      sorting_group_id: grp_debug
+    disabled_by_default: true 
+    turn_on_action:
+      then:
+        # 1. Validieren (Der Türsteher)
+        - if:
+            condition:
+              - lambda: |-
+                  return id(poolpump_ok) && (id(ph_tank_remaining) > 500);
+            then:
+              # 2. Dann Initialisieren (Saubere Trennung)
+              - lambda: |-
+                  id(phdispenser_cycle_time) = 0; 
+                  id(ph_locked) = false;
+                  id(switch_phdosierpumpe).publish_state(true);
+                  ESP_LOGI("switch_phdosierpumpe", "Validierung erfolgreich, Zähler zurückgesetzt.");
+
+              # 3. Physisch schalten
+              - switch.turn_on: switch_relay2_ph
+              - text_sensor.template.publish:
+                      id: txt_sens_status
+                      state: "switch_phdosierpumpe , Dosierung aktiv"
+              - lambda: |-
+                  ESP_LOGI("switch_phdosierpumpe", "PH Dosierpumpe wurde eingeschaltet");
+            else:
+              - lambda: |-
+                  // Bestimme den Grund
+                  std::string reason;
+                  if (!id(poolpump_ok)) {
+                    reason = "Vorlaufzeitpumpe nicht erreicht";
+                  } else if (id(ph_tank_remaining) <= 500.0) {
+                    reason = "PH Tank fast leer --> Auffüllen und Reset drücken!";
+                  }
+                  // Log-Ausgabe
+                  id(txt_sens_status).publish_state(reason);
+                  id(switch_phdosierpumpe).publish_state(false);
+                  ESP_LOGW("switch_phdosierpumpe", "PH Dosierpumpe kann nicht eingeschaltet werden weil: %s", reason.c_str());
+              - rtttl.play: 'error:d=8,o=5,b=100:4e6' # Kurzer Piep für Fehler!
+              - switch.turn_off: switch_phdosierpumpe
+    turn_off_action:
+      - switch.turn_off: switch_relay2_ph
+      - lambda: |-
+          id(switch_phdosierpumpe).publish_state(false);
+          id(glo_ph_remaining_seconds) = 0;
+          ESP_LOGI("switch_phdosierpumpe", "PH Dosierung beendet. Letzter Zyklus: %.1f ml", id(ph_last_cycle_ml));
+          id(txt_sens_status).publish_state(esphome::str_sprintf("PH Dosierung beendet. Letzter Zyklus: %.1f ml", id(ph_last_cycle_ml)));
+
+
+  #H-Brücke schaltet Chlorinator: Phase-Pin für die Richtung
+  - platform: gpio
+    id: switch_chlor_direction_gpio
+    internal: True
+    pin:
+      number: ${phase_hbridge}
+      inverted: False
+      mode: 
+        output: true
+        pulldown: true
+    restore_mode: "ALWAYS_OFF"
+
+  #H-Brücke schaltet Chlorinator: pwmH-Pin für die Richtung
+  - platform: gpio
+    id: switch_chlor_run_gpio
+    internal: True
+    pin:
+      number: ${pwmh_hbridge}
+      inverted: False
+      mode: 
+        output: true
+        pulldown: true
+    restore_mode: "ALWAYS_OFF"
+
+  #Relay 1 == Not used
+  - platform: gpio
+    id: switch_relay1_no_use
+    internal: True
+    pin: ${pin_relay1}
+    restore_mode: "ALWAYS_OFF"
+    
+  #Relay 2 == PH Dosieranlage - Internal = Not showing in HA
+  - platform: gpio
+    id: switch_relay2_ph
+    internal: True
+    pin: ${pin_relay2}
+    restore_mode: "ALWAYS_OFF"
+
+  #Relay 3 == W2839 Tuya an / aus
+  - platform: gpio
+    id: switch_relay3_tuya
+    internal: True
+    pin: ${pin_relay3}
+    restore_mode: "ALWAYS_OFF"
+    on_turn_on:
+      then:
+        - delay: 200ms
+        - switch.turn_off: switch_relay3_tuya
+
+  #Relay 4 == Netzteil 24V - - Internal = Not showing in HA
+  - platform: gpio
+    id: switch_relay4_power24v
+    internal: True
+    pin: ${pin_relay4}
+    restore_mode: "ALWAYS_OFF"
+    on_turn_on:
+      then:
+        - delay: 200ms
+        - switch.turn_off: switch_relay4_power24v
+
+  #Switch to restart the device
+  - platform: restart
+    name: "Neustart (Normal)"
+    id: restart_switch
+    web_server:
+      sorting_group_id: grp_system
+    entity_category: diagnostic
+    icon: "mdi:restart"
+
+  - platform: safe_mode
+    name: "Neustart (Safe Mode)"
+    id: restart_safe
+    disabled_by_default: true 
+    web_server:
+      sorting_group_id: grp_debug
+    entity_category: diagnostic
+    icon: "mdi:shield-sync"
+
+  #The factory_reset component allows you to invalidate (reset) all ESPHome preferences stored in flash memory and reboot your node
+  - platform: factory_reset
+    name: "Reset Konfig"
+    entity_category: Diagnostic
+    disabled_by_default: true 
+    web_server:
+      sorting_group_id: grp_debug
+    icon: "mdi:factory"
+
+  - platform: template
+    name: "Chlor kein Hardware Defekt Check"
+    id: switch_chlor_debug
+    icon: "mdi:shield-check"
+    disabled_by_default: true 
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF  #Per default immer aus
+    entity_category: config
+    web_server:
+      sorting_group_id: grp_debug
+
+  #Switch for timer component - https://github.com/hostcc/esphome-component-dynamic-on-time
+  - platform: template
+    id: switch_timer_mon
+    icon: "mdi:calendar-check"
+    name: "Timer Montag"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 9
+    entity_category: config
+  - platform: template
+    id: switch_timer_tue
+    icon: "mdi:calendar-check"
+    name: "Timer Dienstag"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 12
+    entity_category: config
+  - platform: template
+    id: switch_timer_wed
+    icon: "mdi:calendar-check"
+    name: "Timer Mittwoch"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 15
+    entity_category: config
+  - platform: template
+    id: switch_timer_thu
+    icon: "mdi:calendar-check"
+    name: "Timer Donnerstag"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 18
+    entity_category: config
+  - platform: template
+    id: switch_timer_fri
+    icon: "mdi:calendar-check"
+    name: "Timer Freitag"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 21
+    entity_category: config
+  - platform: template
+    id: switch_timer_sat
+    icon: "mdi:calendar-check"
+    name: "Timer Samstag"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 24
+    entity_category: config
+  - platform: template
+    id: switch_timer_sun
+    icon: "mdi:calendar-check"
+    name: "Timer Sonntag"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 27
+    entity_category: config
+  - platform: template
+    id: switch_timer_disabled
+    icon: "mdi:calendar-check"
+    name: "Timer deaktiviert"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 30
+    entity_category: config
+
+  - platform: template
+    id: switch_no_pump_restart
+    icon: "mdi:calendar-check"
+    name: "Poolpumpe kein Autostart"
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    disabled_by_default: true 
+    web_server:
+      sorting_group_id: grp_debug
+    entity_category: config
+    turn_on_action: 
+      then:
+        - lambda: id(glo_restart_allowed) = false;
+    turn_off_action: 
+      then:
+        - lambda: id(glo_restart_allowed) = true;
+
+  - platform: template
+    id: switch_maintenance
+    icon: "mdi:calendar-check"
+    name: "Wartungsmodus"
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    disabled_by_default: true 
+    web_server:
+      sorting_group_id: grp_debug
+    entity_category: config
+    turn_on_action: 
+      then:
+        - lambda: |- 
+            auto call = id(select_work_mode).make_call();
+            call.set_option("0% Wartung");
+            call.perform();
+    turn_off_action: 
+      then:
+      - lambda: |- 
+            auto call = id(select_work_mode).make_call();
+            call.set_option(id(glo_workmode));
+            call.perform();

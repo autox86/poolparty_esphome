@@ -1,0 +1,118 @@
+
+dynamic_on_time:
+  - id: dynamic_schedule
+    rtc: sntp_time
+    hour: number_timer_hour_on
+    minute: number_timer_minute_on
+    mon: switch_timer_mon
+    tue: switch_timer_tue
+    wed: switch_timer_wed
+    thu: switch_timer_thu
+    fri: switch_timer_fri
+    sat: switch_timer_sat
+    sun: switch_timer_sun
+    disabled: switch_timer_disabled
+    on_time:
+      - logger.log: 
+          format: "Poolpumpe Tageszyklus gestartet"
+          level: info
+      - lambda: id(glo_pump_active_via_automation) = true;
+      - script.execute: script_pumpstart
+
+  - id: dynamic_schedule_2
+    rtc: sntp_time
+    hour: number_timer_hour_off
+    minute: number_timer_minute_off
+    mon: switch_timer_mon
+    tue: switch_timer_tue
+    wed: switch_timer_wed
+    thu: switch_timer_thu
+    fri: switch_timer_fri
+    sat: switch_timer_sat
+    sun: switch_timer_sun
+    disabled: switch_timer_disabled
+    on_time:
+      - logger.log: 
+          format: "Poolpumpe Tageszyklus beendet"
+          level: info
+      - lambda: id(glo_pump_active_via_automation) = false;
+      - script.execute: script_stopp_all
+
+text:
+  - platform: template
+    name: "Timer: Startzeit"
+    id: text_timer_start
+    optimistic: true
+    icon: "mdi:clock-start"
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 3
+    initial_value: "09:00"
+    restore_value: true
+    mode: text
+    # Validierung: Stellt sicher, dass nur 5 Zeichen (HH:MM) erlaubt sind
+    min_length: 5
+    max_length: 5
+    on_value:
+      then:
+        - lambda: |-
+            int h, m;
+            // sscanf versucht das Format HH:MM zu lesen
+            if (sscanf(x.c_str(), "%d:%d", &h, &m) == 2) {
+              if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+                
+                // Stunden-Call
+                auto call_h = id(number_timer_hour_on).make_call();
+                call_h.set_value(h);
+                call_h.perform();
+
+                // Minuten-Call
+                auto call_m = id(number_timer_minute_on).make_call();
+                call_m.set_value(m);
+                call_m.perform();
+                ESP_LOGI("Timer", "Zeitplaner aktualisiert: %02d:%02d", h, m);
+              } else {
+                ESP_LOGW("Timer", "Zeit außerhalb des Bereichs (00:00-23:59)!");
+              }
+            } else {
+              ESP_LOGW("Timer", "Format ungültig! Bitte HH:MM eingeben.");
+            }
+
+  - platform: template
+    name: "Timer: Stoppzeit"
+    id: text_timer_stopp
+    optimistic: true
+    restore_value: true
+    icon: "mdi:clock-end"
+    web_server:
+      sorting_group_id: grp_timer
+      sorting_weight: 6
+    initial_value: "20:00"
+    mode: text
+    # Validierung: Stellt sicher, dass nur 5 Zeichen (HH:MM) erlaubt sind
+    min_length: 5
+    max_length: 5
+    on_value:
+      then:
+        - lambda: |-
+            int h, m;
+            // sscanf versucht das Format HH:MM zu lesen
+            if (sscanf(x.c_str(), "%d:%d", &h, &m) == 2) {
+              if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+                
+                // Stunden-Call
+                auto call_h = id(number_timer_hour_off).make_call();
+                call_h.set_value(h);
+                call_h.perform();
+
+                // Minuten-Call
+                auto call_m = id(number_timer_minute_off).make_call();
+                call_m.set_value(m);
+                call_m.perform();
+                ESP_LOGI("Timer", "Zeitplaner aktualisiert: %02d:%02d", h, m);
+              } else {
+                ESP_LOGW("Timer", "Zeit außerhalb des Bereichs (00:00-23:59)!");
+              }
+            } else {
+              ESP_LOGW("Timer", "Format ungültig! Bitte HH:MM eingeben.");
+            }

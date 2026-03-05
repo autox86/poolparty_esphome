@@ -1,0 +1,338 @@
+################################################################################
+############################### Intervale #######################################
+################################################################################
+
+############################Messungen/Status####################################
+###Bei jedem Zyklus werden die Logikfunktionen getriggert und entsprechend Flags 
+###(globale Variablen) gesetzt. Zudem wird der Status in der Logausgabe angezeigt
+################################################################################
+interval:
+  - interval: 7s
+    then:
+      - if: 
+          condition:
+            - time.has_time:
+          then:
+            - script.execute: script_tuya_watchdog #Online Status vom W2839
+            - delay: 50ms
+            - script.execute: script_check_PumpPreRunTime #Vorlaufzeit der Pumpe erreicht?
+            - delay: 50ms
+            - script.execute: script_check_chlor_needed #Überprüfe ob Chlorbedarf 
+            - delay: 50ms
+            - script.execute: script_check_ph_needed #Überprüfe ob PH Bedarf
+            - delay: 50ms
+      - script.execute: script_status #Schreibe Status ins Log
+      - delay: 50ms
+      
+# Anstarten der Pumpe nach einen Restart des ESP32 / Frostschutz
+      - if: 
+          condition:
+            - lambda: |-
+                float temp = id(sensor_outdoor_temp).state;
+                // Frostschutz aktivieren bei -5 Grad
+                if (!std::isnan(temp) && temp <= -5.0) {
+                   if (!id(glo_frost_active)) {
+                     id(glo_frost_active) = true;
+                     id(glo_frost_start_time) = millis(); // Startzeit merken
+                     ESP_LOGW("frost", "Frostschutz AKTIVIERT bei %.1f°C", temp);
+                   }
+                }
+
+                // Starten wenn: Timer erlaubt ODER Frostschutz aktiv
+                return (id(bs_timer_allows_run).state || id(glo_frost_active)) 
+                        && id(glo_restart_allowed) 
+                        && (id(inv_running).state != 1) 
+                        && !id(glo_maintenance);
+          then:
+            - lambda: |-
+                if (!id(glo_frost_active)) {
+                  id(glo_pump_active_via_automation) = true;
+                }
+            - script.execute: script_pumpstart
+
+
+################################PH-Minus Interval###############################
+###Bei jedem Zyklus wird das ph_locked flag zurückgesetzt um eine erneute
+### PH Dosierung zu ermöglichen und die PH Dosierung gestartet
+################################################################################
+  - interval: ${checkIntervalPH}
+    then:
+      - if: 
+          condition:
+            - time.has_time
+            - lambda: return id(glo_ph_allowed); //falls nicht erlaubt durch Workmode, wird es nicht gestartet
+            - lambda: return !id(switch_relay2_ph).state;
+            - lambda: |-
+                if (id(use_flow_dn40)) {
+                  return (id(flow_pump).state > id(glo_flow_pump_min) && (id(inv_running).state == 1));
+                }else{
+                  return (id(inv_running).state == 1);
+                }
+          then:
+            - if:
+                condition:
+                  - lambda: return id(poolpump_ok) && id(ph_needed) && !id(ph_max_injection_reached) && (id(ph_tank_remaining) > 500.0);
+                then:
+                  - switch.turn_on: switch_phdosierpumpe
+                  - lambda: |-
+                      // 1. Zähler für den neuen Zyklus auf Null setzen
+                      id(phdispenser_cycle_time) = 0;
+                      id(ph_last_cycle_ml) = 0.0f;
+
+                      // 2. Countdown berechnen (Volles Zyklus-Limit)
+                      if (id(ph_ml_per_second) > 0) {
+                          // Da wir oben genullt haben, ist die Restmenge einfach das volle Limit
+                          id(glo_ph_remaining_seconds) = (int)(id(max_ph_ml_per_cycle) / id(ph_ml_per_second));
+                      } else {
+                          id(glo_ph_remaining_seconds) = 0; 
+                      }
+
+                      ESP_LOGI("PH-Minus Interval", "PH Dosierung gestartet. Geplante Dauer: %d s", id(glo_ph_remaining_seconds));
+                      id(txt_sens_status).publish_state("PH Dosierung läuft...");
+                      id(script_status).execute(); // Damit das Web-UI sofort "Inaktiv" gegen den Countdown tauscht
+                else:
+                    - lambda: |-
+                        // Bestimme den Grund
+                        std::string reason;
+                        if (!id(poolpump_ok)) {
+                          reason = "IntervalPH - Vorlaufzeitpumpe nicht erreicht";
+                        } else if (!id(ph_needed)) {
+                          reason = "IntervalPH - kein PH Bedarf (PH ok)";
+                        } else if (id(ph_max_injection_reached)) {
+                          reason = "IntervalPH - tägliches PH-Limit erreicht";
+                        } else if (id(ph_tank_remaining) <= 500.0) {
+                          reason = "IntervalPH - PH Tank fast leer --> Auffüllen und Reset drücken!";
+                          id(ph_tank_refill) = true;
+                        } else {
+                          reason = "IntervalPH - Unbekannte Blockade (ggf. glo_ph_allowed)";
+                        }
+                        // Log-Ausgabe
+                        id(txt_sens_status).publish_state(reason);
+                        ESP_LOGW("PH-Minus Interval", "PH Dosierpumpe über Interval Start verhindert weil: %s", reason.c_str());
+
+#########################ORP (Chlorinator) Interval#################################################
+##Bei jedem Zyklus werden die Flags geprüft und nach bedarf der Chlorinator eingeschaltet##
+##
+###########################################################################################
+  - interval: ${checkIntervalORP}
+    then:
+      - if: 
+          condition:
+            - time.has_time
+            - lambda: return id(glo_orp_allowed) && !id(glo_chlor_error_lockout); //SPERRE PRÜFEN
+            - lambda: return !id(switch_chlorinator).state;
+            - lambda: |-
+                bool flow_ok = true;
+                // Prüfe DN40 falls aktiviert
+                if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_min)) flow_ok = false;
+                // Prüfe S201 falls aktiviert
+                if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min)) flow_ok = false;
+                
+                // Pumpe muss laufen UND (wenn Sensoren aktiv) muss Flow da sein
+                return (id(inv_running).state == 1) && flow_ok;
+          then:
+            - if:
+                condition:
+                  - lambda: return id(poolpump_ok) && id(chlor_needed) && !id(chlorinator_max_reached);
+                then:
+                  # Starte Ablauf: Chlorinator starten (mit Berechnung) + Countdown setzen
+                  - lambda: |-
+                      ESP_LOGI("ORP Interval", "Chlorinator über Zeitintervall angefragt.");
+                  #- script.execute: script_chlorinator_by_interval
+                  - switch.turn_on: switch_chlorinator
+                  
+                  
+                else:
+                    - lambda: |-
+                        // Bestimme den Grund
+                        std::string reason;
+                        if (!id(poolpump_ok)) {
+                          reason = "IntervalORP - Vorlaufzeitpumpe nicht erreicht";
+                        } else if (!id(chlor_needed)) {
+                          reason = "IntervalORP - kein Chlor Bedarf (ORP ok)";
+                        } else if (id(chlorinator_max_reached)) {
+                          reason = "IntervalORP - tägliche ORP-Laufzeit erreicht";
+                        } else if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_min)) {
+                          reason = "YF-DN40 - kein Durchfluss!";
+                        } else if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min)) {
+                          reason = "YF-S201 - kein Durchfluss!";
+                        } else {
+                          reason = "IntervalORP - Unbekannte Blockade (ggf. glo_ph_allowed)";
+                        }
+                        // Log-Ausgabe
+                        id(txt_sens_status).publish_state(reason);
+                        ESP_LOGW("IntervalORP", "Chlorinator über Interval Start verhindert weil: %s", reason.c_str());
+
+
+######################Sicherheitsinterval############################
+#Das Interval prüft laufend ob der Chlorinator oder PH Dosierpumpe noch läuft
+#Fehlerfall: Poolpumpe, Flow Sensor --> aus
+#Chlorinator: Maximale Laufzeit (Tag) erreicht? --> aus
+#PH: Maximale Menge pro Tag errreicht? --> aus
+#Countdown aus Berechnung erreicht? --> aus
+####################################################################################
+  - interval: 7s
+    then:
+      - if:
+          condition:
+            # Nur ausführen, wenn Chlor oder PH ODER Pumpe läuft - während Pumpe laut timer nicht laufen sollte
+            # (Wir erweitern die Bedingung: ...oder wenn Frostschutz noch aktiv ist)
+            - lambda: |-
+                return (id(switch_chlor_run_gpio).state || id(switch_relay2_ph).state) || !id(bs_timer_allows_run).state || id(glo_frost_active);
+          then:
+            - lambda: |-
+                // --- 0. FROSTSCHUTZ LOGIK  ---
+                if (id(glo_frost_active)) {
+                  float temp = id(sensor_outdoor_temp).state;
+                  // Frostschutz NUR deaktivieren, wenn es wärmer als -2 Grad ist
+                  if (!std::isnan(temp) && temp >= -2.0) {
+                    id(glo_frost_active) = false;
+                    ESP_LOGW("safety-interval", "Frostschutz-Status beendet (Temp: %.1f°C)", temp);
+                  }
+                }
+                // --- A. GEMEINSAME SICHERHEIT ---
+                if (id(inv_running).state != 1 || (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_min)) || (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min))) {
+                  ESP_LOGW("safety-interval", "Pumpe aus oder kein Durchfluss YF-DN40 / S201 --> STOPP -> Alles aus.");
+                  id(script_stopp_all).execute();
+                  return;
+                }
+                // --- B. CHLORINATOR LOGIK ---
+                if (id(switch_chlor_run_gpio).state) {
+                  id(chlorinator_today_run_time) += 7;
+                  id(chlorinator_remaining_seconds) -= 7;
+                  
+                  // Prüfung auf: 
+                  // 1. Ziel-ORP erreicht
+                  // 2. Zeit abgelaufen 
+                  // 3. Tagesmaximum erreicht 
+                  bool orp_reached = (id(orp_measvalue).state >= id(glo_orp_target));
+                  bool daily_max  = (id(chlorinator_today_run_time) >= (id(chlor_run_time_max_day) * 60));
+                  bool timer_done = (id(chlorinator_remaining_seconds) <= 0);
+
+                  if (orp_reached || daily_max || timer_done) {
+                    // Grund ermitteln (const char* ist sicher für ESP-IDF)
+                    const char* reason = "Unbekannt";
+                    //std::string reason = "Unbekannt";
+
+                    if (orp_reached) {
+                      reason = "Ziel-ORP erreicht = orp_measvalue";
+                    } else if (daily_max) {
+                      reason = "Tagesmaximum erreicht = chlorinator_today_run_time";
+                    } else if (timer_done) {
+                      reason = "Zyklus-Zeit abgelaufen = chlorinator_remaining_seconds";
+                    }
+
+                    ESP_LOGW("safety-interval", "Chlorinator STOP | Grund: %s", reason);
+                    
+                    // Zusatz-Info im Log für die Analyse (Optional)
+                    ESP_LOGD("safety-interval", "Status beim Stop: ORP: %.1f, Heute: %.0fs, Rest: %ds", 
+                            id(orp_measvalue).state, id(chlorinator_today_run_time), id(chlorinator_remaining_seconds));
+
+                    id(switch_chlorinator).turn_off();
+                    id(chlorinator_remaining_seconds) = 0;
+                  }
+                  // --- NEU: Stromfluss-Überwachung im Betrieb
+                  if (!id(switch_chlor_debug).state) {
+                    
+                    // Wenn der Strom unter e.g. 1.5A liegt ODER der PZEM gar nicht online ist
+                    if (!id(bs_pzem_online).state || id(pzem_dc_current).state < id(glo_pzem_min)) {
+                        id(glo_chlor_fail_count)++;
+                        if (id(glo_chlor_fail_count) >= 2) {
+                          id(glo_chlor_error_lockout) = true;
+                          id(bs_chlor_lockout).publish_state(true);
+                          ESP_LOGE("chlor_watchdog", "SICHERHEITSSPERRE: Chlorinator Hardware defekt?");
+                          // WICHTIG: Sofort stoppen, damit GPIOs nicht auf "An" bleiben
+                          id(script_stopp_chlor).execute();
+                        }
+                    } else {
+                        // Erfolg: Zähler zurücksetzen
+                        id(glo_chlor_fail_count) = 0;
+                    }
+                  }
+                }
+
+                // --- C. pH-DOSIER LOGIK (Verbesserte Sicherheitsprüfung) ---
+                if (id(switch_relay2_ph).state) {
+                    float flow_rate = id(ph_ml_per_second);
+                    
+                    // 1. Aktuelle Menge berechnen BEVOR wir die Zeit erhöhen
+                    // So prüfen wir, ob der LETZTE Schritt uns über das Limit gebracht hat
+                    float current_cycle_ml = id(phdispenser_cycle_time) * flow_rate;
+
+                    // 2. Sofort-Prüfung gegen das Limit
+                    if (current_cycle_ml >= id(max_ph_ml_per_cycle)) {
+                        ESP_LOGW("safety-interval", "PH LIMIT STOP! Zyklus-Limit erreicht: %.1f ml", current_cycle_ml);
+                        id(script_stopp_ph).execute();
+                    } 
+                    else if (id(ph_today_ml) >= id(max_ph_ml_per_day)) {
+                        ESP_LOGW("safety-interval", "PH LIMIT STOP! Tages-Limit erreicht.");
+                        id(script_stopp_ph).execute();
+                    }
+                    else {
+                        // 3. Nur wenn kein Limit erreicht ist, zählen wir die 7 Sekunden dazu
+                        id(phdispenser_today_run_time) += 7; // Korrigiert auf 7!
+                        id(phdispenser_cycle_time) += 7;     // Korrigiert auf 7!
+                        
+                        // Wir ziehen die Sekunden ab vom Timer
+                        id(glo_ph_remaining_seconds) -= 7; 
+                        if (id(glo_ph_remaining_seconds) < 0) id(glo_ph_remaining_seconds) = 0;
+                        float added_ml = 7.0 * flow_rate;    // Korrigiert auf 7!
+                        
+                        id(ph_today_ml) += added_ml; 
+                        id(ph_tank_remaining) -= added_ml;
+                        id(ph_last_cycle_ml) = id(phdispenser_cycle_time) * flow_rate;
+
+                        // PH Zielwert Prüfung (Zusätzlicher Stop-Grund)
+                        if (id(ph_measvalue).state <= id(glo_ph_target)) {
+                            ESP_LOGI("safety-interval", "PH Zielwert erreicht: %.2f", id(ph_measvalue).state);
+                            id(script_stopp_ph).execute();
+                        } else {
+                            ESP_LOGD("safety-interval", "PH läuft: %.1f ml im Zyklus", id(ph_last_cycle_ml));
+                        }
+                    }
+                }
+
+                // --- D. ABSCHALT-LOGIK (Cleanup) ---
+
+                // Wir prüfen: Läuft die Pumpe gerade "unberechtigt"?
+                // 1. Timer ist aus
+                // 2. Frostschutz ist aus
+                // 3. Chlorinator ist aus
+                // 4. PH-Pumpe ist aus
+                // UND: Die Automatisierung denkt eigentlich, sie wäre noch aktiv (Flag) 
+                //      ODER die Pumpe läuft physikalisch noch.
+
+                bool run_allowed = id(bs_timer_allows_run).state || 
+                                  id(glo_frost_active) || 
+                                  id(switch_chlor_run_gpio).state || 
+                                  id(switch_relay2_ph).state;
+
+                if (!run_allowed) {
+                  if (id(inv_running).state == 1 && id(glo_pump_active_via_automation)) {
+                    
+                    ESP_LOGW("safety-interval", "Cleanup: Pumpe läuft ohne Grund -> STOP");
+                    
+                    // Pumpe ausschalten
+                    id(switch_poolpump).turn_off();
+                    
+                    // Status-Flag zurücksetzen
+                    id(glo_pump_active_via_automation) = false;
+                  }
+                  // Wenn sie läuft, aber NICHT von der Automatik gestartet wurde
+                  else if (id(inv_running).state == 1 && !id(glo_pump_active_via_automation)) {
+                    // Statischer Zähler, damit das Log nur alle 5 Minuten (ca. 42 Zyklen à 7s) nervt
+                    static int manual_log_count = 0;
+                    if (manual_log_count++ % 42 == 0) {
+                      ESP_LOGI("safety-interval", "Manueller Modus: Pumpe läuft ohne Automatik-Anforderung.");
+                    }
+                  }
+                }
+                
+                // --- E. Timer check - Abschaltung weil außerhalb der Zeit (Sicherheitsintervall Teil) ---
+                if (!id(bs_timer_allows_run).state && (id(inv_running).state == 1 && id(glo_pump_active_via_automation))) {
+                  ESP_LOGW("safety-interval", "Abschaltung Pumpe - Außerhalb des Timers!");
+                  ESP_LOGW("safety-interval", "bs_timer_allows_run = %s", id(bs_timer_allows_run).state ? "True" : "False");
+                  ESP_LOGW("safety-interval", "id(inv_running).state = %s", (id(inv_running).state) == 1 ? "True" : "False");
+                  ESP_LOGW("safety-interval", "id(glo_pump_active_via_automation) = %s", id(glo_pump_active_via_automation) ? "True" : "False");
+                  id(script_stopp_all).execute();
+                }

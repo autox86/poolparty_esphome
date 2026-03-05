@@ -1,0 +1,116 @@
+
+select:
+  - platform: template
+    name: "Durchflussmesser installiert?"
+    id: select_flowsensor
+    icon: "mdi:gauge-full"
+    web_server:
+      sorting_group_id: grp_config
+      sorting_weight: 93
+    entity_category: config
+    restore_value: true
+    optimistic: false
+    initial_option: 'YF-DN40 & YF-S201'
+    options:
+      - 'No Flow Sensors'
+      - 'YF-DN40'
+      - 'YF-S201'
+      - 'YF-DN40 & YF-S201'
+    set_action:
+      - lambda: |-
+          // Den gewählten Wert sofort im UI bestätigen
+          id(select_flowsensor).publish_state(x);
+
+          // x ist die gewählte Option (z.B. "YF-DN40")
+          const std::string opt = x;
+          if (opt == "YF-DN40 & YF-S201") {
+            id(use_flow_dn40) = true;
+            id(use_flow_s201) = true;
+          
+          } else if (opt == "YF-DN40") {
+            id(use_flow_dn40) = true;
+            id(use_flow_s201) = false;
+
+          } else if (opt == "YF-S201") {
+            id(use_flow_s201) = true;
+            id(use_flow_dn40) = false;
+
+          } else if (opt == "No Flow Sensors") {
+            id(use_flow_dn40) = false;
+            id(use_flow_s201) = false;
+          }
+          ESP_LOGI(
+            "FlowSelect",
+            "Flow Sensor Auswahl: %s | DN40=%d | S201=%d",
+            opt.c_str(),
+            id(use_flow_dn40),
+            id(use_flow_s201)
+          );
+
+# === Select für Pumpenmodus / Frequenz ===
+  - platform: template
+    name: "Pumpenmodus"
+    id: select_work_mode
+    icon: "mdi:cog-sync"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 4
+    entity_category: config
+    optimistic: false
+    options:
+      - "55% Stromsparen"
+      - "70% Badebetrieb"
+      - "85% Badebetrieb"
+      - "100% Badebetrieb"
+      - "0% Wartung"
+      - "55% Winterbetrieb"
+
+    set_action:
+      - lambda: |-
+          id(select_work_mode).publish_state(x);
+          const std::string mode = x;
+
+          // 1. Logik für Frequenzen und Freigaben
+          if (mode == "0% Wartung") {
+              ESP_LOGI("workmode", "Wartung -> Stop");
+              id(glo_maintenance) = true;
+              id(glo_ph_allowed) = false;
+              id(glo_orp_allowed) = false;
+              id(glo_hp_allowed) = false;
+              id(glo_tuya_allowed) = true;
+              id(script_stopp_all).execute();
+              //Ich setze auf 100%, dann kann der Inverter manuell bedient werden 
+              //ohne die Frequenz anpassen zu müssen, z.B. zum Rückspülen...
+              id(glo_set_frequency) = 100;
+              
+
+          } else if (mode == "55% Winterbetrieb") {
+              id(glo_maintenance) = false;
+              id(glo_ph_allowed) = false;
+              id(glo_orp_allowed) = false;
+              id(glo_hp_allowed) = false;
+              id(glo_tuya_allowed) = false;
+              id(switch_phdosierpumpe).turn_off();
+              id(switch_chlorinator).turn_off();
+              id(glo_set_frequency) = 70;
+
+          } else {
+              // Alle Bade- und Stromsparmodi
+              id(glo_ph_allowed) = true;
+              id(glo_orp_allowed) = true;
+              id(glo_hp_allowed) = true;
+              id(glo_maintenance) = false;
+              id(glo_tuya_allowed) = true;
+              id(glo_workmode) = mode;
+
+              if (mode == "55% Stromsparen")      id(glo_set_frequency) = 55;
+              else if (mode == "70% Badebetrieb") id(glo_set_frequency) = 70;
+              else if (mode == "85% Badebetrieb") id(glo_set_frequency) = 85;
+              else if (mode == "100% Badebetrieb")id(glo_set_frequency) = 100;
+          }
+
+          // 2. Abschluss
+          auto call = id(number_target_frequency).make_call();
+          call.set_value(id(glo_set_frequency)); 
+          call.perform();
+          ESP_LOGI("workmode", "Modus: %s | Frequenz: %.0f", mode.c_str(), id(glo_set_frequency));
