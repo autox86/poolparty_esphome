@@ -353,6 +353,7 @@ globals:
   - id: poolpump_start_time
     type: unsigned long
     initial_value: "0" #Rechenhilfe für PumpPreRunTime (Vorlaufzeit)
+    restore_value: false
   - id: glo_set_frequency
     type: float
     initial_value: "100" #globale variabel zum Konvertieren des Betriebsmodus (Select als String) zu einer Zahl
