@@ -169,85 +169,85 @@ globals:
   - id: glo_workmode
     type: std::string
     initial_value: '""' # Workmode in variabel
-    restore_value: "true"
+    restore_value: true
   - id: glo_frost_start_time
     type: uint32_t # <--- Hier das _t ergänzen
     initial_value: "0"
   - id: glo_frost_active
     type: bool
     initial_value: "false" #frostschutz aktiv?
-    restore_value: no
+    restore_value: false
   - id: last_switch_action
     type: uint32_t
     initial_value: "0" #Used for storing a switch action, (see switch_poolpump)
-    restore_value: "false"
+    restore_value: false
   - id: glo_restart_allowed
     type: bool
     initial_value: "false" #In case there was a restart performed, unexpected or not we indicate if we shall restart the pump
-    restore_value: "false"
+    restore_value: false
   - id: glo_last_reset_reason
     type: std::string
     initial_value: '"Initialwert"'
-    restore_value: "false"
+    restore_value: false
   - id: boot_log_buffer
     type: std::string
     initial_value: '""'
   - id: glo_uart_priority
     type: float
     initial_value: "40.0" # Priority
-    restore_value: "false"
+    restore_value: false
   - id: glo_maintenance
     type: bool
-    restore_value: "true"
+    restore_value: true
     initial_value: "false" #Haben wir den Workmode maintenance?
   - id: glo_modbushub_priority
     type: float
     initial_value: "35.0" # Priority
-    restore_value: "false"
+    restore_value: false
   - id: glo_modbussensor_priority
     type: float
     initial_value: "30.0" # Priority
-    restore_value: "false"
+    restore_value: false
   - id: glo_on_boot_priority
     type: float
     initial_value: "10.0" # Priority
-    restore_value: "false"
+    restore_value: false
   - id: glo_pump_active_via_automation
     type: bool
-    restore_value: "true"
+    restore_value: true
     initial_value: "false" #Wurde die Pumpe via Intervall gestartet?
   - id: glo_ph_allowed
     type: bool
-    restore_value: "true"
+    restore_value: true
     initial_value: "false" #PH Erlaubt? Sicher ist sicher, PH Injektor initial auf false
   - id: glo_orp_allowed
     type: bool
-    restore_value: "true"
+    restore_value: true
     initial_value: "false" #Sicher ist sicher, Chlorinator initial auf false
   - id: glo_hp_allowed
     type: bool
-    restore_value: "true"
+    restore_value: true
     initial_value: "false" #Sicher ist sicher, HeatPump initial auf false
   - id: use_flow_dn40
     type: bool
-    restore_value: "true"
+    restore_value: true
     initial_value: "true" #FlowSensor angeschlossen? true or false
   - id: use_flow_s201
     type: bool
-    restore_value: "true"
+    restore_value: true
     initial_value: "true" #FlowSensor angeschlossen? true or false
   - id: chlorinator_polarity
     type: bool
     initial_value: "false" #Polarität für die Zelle merken (Umpolung beim Start)
-    restore_value: yes
+    restore_value: true
   - id: chlorinator_runtime_seconds
     type: int
     initial_value: "0" #globale helfer variabel für Chlorproduktion
-    restore_value: "false"
+    restore_value: false
   - id: chlorinator_remaining_seconds
     type: int
     initial_value: "0" #globale helfer variabel für Chlorberechnung
-    restore_value: "false"
+    restore_value: false
   - id: chlor_needed
     type: bool
     initial_value: "false" # Chlor nötig --> True / False
@@ -257,35 +257,35 @@ globals:
   - id: chlor_run_time_max_day
     type: float
     initial_value: "480" # Minuten die der Chlorinator pro Tag maximal erreichen darf änderbar über Nummernfeld
-    restore_value: "true"
+    restore_value: true
   - id: chlor_run_time_max_cycle
     type: float
     initial_value: "30" # Minuten die der Chlorinator pro Zyklus maximal erreichen darf änderbar über Nummernfeld
-    restore_value: "true"
+    restore_value: true
   - id: chlorinator_today_run_time
     type: float
     initial_value: "0" # Tageslaufzeit in Sekunden (bereits gelaufen)
-    restore_value: "false"
+    restore_value: false
   - id: max_ph_ml_per_cycle
     type: float
     initial_value: "500" # ml die der Dispenser pro Zyklus maximal injezieren darf, änderbar über Nummernfeld
-    restore_value: "true"
+    restore_value: true
   - id: max_ph_ml_per_day
     type: float
     initial_value: "300" # ml die der Dispenser täglich maximal injezieren darf, änderbar über Nummernfeld
-    restore_value: "true"
+    restore_value: true
   - id: glo_orp_max
     type: float
     initial_value: "800" # Der Maximal Wert für ORP
-    restore_value: "true"
+    restore_value: true
   - id: glo_orp_min
     type: float
     initial_value: "600" # Der Minimal Wert für ORP
-    restore_value: "true"
+    restore_value: true
   - id: glo_orp_target
     type: int
     initial_value: "750" #globale helfer variabel für Chlorberechnung
-    restore_value: "true"
+    restore_value: true
   - id: ph_cycles
     type: float
     initial_value: "1" # Anzahl an PH Laufzyklen pro Tag
@@ -295,92 +295,92 @@ globals:
   - id: ph_max
     type: float
     initial_value: "7.8" # Maximaler PH Wert den das Wasser haben darf, änderbar über Nummernfeld
-    restore_value: "true"
+    restore_value: true
   - id: ph_max_injection_reached
     type: bool
     initial_value: "false" # Check: Haben wir die maximale Tagesdosis an PH Minus erreicht?
-    restore_value: "false"
+    restore_value: false
   - id: ph_min
     type: float
     initial_value: "6.8" # Maximaler PH Wert den das Wasser haben darf, änderbar über Nummernfeld
-    restore_value: "true"
+    restore_value: true
   - id: ph_ml_per_second
     type: float
     initial_value: "0.50" #ml die der Dispenser pro Sekunde injeziert, änderbar über Nummernfeld
-    restore_value: "true"
+    restore_value: true
   - id: ph_needed
     type: bool
     initial_value: "false" # Check: PH Minus nötig?
   - id: glo_ph_target
     type: float
     initial_value: "7.0" # PH wert der angestrebt wird.
-    restore_value: "true"
+    restore_value: true
   - id: ph_tank_capacity_ml
     type: float
-    restore_value: "true"
+    restore_value: true
     initial_value: "20000" # Volumen des PH Behälters in ML - änderbar über Nummernfeld
   - id: ph_tank_refill
     type: bool
     initial_value: "false" # Tank leer, also nachfüllen?
-    restore_value: "true"
+    restore_value: true
   - id: ph_tank_remaining
     type: float
     initial_value: "20000" # Verbleibender Tankinhalt
-    restore_value: "true"
+    restore_value: true
   - id: ph_today_ml
     type: float
     initial_value: "0" # Tageszähler:PH Minus an dem heutigen Tag injeziert in ml
-    restore_value: "true"
+    restore_value: true
   - id: phdispenser_today_run_time
     type: float
     initial_value: "0" # Tgeszähler:PH Dispenser Laufzeit in sekunden
-    restore_value: "false"
+    restore_value: false
   - id: poolpump_ok
     type: bool
     initial_value: "false" # CheckVariabel: Ist Poolpumpenvorlaufzeit erreicht ? True / False
   - id: poolvolume
     type: float
-    restore_value: no
+    restore_value: false
     initial_value: "45000" #Größe deines Pools in Liter, änderbar über Nummernfeld
   - id: poolpump_flow_max
     type: float
-    restore_value: no
+    restore_value: false
     initial_value: "12.0" #Durchfluss Poolpumpe bei 100%
   - id: PumpPreRunTime
     type: float
     initial_value: "10" # Vorlaufzeit der Poolpumpe in Minuten angebe, änderbar über Nummernfeld
-    restore_value: "true"
+    restore_value: true
   - id: poolpump_start_time
     type: unsigned long
     initial_value: "0" #Rechenhilfe für PumpPreRunTime (Vorlaufzeit)
   - id: glo_set_frequency
     type: float
     initial_value: "100" #globale variabel zum Konvertieren des Betriebsmodus (Select als String) zu einer Zahl
-    restore_value: "true"
+    restore_value: true
   - id: phdispenser_cycle_time
     type: float
     initial_value: "0" # Zähler für die Laufzeit des aktuellen PH-Zyklus in Sekunden
-    restore_value: "false"
+    restore_value: false
   - id: ph_last_cycle_ml
     type: float
     initial_value: "0" # Menge an PH Minus (ml) im letzten Zyklus, für Tank-Update beim Ausschalten
-    restore_value: "false"
+    restore_value: false
   - id: glo_timer_start_hour
     type: int
     initial_value: "9" # Speichert die Stunde des Timers
-    restore_value: yes
+    restore_value: true
   - id: glo_timer_start_min
     type: int
     initial_value: "0" # Speichert die Minute des Timers
-    restore_value: yes
+    restore_value: true
   - id: glo_timer_stopp_hour
     type: int
     initial_value: "9" # Speichert die Stunde des Timers
-    restore_value: yes
+    restore_value: true
   - id: glo_timer_stopp_min
     type: int
     initial_value: "0" # Speichert die Minute des Timers
-    restore_value: yes
+    restore_value: true
   - id: glo_tuya_last_seen_ms
     type: uint32_t
     initial_value: "0" # Zeit seit letztem Kontakt mit Tuya Controller
