@@ -110,6 +110,7 @@ substitutions:
   # #Poolcontroller-Logics Intial Values
   checkIntervalORP: "2 min" #Angabe nach der Zahl ist wichtig!!
   checkIntervalPH: "15 min" #Angabe nach der Zahl ist wichtig!!
+#  durchflussDN40:  "0.2"
 
 esphome:
   name: "${friendly_name}"
@@ -132,6 +133,7 @@ packages:
   sensors: !include packages/sensors.yaml
   switches: !include packages/switches.yaml
   text_sensors: !include packages/text_sensors.yaml
+  binary_sensors: !include packages/binary_sensors.yaml
 external_components:
   - source: github://hostcc/esphome-component-dynamic-on-time
 
