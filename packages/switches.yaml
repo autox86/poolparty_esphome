@@ -302,6 +302,20 @@ switch:
 
   #Switch for timer component - https://github.com/hostcc/esphome-component-dynamic-on-time
   - platform: template
+    id: timer_internal_disable_logic
+    internal: true
+    # Der Timer sieht diesen Switch als "AN" (Disabled = true), 
+    # wenn dein Hauptschalter "AUS" ist.
+    lambda: |-
+      return !id(switch_timer_enabled).state;
+    
+    # Da es ein Template-Switch ist, braucht er leere Befehle,
+    # damit ESPHome nicht meckert. Er wird nur via Lambda gelesen.
+    turn_on_action: []
+    turn_off_action: []
+
+
+  - platform: template
     id: switch_timer_mon
     icon: "mdi:calendar-check"
     name: "Timer Montag"
@@ -372,9 +386,10 @@ switch:
       sorting_weight: 27
     entity_category: config
   - platform: template
-    id: switch_timer_disabled
+    #id: switch_timer_disabled
+    id: switch_timer_enabled
     icon: "mdi:calendar-check"
-    name: "Timer deaktiviert"
+    name: "Timer aktiviert"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     web_server:

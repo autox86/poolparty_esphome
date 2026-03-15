@@ -1,0 +1,225 @@
+binary_sensor:
+  - platform: template
+    name: "Pumpe Hardware defekt?"
+    id: bs_pump_lockout
+    device_class: problem
+    icon: "mdi:alert-octagon"
+    web_server:
+      sorting_group_id: grp_error
+      sorting_weight: 95
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(glo_pump_lockout) = x;
+
+  - platform: template
+    name: "Chlorinator Hardware defekt?"
+    id: bs_chlor_lockout
+    device_class: problem
+    icon: "mdi:alert-octagon"
+    web_server:
+      sorting_group_id: grp_error
+      sorting_weight: 97
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(glo_chlor_error_lockout) = x;
+
+  - platform: template
+    name: "Tuya Hardware defekt?"
+    id: bs_tuya_lockout
+    device_class: problem
+    icon: "mdi:alert-octagon"
+    web_server:
+      sorting_group_id: grp_error
+      sorting_weight: 99
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(glo_tuya_error_lockout) = x;
+  
+  - platform: template
+    name: "Low Salt Meldung?"
+    id: bin_low_salt_warning
+    device_class: problem
+    icon: "mdi:shaker-outline"
+    web_server:
+      sorting_group_id: grp_error
+      sorting_weight: 93
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(glo_low_salt) = x;
+  
+  # Zeigt den Online Status vom Inverter (Poolpumpe) Modul
+  - platform: template
+    name: "Frequenzsteuerung Online"
+    id: bs_inv_online
+    icon: "mdi:toggle-switch"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 5
+    device_class: connectivity
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(glo_inv_online) = x;
+
+  # Zeigt RUN Status vom Inverter (Poolpumpe) Modul
+  - platform: template
+    name: "Frequenzsteuerung Running?"
+    id: bs_inv_running
+    icon: "mdi:toggle-switch"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 6
+    device_class: connectivity
+
+  # Zeigt den Status des Tuya W2839 an
+  - platform: template
+    name: "Tuya W2839 Online"
+    id: bs_tuya_online
+    icon: "mdi:toggle-switch"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 8
+    device_class: connectivity
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(glo_tuya_online) = x;
+
+  # Zeigt den Status vom PZEM Modul
+  - platform: template
+    name: "Chlorinator 24V Online"
+    id: bs_pzem_online
+    icon: "mdi:toggle-switch"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 11
+    device_class: connectivity
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(glo_pzem_online) = x;
+
+  # Zeigt den Status von der Wärmepumpe
+  - platform: template
+    name: "Wärmepumpe Online"
+    id: bs_hp_online
+    icon: "mdi:toggle-switch"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 4
+    device_class: connectivity
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(glo_hp_online) = x;
+
+  # Zeigt den Status des Stromzählers für PV
+  - platform: template
+    name: "PV Zähler Online"
+    id: bs_energy_meter_online
+    icon: "mdi:toggle-switch"
+    web_server:
+      sorting_group_id: grp_system
+      #sorting_weight: 17
+    device_class: connectivity
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(glo_energy_online) = x;
+
+  # Zeigt ob der PH Tank leer ist
+  - platform: template
+    name: "PH Tank leer"
+    id: bs_tank_empty
+    icon: "mdi:toggle-switch"
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 26
+    device_class: connectivity
+    on_state:
+      then:
+        - lambda: |-
+            // x ist der neue Status des Binary Sensors (bool)
+            id(ph_tank_refill) = x;
+
+  # Physikalischer Taster für Tank Reset
+  - platform: gpio
+    pin:
+      number: ${phtank_reset}
+      inverted: true
+    id: bs_ph_tank_reset_physical
+    icon: "mdi:barrel"
+    internal: true  # Versteckt den Sensor im Web, da wir ja den Button (oben) haben
+    filters:
+      - delayed_on: 50ms
+    on_press:
+      then:
+        - button.press: bt_ph_tank_reset_web # Drückt den Web-Button virtuell mit
+
+  # Physikalischer Taster für Wartungsmodus
+  - platform: gpio
+    id: bs_maintenance
+    internal: True
+    pin: 
+      number: ${maintenance} # GPIO 39 ist mit pullup 10K versehen
+      mode: INPUT
+    on_press:
+      then:
+        - switch.turn_on: switch_maintenance
+    on_release:
+      then:
+        - switch.turn_off: switch_maintenance
+
+  # Wird benötigt für den automatischen Restart der Pumpe nach einem Ausfall/Reboot des ESP
+  - platform: template
+    name: "Lauf über Timer erlaubt?"
+    id: bs_timer_allows_run
+    icon: "mdi:clock-check"
+    web_server:
+      sorting_group_id: grp_error
+      sorting_weight: 90
+    lambda: |-
+      auto now = id(sntp_time).now();
+      if (!now.is_valid()) return false;
+
+      // 1. Zeitfenster berechnen (Minuten seit Mitternacht)
+      int current_min = now.hour * 60 + now.minute;
+      int start_min   = id(number_timer_hour_on).state * 60 + id(number_timer_minute_on).state;
+      int stop_min    = id(number_timer_hour_off).state * 60 + id(number_timer_minute_off).state;
+
+      bool time_ok = false;
+      if (start_min < stop_min) {
+        time_ok = (current_min >= start_min && current_min < stop_min);
+      } else {
+        // Über Mitternacht Fall
+        time_ok = (current_min >= start_min || current_min < stop_min);
+      }
+
+      // 2. Wochentag prüfen
+      // ESPHome SNTP: 1=Sonntag, 2=Montag, 3=Dienstag, 4=Mittwoch, 5=Donnerstag, 6=Freitag, 7=Samstag
+      bool day_ok = false;
+      switch (now.day_of_week) {
+        case 1: day_ok = id(switch_timer_sun).state; break;
+        case 2: day_ok = id(switch_timer_mon).state; break;
+        case 3: day_ok = id(switch_timer_tue).state; break;
+        case 4: day_ok = id(switch_timer_wed).state; break;
+        case 5: day_ok = id(switch_timer_thu).state; break;
+        case 6: day_ok = id(switch_timer_fri).state; break;
+        case 7: day_ok = id(switch_timer_sat).state; break;
+      }
+
+      // 3. Gesamtstatus (Zeit OK UND Tag OK UND Timer aktiviert)
+      return time_ok && day_ok && id(switch_timer_enabled).state;

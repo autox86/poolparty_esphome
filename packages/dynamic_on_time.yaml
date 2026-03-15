@@ -11,7 +11,7 @@ dynamic_on_time:
     fri: switch_timer_fri
     sat: switch_timer_sat
     sun: switch_timer_sun
-    disabled: switch_timer_disabled
+    disabled: timer_internal_disable_logic
     on_time:
       - logger.log: 
           format: "Poolpumpe Tageszyklus gestartet"
@@ -30,7 +30,7 @@ dynamic_on_time:
     fri: switch_timer_fri
     sat: switch_timer_sat
     sun: switch_timer_sun
-    disabled: switch_timer_disabled
+    disabled: timer_internal_disable_logic
     on_time:
       - logger.log: 
           format: "Poolpumpe Tageszyklus beendet"

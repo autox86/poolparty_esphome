@@ -26,7 +26,13 @@ sensor:
     web_server:
       sorting_group_id: grp_sensors
       sorting_weight: 51
-    
+    filters:
+      - lambda: |-
+          if (std::isnan(x)) {
+            return 0.0;
+          } else {
+            return x;
+          }
 
   - platform: dallas_temp
     id: sensor_water_temp
@@ -38,6 +44,31 @@ sensor:
     web_server:
       sorting_group_id: grp_status
       sorting_weight: 47
+    filters:
+      - lambda: |-
+          if (std::isnan(x)) {
+            return 0.0;
+          } else {
+            return x;
+          }
+
+  # - platform: dallas_temp
+  #   id: sensor_water_temp_hp
+  #   name: "Wasser Temperatur nach WP"
+  #   # address ist im Log, für ersten Start 
+  #   # address auskommentieren und nur den "neuen" Dallas anschließen
+  #   #address: 0x843c01b556227b28
+  #   icon: "mdi:thermometer"
+  #   web_server:
+  #     sorting_group_id: grp_status
+  #     sorting_weight: 47
+  #   filters:
+  #     - lambda: |-
+  #         if (std::isnan(x)) {
+  #           return 0.0;
+  #         } else {
+  #           return x;
+  #         }
 
   - platform: template
     name: "Poolpumpe Vorlaufzeit Timer"
@@ -135,39 +166,71 @@ sensor:
 
 ########################## YF DN40 Flow Meter – Pumpe###########################
 ################################################################################
+  # - platform: pulse_counter
+  #   id: flow_pump
+  #   pin: ${yfdn40}
+  #   name: "Durchfluss Pumpe L-Std."
+  #   update_interval: 5s
+  #   web_server:
+  #     sorting_group_id: grp_sensors
+  #     sorting_weight: 66
+  #   state_class: measurement
+  #   device_class: water
+  #   icon: "mdi:waves"
+  #   unit_of_measurement: "L/Std."
+  #   filters:
+  #     # Pulses per Liter/min = 27 -> Kalibrierung für DN40
+  #     # x = Pulse im Intervall, umrechnen auf L/Std.
+  #     # Pulses per Liter/min: 27 (x/27) => x is pulses received =x L/min *60 = x L/hr
+  #     - lambda: |-
+  #         return (x / 27.0) * 60.0;  // L/Std.
+  #     - throttle: 10s  # nur alle 10s an HA senden
+  #   total:
+  #     name: "Durchfluss Pumpe Tag"
+  #     unit_of_measurement: "L"
+  #     device_class: water
+  #     state_class: total_increasing
+  #     web_server:
+  #       sorting_group_id: grp_sensors
+  #       sorting_weight: 69
+  #     icon: "mdi:water-check"
+  #     filters:
+  #       # Tageswert kumuliert aus Pulse -> Liter
+  #       - lambda: |-
+  #           return x / 27.0;  // L gesamt
+
   - platform: pulse_counter
     id: flow_pump
     pin: ${yfdn40}
-    name: "Durchfluss Pumpe L-Std."
+    name: "Durchfluss Pumpe m³- h"
     update_interval: 5s
     web_server:
       sorting_group_id: grp_sensors
       sorting_weight: 66
     state_class: measurement
-    device_class: water
-    icon: "mdi:waves"
-    unit_of_measurement: "L/Std."
+    # Device_class 'water' erwartet oft L, daher bei m³/h ggf. weglassen oder lassen
+    device_class: gas
+    icon: "mdi:hydro-power"
+    unit_of_measurement: "m³/h"
     filters:
-      # Pulses per Liter/min = 27 -> Kalibrierung für DN40
-      # x = Pulse im Intervall, umrechnen auf L/Std.
-      # Pulses per Liter/min: 27 (x/27) => x is pulses received =x L/min *60 = x L/hr
-      - lambda: |-
-          return (x / 27.0) * 60.0;  // L/Std.
-      - throttle: 10s  # nur alle 10s an HA senden
+      - lambda: return ((x / 27.0) * 60.0) / 1000.0;
+      - sliding_window_moving_average:
+          window_size: 6  # Glättet über die letzten 6 Messungen
+          send_every: 1
+      - throttle: 10s
     total:
-      name: "Durchfluss Pumpe Tag"
-      unit_of_measurement: "L"
+      name: "Durchfluss Pumpe Gesamt m³"
+      unit_of_measurement: "m³"
       device_class: water
       state_class: total_increasing
       web_server:
         sorting_group_id: grp_sensors
         sorting_weight: 69
-      icon: "mdi:water-check"
+      icon: "mdi:hydro-power"
       filters:
-        # Tageswert kumuliert aus Pulse -> Liter
+        # Umrechnung der Pulse direkt in Kubikmeter
         - lambda: |-
-            return x / 27.0;  // L gesamt
-
+            return (x / 27.0) / 1000.0;
 
 ###################### YF S201 Flow Meter – Messzelle###########################
 ################################################################################
@@ -181,23 +244,26 @@ sensor:
       sorting_weight: 72
     state_class: measurement
     device_class: water
-    icon: "mdi:water-sync"
+    icon: "mdi:flask-round-bottom"
     unit_of_measurement: "L/Std."
     filters:
       # Pulses per Liter/min = 450 -> Kalibrierung für S201
       #Pulses per Liter/min: 450 (x/27) => x is pulses received =x L/min *60 = x L/hr
       - lambda: |-
           return (x / 450.0) * 60.0;  // l/Std.
+      - sliding_window_moving_average:
+          window_size: 6  # Glättet über die letzten 6 Messungen
+          send_every: 1
       - throttle: 10s  # nur alle 10s an HA senden
     total:
-      name: "Durchfluss Messzelle Tag"
+      name: "Durchfluss Messzelle Gesamt"
       unit_of_measurement: "L"
       device_class: water
       state_class: total_increasing
       web_server:
         sorting_group_id: grp_sensors
         sorting_weight: 75
-      icon: "mdi:opacity"
+      icon: "mdi:flask-round-bottom"
       filters:
       #   # Tageswert kumuliert aus Pulse -> Liter
         - lambda: |-

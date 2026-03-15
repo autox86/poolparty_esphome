@@ -73,6 +73,7 @@ select:
           // 1. Logik für Frequenzen und Freigaben
           if (mode == "0% Wartung") {
               ESP_LOGI("workmode", "Wartung -> Stop");
+              id(glo_winter) = false;
               id(glo_maintenance) = true;
               id(glo_ph_allowed) = false;
               id(glo_orp_allowed) = false;
@@ -85,6 +86,7 @@ select:
               
 
           } else if (mode == "55% Winterbetrieb") {
+              id(glo_winter) = true;
               id(glo_maintenance) = false;
               id(glo_ph_allowed) = false;
               id(glo_orp_allowed) = false;
@@ -96,6 +98,7 @@ select:
 
           } else {
               // Alle Bade- und Stromsparmodi
+              id(glo_winter) = false;
               id(glo_ph_allowed) = true;
               id(glo_orp_allowed) = true;
               id(glo_hp_allowed) = true;

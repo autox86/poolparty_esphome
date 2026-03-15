@@ -133,9 +133,9 @@ number:
 
   # ORP Max Wert Wasser
   - platform: template
-    name: "ORP Max Wert Wasser"
+    name: "ORP Max Wert"
     id: orp_max_setter
-    icon: "mdi:water-percent"
+    icon: "mdi:shimmer"
     web_server:
       sorting_group_id: grp_config
       sorting_weight: 63
@@ -143,24 +143,24 @@ number:
     entity_category: config
     restore_value: true
     optimistic: false
-    min_value: 400
+    min_value: 600
     max_value: 900
-    step: 1
+    step: 5
     set_action:
       - lambda: |-
-          if (x <= id(glo_orp_min)) {
-            ESP_LOGW("ORP", "ORP Max muss größer als ORP Min sein");
-            id(orp_max_setter).publish_state(id(glo_orp_max));
-            return;
-          }
+          // if (x <= id(glo_orp_min)) {
+          //   ESP_LOGW("ORP", "ORP Max muss größer als ORP Min sein");
+          //   id(orp_max_setter).publish_state(id(glo_orp_max));
+          //   return;
+          // }
           id(glo_orp_max) = x;
           id(orp_max_setter).publish_state(x);
 
   # ORP Min Wert Wasser
   - platform: template
-    name: "ORP Min Wert Wasser"
+    name: "ORP Min Wert"
     id: orp_min_setter
-    icon: "mdi:water-percent"
+    icon: "mdi:shimmer"
     web_server:
       sorting_group_id: grp_config
       sorting_weight: 66
@@ -168,24 +168,24 @@ number:
     entity_category: config
     restore_value: true
     optimistic: false
-    min_value: 400
+    min_value: 600
     max_value: 900
-    step: 1
+    step: 5
     set_action:
       - lambda: |-
-          if (x >= id(glo_orp_max)) {
-            ESP_LOGW("ORP", "ORP Min muss kleiner als ORP Max sein");
-            id(orp_min_setter).publish_state(id(glo_orp_min));
-            return;
-          }
+          // if (x >= id(glo_orp_max)) {
+          //   ESP_LOGW("ORP", "ORP Min muss kleiner als ORP Max sein");
+          //   id(orp_min_setter).publish_state(id(glo_orp_min));
+          //   return;
+          // }
           id(glo_orp_min) = x;
           id(orp_min_setter).publish_state(x);
 
   # ORP Zielwert Wasser
   - platform: template
-    name: "ORP Zielwert Wasser"
+    name: "ORP Sollwert"
     id: num_orp_target_setter
-    icon: "mdi:water-percent"
+    icon: "mdi:shimmer"
     web_server:
       sorting_group_id: grp_config
       sorting_weight: 60
@@ -193,16 +193,17 @@ number:
     entity_category: config
     restore_value: true
     optimistic: false
-    min_value: 400
+    min_value: 600
     max_value: 900
-    step: 1
+    step: 5
+    mode: SLIDER
     set_action:
       - lambda: |-
-          if (x >= id(glo_orp_max) || x <= id(glo_orp_min) ) {
-            ESP_LOGW("ORP", "ORP Target muss kleiner als ORP Max und größer als ORP Min sein");
-            id(num_orp_target_setter).publish_state(id(glo_orp_target));
-            return;
-          }
+          // if (x >= id(glo_orp_max) || x <= id(glo_orp_min) ) {
+          //   ESP_LOGW("ORP", "ORP Target muss kleiner als ORP Max und größer als ORP Min sein");
+          //   id(num_orp_target_setter).publish_state(id(glo_orp_target));
+          //   return;
+          // }
           id(glo_orp_target) = x;
           id(num_orp_target_setter).publish_state(x);
 

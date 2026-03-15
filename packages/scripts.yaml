@@ -4,181 +4,28 @@
 script:
 ############################## Tuya WatchDog ###################################
 ################################################################################
-  # - id: script_tuya_watchdog
-  #   mode: single
-  #   then:
-  #     - lambda: |-
-  #         const uint32_t timeout_ms = 25000; 
-  #         uint32_t now = millis();
 
-  #         // 1. WATCHDOG LOGIK
-  #         if (now < id(glo_tuya_last_seen_ms)) {
-  #           ESP_LOGD("tuya_watchdog", "Gnadenfrist aktiv - Warte auf Hardware...");
-  #         } 
-  #         else if ((now - id(glo_tuya_last_seen_ms)) < timeout_ms) {
-  #           if (!id(glo_tuya_online)) {
-  #             ESP_LOGI("tuya_watchdog", "Tuya ONLINE");
-  #             id(glo_tuya_online) = true;
-  #             id(bs_tuya_online).publish_state(true);
-  #           }
-  #         } 
-  #         else {
-  #           if (id(glo_tuya_online)) {
-  #             ESP_LOGW("tuya_watchdog", "Tuya OFFLINE -> Sensoren auf NAN");
-  #             id(glo_tuya_online) = false;
-  #             id(bs_tuya_online).publish_state(false);
-  #             id(ph_measvalue).publish_state(NAN);
-  #             id(orp_measvalue).publish_state(NAN);
-  #             id(tuya_temp).publish_state(NAN);
-  #           }
-  #         }
-        
-  #         // 2. TOGGLE LOGIK (ELTAKO)
-  #         if (id(uptime_raw).state >= 60 && now >= id(glo_tuya_last_seen_ms)) {
-            
-  #           if (id(glo_tuya_error_lockout)) return; 
-
-  #           const std::string mode = id(select_work_mode).current_option();
-  #           bool is_winter = (mode == "55% Winterbetrieb");
-            
-  #           // LOGIK-KORREKTUR:
-  #           // Wir toggeln NUR, wenn:
-  #           // a) Wir NICHT im Winter sind aber der Sensor offline ist (wir wollen ihn anhaben)
-  #           // b) Wir IM Winter sind aber der Sensor NOCH online ist (wir wollen ihn ausmachen)
-            
-  #           bool needs_toggle = false;
-  #           if (!is_winter && !id(glo_tuya_online)) {
-  #               needs_toggle = true;
-  #               ESP_LOGW("tuya_watchdog", "Sommerbetrieb: Tuya fehlt -> Toggle AN");
-  #           } 
-  #           else if (is_winter && id(glo_tuya_online)) {
-  #               needs_toggle = true;
-  #               ESP_LOGW("tuya_watchdog", "Winterbetrieb: Tuya sendet noch -> Toggle AUS");
-  #           }
-
-  #           if (needs_toggle) {
-  #               // --- SCHALTWÄCHTER ---
-  #               if (now - id(glo_tuya_last_reset_ms) > 1800000) {
-  #                 id(glo_tuya_toggle_count) = 0;
-  #                 id(glo_tuya_last_reset_ms) = now;
-  #               }
-
-  #               id(glo_tuya_toggle_count)++;
-
-  #               if (id(glo_tuya_toggle_count) > 10) {
-  #                 id(glo_tuya_error_lockout) = true;
-  #                 id(bs_tuya_lockout).publish_state(true);
-  #                 return; 
-  #               }
-
-  #               id(switch_relay3_tuya).turn_on(); // Der physische Klick am Eltako
-                
-  #               // WICHTIG: Lange Gnadenfrist, damit er nicht sofort wieder prüft
-  #               id(glo_tuya_last_seen_ms) = now + 30000; 
-                
-  #               // Wir nehmen an, dass der Toggle erfolgreich war, um Dauer-Toggles zu verhindern
-  #               if (is_winter) {
-  #                   id(glo_tuya_online) = false;
-  #                   id(bs_tuya_online).publish_state(false);
-  #               }
-  #           }
-  #         }
-
-  # - id: script_tuya_watchdog
-  #   mode: single
-  #   then:
-  #     - lambda: |-
-  #         const uint32_t timeout_ms = 15000; // 15s ohne UART → offline
-
-  #         if ((millis() - id(glo_tuya_last_seen_ms)) < timeout_ms) {
-  #           if (!id(glo_tuya_online)) {  //"Wenn wir bisher dachten, es sei offline..."
-  #             ESP_LOGI("tuya_watchdog", "Tuya ONLINE");
-  #             id(glo_tuya_online) = true;  // "...dann merken wir uns jetzt: Es ist ONLINE."
-  #             id(bs_tuya_online).publish_state(true);
-  #           }
-  #         //weil es einen Timeout gibt, gehts weiter mit else
-  #         } else {
-  #           if (id(glo_tuya_online)) {  //"Wenn wir bisher dachten, es sei online..."
-  #             ESP_LOGW("tuya_watchdog", "Tuya OFFLINE → Status reset");
-  #             id(glo_tuya_online) = false; // "...dann merken wir uns jetzt: Es ist OFFLINE."
-  #             id(bs_tuya_online).publish_state(false);
-              
-  #             // HIER: Sensoren auf NAN setzen, damit HA nicht mit alten Werten rechnet
-  #             id(ph_measvalue).publish_state(NAN);
-  #             id(orp_measvalue).publish_state(NAN);
-  #             id(tuya_temp).publish_state(NAN);
-  #           }
-  #         }
-
-  # - id: script_tuya_watchdog
-  #   mode: single
-  #   then:
-  #     - lambda: |-
-  #         bool needs_toggle = false;
-
-  #         if (id(glo_tuya_allowed)) {
-  #           if (!id(glo_tuya_online)) {  //"Wenn wir bisher dachten, es sei offline..."
-  #             ESP_LOGI("tuya_watchdog", "Tuya ist offline, soll aber Online sein");
-  #             id(glo_tuya_online) = true;  // "...dann merken wir uns jetzt: Es ist ONLINE."
-  #             id(bs_tuya_online).publish_state(true);
-  #             needs_toggle = true;
-  #             id(glo_tuya_toggle_count)++;
-  #           }
-  #         } else {
-  #           if (id(glo_tuya_online)) {  //"Wenn wir bisher dachten, es sei online..."
-  #             ESP_LOGW("tuya_watchdog", "Tuya ist online, soll aber Offline sein");
-  #             id(glo_tuya_online) = false; // "...dann merken wir uns jetzt: Es ist OFFLINE."
-  #             id(bs_tuya_online).publish_state(false);
-  #             needs_toggle = true;
-  #             id(glo_tuya_toggle_count)++;
-              
-  #             // // HIER: Sensoren auf NAN setzen, damit HA nicht mit alten Werten rechnet
-  #             // id(ph_measvalue).publish_state(NAN);
-  #             // id(orp_measvalue).publish_state(NAN);
-  #             // id(tuya_temp).publish_state(NAN);
-  #           }
-  #         }
-  #         // // 2. TOGGLE LOGIK (ELTAKO)
-  #         // if (id(uptime_raw).state >= 60 && needs_toggle && id(glo_tuya_toggle_count) >= 3 ) {
-  #         //   id(switch_relay3_tuya).turn_on(); // Der physische Klick am Eltako
-  #         //   id(glo_tuya_toggle_count) = 0;
-  #         // }
-  #         //Wird nicht gebraucht, denn ist lokal und beim nächsten Start false
-  #         //needs_toggle = false;
-
-
+#Working well without lockout
   # - id: script_tuya_watchdog
   #   mode: single
   #   then:
   #     - lambda: |-
   #         bool needs_toggle = false;
   #         uint32_t now = millis();
-  #         const uint32_t timeout_ms = 60000; // 60 Sekunden ohne Daten = Offline
+  #         const uint32_t timeout_ms = 60000; 
 
-  #         // 1. TIMEOUT-CHECK (Falls der Tuya einfach verstummt)
-  #         // Wenn wir im Modus sind, wo er laufen darf, aber die letzte Meldung zu alt ist
+  #         // 1. TIMEOUT-CHECK
   #         if (id(glo_tuya_allowed) && (now - id(glo_tuya_last_seen_ms) > timeout_ms)) {
   #             if (id(glo_tuya_online)) {
-  #               ESP_LOGW("tuya_watchdog", "TIMEOUT: Keine Daten seit 60s. Setze auf Offline.");
+  #               ESP_LOGW("tuya_watchdog", "TIMEOUT: Keine Daten. Setze auf Offline.");
   #               id(glo_tuya_online) = false;
   #               id(bs_tuya_online).publish_state(false);
   #             }
   #         }
 
-  #         // 2. ZUSTANDS-PRÜFUNG (Soll vs. Ist)
-  #         if (id(glo_tuya_allowed)) {
-  #           if (!id(glo_tuya_online)) {
+  #         // 2. ZUSTANDS-PRÜFUNG
+  #         if (id(glo_tuya_allowed) != id(glo_tuya_online)) {
   #             needs_toggle = true;
-  #           } else {
-  #             id(glo_tuya_toggle_count) = 0; // Alles okay, Zähler reset
-  #           }
-  #         } else {
-  #           // Im Winterbetrieb: Falls er noch Online ist, wollen wir ihn aus haben
-  #           if (id(glo_tuya_online)) {
-  #             needs_toggle = true;
-  #           } else {
-  #             id(glo_tuya_toggle_count) = 0;
-  #           }
   #         }
 
   #         // 3. TOGGLE LOGIK (ELTAKO)
@@ -186,17 +33,20 @@ script:
   #           id(glo_tuya_toggle_count)++;
 
   #           if (id(glo_tuya_toggle_count) >= 3) {
-  #             ESP_LOGW("tuya_watchdog", "Abweichung bestätigt! Toggle-Impuls...");
+  #             ESP_LOGW("tuya_watchdog", "Toggle-Impuls für Modus: %s", id(glo_tuya_allowed) ? "AN" : "AUS");
   #             id(switch_relay3_tuya).turn_on();
   #             id(glo_tuya_toggle_count) = 0;
               
-  #             // Sicherheits-Gnadenfrist: Wir tun so, als hätten wir gerade erst Daten gesehen,
-  #             // damit der Timeout nicht sofort wieder zuschlägt, während das Teil bootet.
+  #             // DIE VERSICHERUNG:
   #             id(glo_tuya_last_seen_ms) = now; 
+              
+  #             // WICHTIG: Wir setzen den Status jetzt schon auf das Ziel!
+  #             // Wenn wir einschalten, hoffen wir, dass er in 60s da ist.
+  #             // Wenn wir ausschalten, löschen wir die Werte.
+  #             id(glo_tuya_online) = id(glo_tuya_allowed);
+  #             id(bs_tuya_online).publish_state(id(glo_tuya_allowed));
 
   #             if (!id(glo_tuya_allowed)) {
-  #               id(glo_tuya_online) = false;
-  #               id(bs_tuya_online).publish_state(false);
   #               id(ph_measvalue).publish_state(NAN);
   #               id(orp_measvalue).publish_state(NAN);
   #               id(tuya_temp).publish_state(NAN);
@@ -204,14 +54,17 @@ script:
   #           }
   #         }
 
-
+#Adding lockout - Hardware defekt?
   - id: script_tuya_watchdog
     mode: single
     then:
       - lambda: |-
+          if (id(glo_tuya_error_lockout)) return; // Abbruch, wenn bereits gesperrt
+
           bool needs_toggle = false;
           uint32_t now = millis();
-          const uint32_t timeout_ms = 60000; 
+          const uint32_t timeout_ms = 60000;      // 1 Minute kein Signal
+          const uint32_t lockout_window = 3600000; // 60 Minuten Zeitfenster
 
           // 1. TIMEOUT-CHECK
           if (id(glo_tuya_allowed) && (now - id(glo_tuya_last_seen_ms) > timeout_ms)) {
@@ -232,16 +85,32 @@ script:
             id(glo_tuya_toggle_count)++;
 
             if (id(glo_tuya_toggle_count) >= 3) {
+              
+              // --- NEU: LOCKOUT LOGIK START ---
+              // Wenn das Zeitfenster abgelaufen ist, Zähler zurücksetzen
+              if (now - id(glo_tuya_lockout_start_ms) > lockout_window) {
+                id(glo_tuya_lockout_start_ms) = now;
+                id(glo_tuya_lockout_counter) = 0;
+              }
+
+              id(glo_tuya_lockout_counter)++;
+
+              if (id(glo_tuya_lockout_counter) >= 4) {
+                ESP_LOGE("tuya_watchdog", "!!! LOCKOUT !!! 4 Toggles in 60 Min. Hardware gesperrt!");
+                id(glo_tuya_error_lockout) = true;
+                id(bs_tuya_lockout).publish_state(true);
+                //Wir verbieten PH und ORP zu laufen!
+                id(glo_orp_allowed) = false;
+                id(glo_ph_allowed) = false;
+                return;
+              }
+              // --- NEU: LOCKOUT LOGIK ENDE ---
+
               ESP_LOGW("tuya_watchdog", "Toggle-Impuls für Modus: %s", id(glo_tuya_allowed) ? "AN" : "AUS");
               id(switch_relay3_tuya).turn_on();
               id(glo_tuya_toggle_count) = 0;
               
-              // DIE VERSICHERUNG:
               id(glo_tuya_last_seen_ms) = now; 
-              
-              // WICHTIG: Wir setzen den Status jetzt schon auf das Ziel!
-              // Wenn wir einschalten, hoffen wir, dass er in 60s da ist.
-              // Wenn wir ausschalten, löschen wir die Werte.
               id(glo_tuya_online) = id(glo_tuya_allowed);
               id(bs_tuya_online).publish_state(id(glo_tuya_allowed));
 
@@ -284,6 +153,20 @@ script:
           id(chlor_run_time_max_day_setter).publish_state(id(chlor_run_time_max_day));
           id(ph_tank_capacity_setter).publish_state(id(ph_tank_capacity_ml));
           id(num_low_salt_limit).publish_state(id(glo_low_salt_limit));
+          id(bs_tuya_lockout).publish_state(id(glo_tuya_error_lockout));
+          id(bs_chlor_lockout).publish_state(id(glo_chlor_error_lockout));
+          id(bin_low_salt_warning).publish_state(id(glo_low_salt));
+          id(bs_inv_online).publish_state(id(glo_inv_online));
+          id(bs_inv_running).publish_state(false);
+          id(bs_tuya_online).publish_state(id(glo_tuya_online));
+          id(bs_pzem_online).publish_state(id(glo_pzem_online));
+          id(bs_hp_online).publish_state(id(glo_hp_online));
+          id(bs_energy_meter_online).publish_state(id(glo_energy_online));
+          id(bs_tank_empty).publish_state(id(ph_tank_refill));
+          id(bs_pump_lockout).publish_state(id(glo_pump_lockout));
+          id(sensor_outdoor_temp).publish_state(0.0);
+          id(sensor_water_temp).publish_state(0.0);
+          // id(sensor_water_temp_hp).publish_state(0.0);
           
           // Inverter / Pumpe
           id(pump_prerun_time_setter).publish_state(id(PumpPreRunTime));
@@ -441,7 +324,7 @@ script:
       # 4) Poolpumpe ausschalten
       - if:
           condition:
-            - lambda: return id(inv_running).state == 1 || (id(use_flow_dn40) && id(flow_pump).state >= id(glo_flow_pump_min));
+            - lambda: return id(inv_running).state == 1 || (id(use_flow_dn40) && id(flow_pump).state >= id(glo_flow_pump_m3));
           then:
             - lambda: |-
                 ESP_LOGI("script_stopp_all", "Poolpumpe wird ausgeschaltet");
@@ -509,7 +392,7 @@ script:
                       condition:
                         - lambda: |-
                             if (id(use_flow_dn40)) {
-                              return id(flow_pump).state > id(glo_flow_pump_min);
+                              return id(flow_pump).state > id(glo_flow_pump_m3);
                             } else {
                               return true;
                             }
@@ -535,6 +418,7 @@ script:
                         # Fehler
                         - lambda: |-
                             ESP_LOGE("script_pumpstart","Pumpenstart fehlgeschlagen: kein Durchfluss. Prüfen!");
+                            id(bs_pump_lockout).publish_state(true);
                         - switch.turn_off: switch_poolpump
                 else:
                   - lambda: |-
@@ -546,6 +430,7 @@ script:
 
 
 ############Improved check_PumpPreRunTime Script################################
+## Counting PreRunTime as well as runtime per day
 ################################################################################
   - id: script_check_PumpPreRunTime
     mode: single
@@ -561,16 +446,19 @@ script:
               unsigned long elapsed = millis() - id(poolpump_start_time);
               bool is_finished = (elapsed >= (unsigned long)id(PumpPreRunTime) * 60000);
 
-              // Nur bei Änderung schalten (verhindert unnötiges Log-Spamming)
+              // 1.Nur bei Änderung schalten (verhindert unnötiges Log-Spamming)
               if (is_finished && !id(poolpump_ok)) {
                   id(poolpump_ok) = true;
                   ESP_LOGI("pump_timer", "Vorlaufzeit abgeschlossen. Dosierung freigegeben.");
               }
+              // 2. NEU: Laufzeit Heute hochzählen (7 Sekunde pro Aufruf aus dem Interval)
+              id(glo_runtime_today_seconds) += 7;
           } else {
               // Pumpe aus oder im Standby -> Alles auf Anfang
               if (id(poolpump_start_time) != 0 || id(poolpump_ok)) {
                   id(poolpump_start_time) = 0;
                   id(poolpump_ok) = false;
+                  id(runtime_today).update();
                   ESP_LOGI("pump_timer", "Pumpe gestoppt, Timer zurückgesetzt.");
               }
           }
@@ -705,7 +593,10 @@ script:
                 id(txt_chlor_today).publish_state("0.0 Min");
               }
           }
-          // --- PH-Werte & Laufzeiten (Update für TEXT-SENSOREN) ---
+          // --- PH-Werte & Laufzeiten (Update für BS & TEXT-SENSOREN) ---
+          if (id(ph_tank_refill)) {
+            id(bs_tank_empty).publish_state(true);
+          }
           if (id(switch_relay2_ph).state) {
               // 1. PH Heute Menge (ml oder l)
               if (id(ph_today_ml) < 1000.0f) {

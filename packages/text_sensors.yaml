@@ -12,6 +12,23 @@ text_sensor:
       return id(glo_last_reset_reason);
 
   - platform: template
+    name: "Pumpen Laufzeit Heute"
+    id: runtime_today
+    icon: mdi:timer-outline
+    update_interval: 63s
+    web_server:
+      sorting_group_id: grp_status
+      sorting_weight: 22
+    lambda: |-
+      uint32_t total_seconds = id(glo_runtime_today_seconds);
+      uint32_t hours = total_seconds / 3600;
+      uint32_t minutes = (total_seconds % 3600) / 60;
+      char buffer[16];
+      // Formatiert als "00h 00m" -> %02u erzwingt zwei Stellen mit führender Null
+      sprintf(buffer, "%02ustd %02umin", hours, minutes);
+      return {buffer};
+
+  - platform: template
     name: "Betriebszeit seit Boot"
     id: uptime_human
     icon: mdi:clock-start

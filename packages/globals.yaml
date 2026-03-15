@@ -1,15 +1,27 @@
 globals:
-  - id: glo_flow_meter_min
-    type: float
-    initial_value: '200.0' #Minimum was an Durchfluss des Meter herrscht, sonst beendet die Pumpe
-  - id: glo_flow_pump_min
+  - id: glo_flow_pump_m3
     type: float
     initial_value: '200.0' #Minimum was an Durchfluss der Pumpe herrscht, sonst beendet die Pumpe
     restore_value: true
+  - id: glo_winter
+    type: bool
+    initial_value: 'false' #Haben wir den Workmode Wintermodus?
+    restore_value: true
+  - id: glo_flow_meter_min
+    type: float
+    initial_value: '2.0' #Minimum was an Durchfluss des Meter herrscht, sonst beendet die Pumpe
   - id: glo_pzem_min
     type: float
     initial_value: '1.5' #Minimum was an Strom fließen muss, sonst beendet die Elektrolyse ()
     restore_value: true
+  - id: glo_pump_fail_count
+    type: int
+    initial_value: '0' # Variable für die Fehlerfall Pumpe
+    restore_value: false
+  - id: glo_pump_lockout
+    type: bool
+    initial_value: 'false' # Variable für die Fehlerfall Elektrolyse
+    restore_value: false
   - id: glo_chlor_fail_count
     type: int
     initial_value: '0' # Variable für die Fehlerfall Elektrolyse
@@ -20,12 +32,18 @@ globals:
     restore_value: false
   - id: glo_tuya_toggle_count
     type: int
-    initial_value: '0' # Variable für die Fehlerfall Tuya
+    initial_value: '0' # Variable für den Fehlerfall Tuya
     restore_value: false
   - id: glo_tuya_error_lockout
     type: bool
     initial_value: 'false' # Variable für die Fehlerfall Tuya
-    restore_value: false
+    restore_value: true
+  - id: glo_tuya_lockout_counter
+    type: int
+    initial_value: '0'
+  - id: glo_tuya_lockout_start_ms
+    type: uint32_t
+    initial_value: '0'
   - id: glo_tuya_last_reset_ms
     type: uint32_t
     initial_value: '0' # Variable für die Fehlerfall Tuya
@@ -34,6 +52,10 @@ globals:
     type: bool
     initial_value: 'false' #brauchen wir Salz?
     restore_value: false
+  - id: glo_low_salt
+    type: bool
+    initial_value: 'false' # LowSalt global
+    restore_value: true
   - id: glo_low_salt_limit
     type: float
     initial_value: '7.5' # Bei 7.5A wird ein LowSalt Alarm ausgelöst
@@ -233,6 +255,10 @@ globals:
   - id: poolpump_start_time
     type: unsigned long
     initial_value: '0'  #Rechenhilfe für PumpPreRunTime (Vorlaufzeit)
+  - id: glo_runtime_today_seconds
+    type: uint32_t
+    initial_value: '0'
+    restore_value: true #Soll Laufzeit heute speichern
   - id: glo_set_frequency
     type: float
     initial_value: '100' #globale variabel zum Konvertieren des Betriebsmodus (Select als String) zu einer Zahl
@@ -268,6 +294,22 @@ globals:
   - id: glo_tuya_online
     type: bool
     initial_value: 'false'  # Wird über irgendeinen Tuya sensor befüllt
+    restore_value: false
+  - id: glo_inv_online
+    type: bool
+    initial_value: 'false'  # Wird über Inverter Status gefüllt
+    restore_value: false
+  - id: glo_pzem_online
+    type: bool
+    initial_value: 'false'  # Wird über Inverter Status gefüllt
+    restore_value: false
+  - id: glo_hp_online
+    type: bool
+    initial_value: 'false'  # Wird über Inverter Status gefüllt
+    restore_value: false
+  - id: glo_energy_online
+    type: bool
+    initial_value: 'false'  # Wird über Inverter Status gefüllt
     restore_value: false
   - id: glo_tuya_uart_seen_recently
     type: bool

@@ -168,10 +168,10 @@ safe_mode:
 
 # https://esphome.io/components/esphome.html#adjusting-flash-writes
 preferences:
-  #setting interval to 5 minutes since this defines writing to flash
+  #setting interval to 15 minutes since this defines writing to flash
   #Created a specific save script that is executed for things that need
   #to save more quickly.
-  flash_write_interval: 5min
+  flash_write_interval: 15min
 
 #Enable logging
 debug:
@@ -295,17 +295,30 @@ time:
               format: "Zähler für tägliche Mengen zurückgesetzt."
               level: info
           - lambda: |
-              id(ph_today_ml) = 0.0;
-              id(ph_last_cycle_ml) = 0.0;
-              id(phdispenser_cycle_time) = 0.0;
-              id(phdispenser_today_run_time) = 0.0;
-              id(ph_cycles) = 1.0;
+              // PH-System
+              id(ph_today_ml) = 0.0f;
+              id(ph_last_cycle_ml) = 0.0f;
+              id(phdispenser_cycle_time) = 0.0f;
+              id(phdispenser_today_run_time) = 0.0f;
+              id(ph_cycles) = 1.0f;
               id(ph_max_injection_reached) = false;
-              id(chlorinator_today_run_time) = 0.0;
+              id(ph_needed) = false;
+              id(ph_locked) = false; // Sperre für neuen Tag aufheben
+
+              // Chlor-System
+              id(chlorinator_today_run_time) = 0.0f;
+              id(chlorinator_runtime_seconds) = 0; // Ergänzt
               id(chlorinator_max_reached) = false;
               id(chlorinator_remaining_seconds) = 0;
               id(chlor_needed) = false;
-              id(ph_needed) = false;
+
+              // Pumpe
+              id(glo_runtime_today_seconds) = 0; 
+              
+              // Optional: Falls du einen Text-Sensor hast, 
+              // sofort aktualisieren, damit 00:00 im Dashboard steht
+              id(runtime_today).update(); //Tageszähler Pumpe
+
 
 uart:
 #Tuya RX / TX

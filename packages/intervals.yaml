@@ -64,7 +64,7 @@ interval:
             - lambda: return !id(switch_relay2_ph).state;
             - lambda: |-
                 if (id(use_flow_dn40)) {
-                  return (id(flow_pump).state > id(glo_flow_pump_min) && (id(inv_running).state == 1));
+                  return (id(flow_pump).state > id(glo_flow_pump_m3) && (id(inv_running).state == 1));
                 }else{
                   return (id(inv_running).state == 1);
                 }
@@ -124,7 +124,7 @@ interval:
             - lambda: |-
                 bool flow_ok = true;
                 // Prüfe DN40 falls aktiviert
-                if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_min)) flow_ok = false;
+                if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_m3)) flow_ok = false;
                 // Prüfe S201 falls aktiviert
                 if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min)) flow_ok = false;
                 
@@ -152,7 +152,7 @@ interval:
                           reason = "IntervalORP - kein Chlor Bedarf (ORP ok)";
                         } else if (id(chlorinator_max_reached)) {
                           reason = "IntervalORP - tägliche ORP-Laufzeit erreicht";
-                        } else if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_min)) {
+                        } else if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_m3)) {
                           reason = "YF-DN40 - kein Durchfluss!";
                         } else if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min)) {
                           reason = "YF-S201 - kein Durchfluss!";
@@ -191,7 +191,7 @@ interval:
                   }
                 }
                 // --- A. GEMEINSAME SICHERHEIT ---
-                if (id(inv_running).state != 1 || (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_min)) || (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min))) {
+                if (id(inv_running).state != 1 || (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_m3)) || (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min))) {
                   ESP_LOGW("safety-interval", "Pumpe aus oder kein Durchfluss YF-DN40 / S201 --> STOPP -> Alles aus.");
                   id(script_stopp_all).execute();
                   return;
@@ -208,8 +208,9 @@ interval:
                   bool orp_reached = (id(orp_measvalue).state >= id(glo_orp_target));
                   bool daily_max  = (id(chlorinator_today_run_time) >= (id(chlor_run_time_max_day) * 60));
                   bool timer_done = (id(chlorinator_remaining_seconds) <= 0);
+                  bool not_allowed  = !id(glo_orp_allowed); // Workmode, Tuya oder Chlorinator defekt
 
-                  if (orp_reached || daily_max || timer_done) {
+                  if (orp_reached || daily_max || timer_done || not_allowed) {
                     // Grund ermitteln (const char* ist sicher für ESP-IDF)
                     const char* reason = "Unbekannt";
                     //std::string reason = "Unbekannt";
@@ -220,7 +221,20 @@ interval:
                       reason = "Tagesmaximum erreicht = chlorinator_today_run_time";
                     } else if (timer_done) {
                       reason = "Zyklus-Zeit abgelaufen = chlorinator_remaining_seconds";
-                    }
+                    } else if (not_allowed) {
+                        // Wir fangen mit dem kritischsten Grund an
+                        if (id(glo_tuya_error_lockout)) {
+                          reason = "Tuya Hardware defekt (Lockout)!";
+                        } else if (id(glo_chlor_error_lockout)) {
+                          reason = "Chlorinator Hardware defekt (PZEM Lockout)!";
+                        } else if (id(glo_maintenance)) {
+                          reason = "Wartungsmodus aktiv";
+                        } else if (id(glo_winter)) {
+                          reason = "Wintermodus aktiv";
+                        } else {
+                          reason = "Allgemeine Freigabe entzogen (glo_orp_allowed = false)";
+                        }
+                      }
 
                     ESP_LOGW("safety-interval", "Chlorinator STOP | Grund: %s", reason);
                     
@@ -251,46 +265,107 @@ interval:
                   }
                 }
 
-                // --- C. pH-DOSIER LOGIK (Verbesserte Sicherheitsprüfung) ---
-                if (id(switch_relay2_ph).state) {
-                    float flow_rate = id(ph_ml_per_second);
+                // // --- C. pH-DOSIER LOGIK (Verbesserte Sicherheitsprüfung) ---
+                // if (id(switch_relay2_ph).state) {
+                //     float flow_rate = id(ph_ml_per_second);
                     
-                    // 1. Aktuelle Menge berechnen BEVOR wir die Zeit erhöhen
-                    // So prüfen wir, ob der LETZTE Schritt uns über das Limit gebracht hat
-                    float current_cycle_ml = id(phdispenser_cycle_time) * flow_rate;
+                //     // 1. Aktuelle Menge berechnen BEVOR wir die Zeit erhöhen
+                //     // So prüfen wir, ob der LETZTE Schritt uns über das Limit gebracht hat
+                //     float current_cycle_ml = id(phdispenser_cycle_time) * flow_rate;
 
-                    // 2. Sofort-Prüfung gegen das Limit
-                    if (current_cycle_ml >= id(max_ph_ml_per_cycle)) {
-                        ESP_LOGW("safety-interval", "PH LIMIT STOP! Zyklus-Limit erreicht: %.1f ml", current_cycle_ml);
-                        id(script_stopp_ph).execute();
-                    } 
-                    else if (id(ph_today_ml) >= id(max_ph_ml_per_day)) {
-                        ESP_LOGW("safety-interval", "PH LIMIT STOP! Tages-Limit erreicht.");
-                        id(script_stopp_ph).execute();
-                    }
-                    else {
-                        // 3. Nur wenn kein Limit erreicht ist, zählen wir die 7 Sekunden dazu
-                        id(phdispenser_today_run_time) += 7; // Korrigiert auf 7!
-                        id(phdispenser_cycle_time) += 7;     // Korrigiert auf 7!
+                //     // 2. Sofort-Prüfung gegen das Limit
+                //     if (current_cycle_ml >= id(max_ph_ml_per_cycle)) {
+                //         ESP_LOGW("safety-interval", "PH LIMIT STOP! Zyklus-Limit erreicht: %.1f ml", current_cycle_ml);
+                //         id(script_stopp_ph).execute();
+                //     } 
+                //     else if (id(ph_today_ml) >= id(max_ph_ml_per_day)) {
+                //         ESP_LOGW("safety-interval", "PH LIMIT STOP! Tages-Limit erreicht.");
+                //         id(script_stopp_ph).execute();
+                //     }
+                //     else {
+                //         // 3. Nur wenn kein Limit erreicht ist, zählen wir die 7 Sekunden dazu
+                //         id(phdispenser_today_run_time) += 7; // Korrigiert auf 7!
+                //         id(phdispenser_cycle_time) += 7;     // Korrigiert auf 7!
                         
-                        // Wir ziehen die Sekunden ab vom Timer
-                        id(glo_ph_remaining_seconds) -= 7; 
-                        if (id(glo_ph_remaining_seconds) < 0) id(glo_ph_remaining_seconds) = 0;
-                        float added_ml = 7.0 * flow_rate;    // Korrigiert auf 7!
+                //         // Wir ziehen die Sekunden ab vom Timer
+                //         id(glo_ph_remaining_seconds) -= 7; 
+                //         if (id(glo_ph_remaining_seconds) < 0) id(glo_ph_remaining_seconds) = 0;
+                //         float added_ml = 7.0 * flow_rate;    // Korrigiert auf 7!
                         
-                        id(ph_today_ml) += added_ml; 
-                        id(ph_tank_remaining) -= added_ml;
-                        id(ph_last_cycle_ml) = id(phdispenser_cycle_time) * flow_rate;
+                //         id(ph_today_ml) += added_ml; 
+                //         id(ph_tank_remaining) -= added_ml;
+                //         id(ph_last_cycle_ml) = id(phdispenser_cycle_time) * flow_rate;
 
-                        // PH Zielwert Prüfung (Zusätzlicher Stop-Grund)
-                        if (id(ph_measvalue).state <= id(glo_ph_target)) {
-                            ESP_LOGI("safety-interval", "PH Zielwert erreicht: %.2f", id(ph_measvalue).state);
-                            id(script_stopp_ph).execute();
-                        } else {
-                            ESP_LOGD("safety-interval", "PH läuft: %.1f ml im Zyklus", id(ph_last_cycle_ml));
-                        }
+                //         // PH Zielwert Prüfung (Zusätzlicher Stop-Grund)
+                //         if (id(ph_measvalue).state <= id(glo_ph_target)) {
+                //             ESP_LOGI("safety-interval", "PH Zielwert erreicht: %.2f", id(ph_measvalue).state);
+                //             id(script_stopp_ph).execute();
+                //         } else {
+                //             ESP_LOGD("safety-interval", "PH läuft: %.1f ml im Zyklus", id(ph_last_cycle_ml));
+                //         }
+                //     }
+                // }
+
+                // --- C. pH-DOSIER LOGIK (Vereinheitlichtes Schema) ---
+                if (id(switch_relay2_ph).state) {
+                  float flow_rate = id(ph_ml_per_second);
+                  float current_cycle_ml = id(phdispenser_cycle_time) * flow_rate; // 1. Aktuelle Menge berechnen BEVOR wir die Zeit erhöhen
+
+                  // 2. Prüfung der Abschaltgründe
+                  bool ph_reached  = (id(ph_measvalue).state <= id(glo_ph_target)); // PH Zielwert Prüfung (Zusätzlicher Stop-Grund)
+                  bool cycle_limit = (current_cycle_ml >= id(max_ph_ml_per_cycle)); //Zykluslimit erreicht
+                  bool daily_max   = (id(ph_today_ml) >= id(max_ph_ml_per_day)); // Tageslimit erreicht
+                  bool timer_done  = (id(glo_ph_remaining_seconds) <= 0); //Zeitabgelaufen
+                  bool not_allowed2 = !id(glo_ph_allowed); // PH ist nicht mehr erlaubt
+
+                  if (ph_reached || cycle_limit || daily_max || timer_done || not_allowed2) {
+                    const char* reason = "Unbekannt";
+
+                    if (ph_reached) {
+                      reason = "Ziel-pH erreicht (Soll-Wert unterschritten)";
+                    } else if (cycle_limit) {
+                      reason = "Zyklus-Limit (ml) erreicht";
+                    } else if (daily_max) {
+                      reason = "Tages-Limit (ml) erreicht";
+                    } else if (timer_done) {
+                      reason = "Zyklus-Zeit abgelaufen (Timer)";
+                    } else if (not_allowed2) {
+                      // Spezifische Grund-Ermittlung bei Lockout/Workmode
+                      if (id(glo_tuya_error_lockout)) {
+                        reason = "Tuya Hardware defekt (Lockout)!";
+                      } else if (id(glo_maintenance)) {
+                        reason = "Wartungsmodus aktiv";
+                      } else if (id(glo_winter)) {
+                        reason = "Wintermodus aktiv";
+                      } else {
+                        reason = "Freigabe entzogen (glo_ph_allowed = false)";
+                      }
                     }
+
+                    ESP_LOGW("safety-interval", "PH STOP | Grund: %s", reason);
+                    // Wir nutzen dein existierendes Stop-Script
+                    id(script_stopp_ph).execute();
+                    
+                  } else {
+                    // 2. WEITERLAUFEN & WERTE AKTUALISIEREN (Nur wenn kein Stop-Grund vorliegt)
+
+                    id(phdispenser_today_run_time) += 7;
+                    id(phdispenser_cycle_time) += 7;
+                    
+                    // Wir ziehen die Sekunden ab vom Timer
+                    id(glo_ph_remaining_seconds) -= 7; 
+                    if (id(glo_ph_remaining_seconds) < 0) id(glo_ph_remaining_seconds) = 0;
+                    
+                    float added_ml = 7.0 * flow_rate;
+                    id(ph_today_ml) += added_ml; 
+                    id(ph_tank_remaining) -= added_ml;
+                    id(ph_last_cycle_ml) = id(phdispenser_cycle_time) * flow_rate;
+
+                    ESP_LOGD("safety-interval", "PH läuft: %.1f ml im Zyklus | pH-Ist: %.2f", 
+                             id(ph_last_cycle_ml), id(ph_measvalue).state);
+                  }
                 }
+
 
                 // --- D. ABSCHALT-LOGIK (Cleanup) ---
 
