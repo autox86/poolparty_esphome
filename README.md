@@ -44,6 +44,19 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
 
 ---
 
+
+
+## ✨ Look & Feel
+
+
+
+
+
+
+---
+
+
+
 ## 📊 Übersicht: Sensor- und Schaltmöglichkeiten
 
 * Frequenzsteuerung (Modbus Register)
@@ -59,7 +72,7 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
 **Noch offen:**
 - Hardware Installation am Pool
 - Wärmepumpe via Modbus
-- Integration in HA mit Dashboard und Steuermöglichkeiten
+~~- Integration in HA mit Dashboard und Steuermöglichkeiten~~
 
 ---
 
