@@ -116,15 +116,14 @@ Die Dosierung (pH / Chlor) ist softwareseitig mehrfach abgesichert:
 
 ## 🚀 Installation
 
-1. Erstelle eine neue Datei `poolcontroller.yaml` in deinem ESPHome Verzeichnis.
-2. Kopiere den Code aus der Config-Datei hinein.
-3. Passe die **Substitutions** an deine Wünsche an.
+1. Lade dir das Repository herunter (Rechts oben im Repo: <Code> - Download ZIP )
+2. Lade den Ordner */packages* und die *poolcontroller.yaml* in dein ESPHome Configverzeichnis hoch
+3. Passe die **Substitutions** in der *poolcontroller.yaml* an deine Wünsche an.
 *(Tipp: Siehe [ESPHome Secrets Guide](https://esphome.io/guides/yaml/#secrets-and-the-secretsyaml-file))*
 ```yaml
 substitutions:
   device_name: "poolcontroller"
   friendly_name: "Pool"
-  friendly_name_entity: "#"
   domain: !secret domain
   ssid1_ap: !secret wifi_ssid
   ssid1_pw: !secret wifi_pass
@@ -132,7 +131,7 @@ substitutions:
 ```
 
 
-4. Flashe den ESP32 (OTA, ESPHome Web Flasher etc.).
+4. Flashe den ESP32 (OTA, ESPHome Web Flasher etc.)
 
 
 ---
