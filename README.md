@@ -48,16 +48,9 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
 
 ## ✨ Look & Feel
 
-<<<<<<< HEAD
 Home Assistant Integration
 
-
-=======
-![alt text](image.png)
->>>>>>> 98db2c0 (Upload image readme)
-
-
-
+![alt text](image-1.png)
 
 ---
 
