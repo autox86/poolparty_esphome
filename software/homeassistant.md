@@ -1,6 +1,9 @@
-## 🏅 Pool pH Tank-Steuerung
+## 🏅 HomeAssitant Dashboard
 
-Hier ist die Konfiguration für die **Mushroom Template Badge**, um den Füllstand des pH-Tanks im Dashboard anzuzeigen:
+Hier ist die Konfiguration für das *HomeAssistant Dashboard**
+
+
+**Badges**
 
 ```yaml
 type: custom:mushroom-template-badge
@@ -182,7 +185,7 @@ tap_action:
 ---
 
 
-Bubble Card
+**Linke Seite**
 
 ```yaml
 type: grid
@@ -416,7 +419,7 @@ styles: |
 ```
 ---
 
-Arbeitsmodus und Timer
+**Rechte Seite**
 
 ```yaml
 type: custom:vertical-stack-in-card
@@ -1028,6 +1031,8 @@ cards:
 
 ```
 ---
+
+**Unsichtbar: Die Popups**
 
 PopUp: Einstellung (Unsichtbar)
 
