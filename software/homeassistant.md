@@ -1,6 +1,6 @@
-## 🏅 HomeAssitant Dashboard
+## 🏅 HomeAssistant Dashboard
 
-Hier ist die Konfiguration für das *HomeAssistant Dashboard**
+Hier ist die Konfiguration für das **HomeAssistant Dashboard**
 
 
 **Badges**
