@@ -50,7 +50,7 @@ Detaillierte Informationen sind unter folgenden Links zu finden:
 
 Home Assistant Integration
 
-![alt text](image-1.png)
+<img width="1760" height="1055" alt="image" src=https://github.com/autox86/poolparty_esphome/blob/dev/assets/HA-Poolsteuerung.png />
 
 ---
 
