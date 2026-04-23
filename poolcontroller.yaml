@@ -56,7 +56,7 @@ substitutions:
   prog:                     GPIO00 #Für Flash auf GND ziehen, EN kurz auf GND ziehen danach wieder loslassen (3,3V)
 
   #Input_only GPIOs - All Screw Header
-  yfdn40:                   GPIO34
+  yfdn50:                   GPIO34
   yfs201:                   GPIO35
   phtank_reset:             GPIO36
   maintenance:              GPIO39
@@ -110,7 +110,7 @@ substitutions:
   # #Poolcontroller-Logics Intial Values
   checkIntervalORP: "2 min" #Angabe nach der Zahl ist wichtig!!
   checkIntervalPH: "15 min" #Angabe nach der Zahl ist wichtig!!
-#  durchflussDN40:  "0.2"
+#  durchflussDN50:  "0.2"
 
 esphome:
   name: "${friendly_name}"

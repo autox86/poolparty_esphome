@@ -1,7 +1,7 @@
 
 select:
   - platform: template
-    name: "Durchflussmesser installiert?"
+    name: "Failsafe - Durchflussmesser?"
     id: select_flowsensor
     icon: "mdi:gauge-full"
     web_server:
@@ -10,40 +10,35 @@ select:
     entity_category: config
     restore_value: true
     optimistic: false
-    initial_option: 'YF-DN40 & YF-S201'
+    initial_option: 'YF-S201'
     options:
-      - 'No Flow Sensors'
-      - 'YF-DN40'
+      - 'Keinen Flow Sensor'
+      - 'YF-DN50'
       - 'YF-S201'
-      - 'YF-DN40 & YF-S201'
     set_action:
       - lambda: |-
           // Den gewählten Wert sofort im UI bestätigen
           id(select_flowsensor).publish_state(x);
 
-          // x ist die gewählte Option (z.B. "YF-DN40")
+          // x ist die gewählte Option (z.B. "YF-DN50")
           const std::string opt = x;
-          if (opt == "YF-DN40 & YF-S201") {
-            id(use_flow_dn40) = true;
+          if (opt == "YF-S201") {
+            id(use_flow_dn50) = false;
             id(use_flow_s201) = true;
           
-          } else if (opt == "YF-DN40") {
-            id(use_flow_dn40) = true;
+          } else if (opt == "YF-DN50") {
+            id(use_flow_dn50) = true;
             id(use_flow_s201) = false;
 
-          } else if (opt == "YF-S201") {
-            id(use_flow_s201) = true;
-            id(use_flow_dn40) = false;
-
-          } else if (opt == "No Flow Sensors") {
-            id(use_flow_dn40) = false;
+          } else if (opt == "Keinen Flow Sensor") {
+            id(use_flow_dn50) = false;
             id(use_flow_s201) = false;
           }
           ESP_LOGI(
             "FlowSelect",
-            "Flow Sensor Auswahl: %s | DN40=%d | S201=%d",
+            "Flow Sensor Auswahl: %s | DN50=%d | S201=%d",
             opt.c_str(),
-            id(use_flow_dn40),
+            id(use_flow_dn50),
             id(use_flow_s201)
           );
 

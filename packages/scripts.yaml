@@ -173,14 +173,12 @@ script:
           id(glo_pump_active_via_automation) = false; //resete den Wert nach Boot
 
           // Flow-Sensor Select UI Sync
-          if (id(use_flow_dn40) && id(use_flow_s201)) {
-              id(select_flowsensor).publish_state("YF-DN40 & YF-S201");
-          } else if (id(use_flow_dn40)) {
-              id(select_flowsensor).publish_state("YF-DN40");
+          if (id(use_flow_dn50)) {
+              id(select_flowsensor).publish_state("YF-DN50");
           } else if (id(use_flow_s201)) {
               id(select_flowsensor).publish_state("YF-S201");
           } else {
-              id(select_flowsensor).publish_state("No Flow Sensors");
+              id(select_flowsensor).publish_state("Keinen Flow Sensor");
           }
 
       # 2. ZeitSync
@@ -266,11 +264,29 @@ script:
           id(glo_restart_allowed) = restart_allowed_bool;
           id(last_reset_reason_sensor).publish_state(reason_str);
 
-          //Workmode erneut setzen nach Reboot (Sicherheitshalber)
-          // Wir lösen die komplette Logik aus, als hätte jemand den das Select ausgewählt
-          auto call = id(select_work_mode).make_call();
-          call.set_option(id(select_work_mode).current_option()); // Nutzt den wiederhergestellten Wert
-          call.perform();
+          ///////// Prüfen auf Maintenance Schalter und setzen  ////////
+          //////////des Workmodes nach Reboot (Sicherheitshalber////////
+          // 1. Wir prüfen den echten Hardware-Zustand des Schalters
+          if (id(bs_maintenance).state) {
+            id(boot_log_buffer) += "BOOT-CHECK: Schalter steht auf WARTUNG. Erzwinge Modus...\n";
+            
+            // Software-Switch auf AN
+            id(switch_maintenance).turn_on(); 
+          } else {
+            id(boot_log_buffer) += "BOOT-CHECK: Schalter ist AUS. Lade letzten Modus...\n";
+            
+            // Normaler Boot-Vorgang: Letzten Modus wiederherstellen
+            // Wir lösen die komplette Logik aus, als hätte jemand den das Select ausgewählt
+            auto call = id(select_work_mode).make_call();
+            call.set_option(id(select_work_mode).current_option());
+            call.perform();
+          }
+
+          // //Workmode erneut setzen nach Reboot (Sicherheitshalber)
+          // // Wir lösen die komplette Logik aus, als hätte jemand den das Select ausgewählt
+          // auto call = id(select_work_mode).make_call();
+          // call.set_option(id(select_work_mode).current_option()); // Nutzt den wiederhergestellten Wert
+          // call.perform();
 
 
       - rtttl.play: 'two_short:d=4,o=5,b=100:16e6,16e6'
@@ -324,7 +340,7 @@ script:
       # 4) Poolpumpe ausschalten
       - if:
           condition:
-            - lambda: return id(inv_running).state == 1 || (id(use_flow_dn40) && id(flow_pump).state >= id(glo_flow_pump_m3));
+            - lambda: return id(inv_running).state == 1 || (id(use_flow_dn50) && id(flow_pump).state >= id(glo_flow_min)) || (id(use_flow_s201) && id(flow_meter).state >= id(glo_flow_min));
           then:
             - lambda: |-
                 ESP_LOGI("script_stopp_all", "Poolpumpe wird ausgeschaltet");
@@ -360,7 +376,7 @@ script:
       - if:
           condition: 
             #Die FU darf nicht laufen UND die Frequenz darf nicht 0 sein
-            - lambda: "return (id(inv_running).state != 1 && id(glo_set_frequency) >= 55);"
+            - lambda: "return (id(inv_running).state != 1 && id(glo_set_frequency) >= 55) && (!id(glo_pump_lockout));"
           then:
             - lambda: |-
                 ESP_LOGI("script_pumpstart","Initiere Pumpenstart... Starte Pumpe auf 100%%");
@@ -373,29 +389,70 @@ script:
             # 2.) Pumpe starten
             - switch.turn_on: switch_poolpump
 
+            # # 3.) kurz warten und prüfen, ob inv_running = 1
+            # - delay: 10s
+            # - if:
+            #     condition:
+            #       - lambda: "return (id(inv_running).state == 1);"
+            #     then:
+            #       - if:
+            #           condition:
+            #   # 4.) Wenn DN50 Flow Sensor aktiv ist → 15 Sekunden warten
+            #             - lambda: |-
+            #                 ESP_LOGI("script_pumpstart","FU läuft, warte 15s und überprüfe Durchfluss am DN50");
+            #                 return id(use_flow_dn50);
+            #           then:
+            #             - delay: 15s
+            #   # 5.) DN50 prüfen oder ignorieren weil nicht installiert
+            #       - if:
+            #           condition:
+            #             - lambda: |-
+            #                 if (id(use_flow_dn50)) {
+            #                   return id(flow_pump).state > id(glo_flow_min);
+            #                 } else {
+            #                   return true;
+            #                 }
             # 3.) kurz warten und prüfen, ob inv_running = 1
             - delay: 10s
             - if:
                 condition:
                   - lambda: "return (id(inv_running).state == 1);"
                 then:
+                  # 4.) Wartezeit einlegen, wenn ÜBERHAUPT ein Flow-Sensor aktiv ist
                   - if:
                       condition:
-              # 4.) Wenn DN40 Flow Sensor aktiv ist → 15 Sekunden warten
                         - lambda: |-
-                            ESP_LOGI("script_pumpstart","FU läuft, warte 15s und überprüfe Durchfluss am DN40");
-                            return id(use_flow_dn40);
+                            bool active = id(use_flow_dn50) || id(use_flow_s201);
+                            if (active) {
+                              ESP_LOGI("script_pumpstart", "FU läuft, warte 15s auf Stabilisierung der Flow-Sensoren");
+                            }
+                            return active;
                       then:
                         - delay: 15s
-              # 5.) DN40 prüfen oder ignorieren weil nicht installiert
+
+                  # 5.) Sensoren prüfen (Nur die, die auch aktiv gesetzt sind)
                   - if:
                       condition:
                         - lambda: |-
-                            if (id(use_flow_dn40)) {
-                              return id(flow_pump).state > id(glo_flow_pump_m3);
-                            } else {
-                              return true;
+                            bool ok = true;
+                            
+                            // Check DN50
+                            if (id(use_flow_dn50)) {
+                              if (id(flow_pump).state <= id(glo_flow_min)) {
+                                ESP_LOGW("script_pumpstart", "DN50 Flow zu niedrig: %.1f", id(flow_pump).state);
+                                ok = false;
+                              }
                             }
+                            
+                            // Check S201
+                            if (id(use_flow_s201)) {
+                              if (id(flow_meter).state <= id(glo_flow_min)) {
+                                ESP_LOGW("script_pumpstart", "S201 Flow zu niedrig: %.1f", id(flow_meter).state);
+                                ok = false;
+                              }
+                            }
+                            
+                            return ok;
                       then:
                         # Erfolg
                         - lambda: |-
@@ -666,7 +723,7 @@ script:
     then:
       - lambda: |-
                 if (id(glo_chlor_error_lockout)) {
-                  ESP_LOGE("chlorinator", "START ABGEBROCHEN: Hardware-Sperre aktiv! Bitte prüfen.");
+                  ESP_LOGE("chlorinator", "START ABGEBROCHEN: Hardware-Sperre aktiv! PZEM unter 1.5A!.");
                   return; // Beendet das Skript hier sofort
                 }
 

@@ -1,15 +1,15 @@
 globals:
-  - id: glo_flow_pump_m3
+  - id: glo_flow_min
     type: float
-    initial_value: '200.0' #Minimum was an Durchfluss der Pumpe herrscht, sonst beendet die Pumpe
+    initial_value: '20.0' #Minimum was an Durchfluss der Pumpe herrscht, sonst beendet die Pumpe
     restore_value: true
   - id: glo_winter
     type: bool
     initial_value: 'false' #Haben wir den Workmode Wintermodus?
     restore_value: true
-  - id: glo_flow_meter_min
-    type: float
-    initial_value: '2.0' #Minimum was an Durchfluss des Meter herrscht, sonst beendet die Pumpe
+  # - id: glo_flow_meter_min
+  #   type: float
+  #   initial_value: '2.0' #Minimum was an Durchfluss des Meter herrscht, sonst beendet die Pumpe
   - id: glo_pzem_min
     type: float
     initial_value: '1.5' #Minimum was an Strom fließen muss, sonst beendet die Elektrolyse ()
@@ -126,7 +126,7 @@ globals:
     type: bool
     restore_value: true
     initial_value: 'false' #Sicher ist sicher, HeatPump initial auf false
-  - id: use_flow_dn40 
+  - id: use_flow_dn50 
     type: bool
     restore_value: true
     initial_value: 'true' #FlowSensor angeschlossen? true or false

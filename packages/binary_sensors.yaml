@@ -157,31 +157,35 @@ binary_sensor:
 
   # Physikalischer Taster für Tank Reset
   - platform: gpio
-    pin:
-      number: ${phtank_reset}
-      inverted: true
     id: bs_ph_tank_reset_physical
-    icon: "mdi:barrel"
-    internal: true  # Versteckt den Sensor im Web, da wir ja den Button (oben) haben
+    pin:
+      number: ${phtank_reset} # GPIO 36 ist mit pullup 10K versehen
+      mode: INPUT
+      inverted: true
     filters:
-      - delayed_on: 50ms
+      - delayed_on: 160ms   # Reagiert erst, wenn der Taster stabil auf AN steht
+    icon: "mdi:barrel"
+    internal: true  # Versteckt den Sensor im Web, da wir ja den Button als Switch haben
     on_press:
       then:
         - button.press: bt_ph_tank_reset_web # Drückt den Web-Button virtuell mit
 
-  # Physikalischer Taster für Wartungsmodus
+  # Physikalischer Schalter für Wartungsmodus
   - platform: gpio
     id: bs_maintenance
     internal: True
     pin: 
       number: ${maintenance} # GPIO 39 ist mit pullup 10K versehen
       mode: INPUT
+      inverted: true
+    filters:
+      # - delayed_on: 100ms   # Reagiert erst, wenn der Schalter stabil auf AN steht
+      # - delayed_off: 100ms  # Reagiert erst, wenn der Schalter  stabil auf AUS steht
+      - delayed_on_off: 200ms
     on_press:
-      then:
-        - switch.turn_on: switch_maintenance
+      - switch.turn_on: switch_maintenance
     on_release:
-      then:
-        - switch.turn_off: switch_maintenance
+      - switch.turn_off: switch_maintenance
 
   # Wird benötigt für den automatischen Restart der Pumpe nach einem Ausfall/Reboot des ESP
   - platform: template

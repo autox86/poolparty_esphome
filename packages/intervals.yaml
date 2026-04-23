@@ -31,11 +31,11 @@ interval:
                 float temp = id(sensor_outdoor_temp).state;
                 // Frostschutz aktivieren bei -5 Grad
                 if (!std::isnan(temp) && temp <= -5.0) {
-                   if (!id(glo_frost_active)) {
-                     id(glo_frost_active) = true;
-                     id(glo_frost_start_time) = millis(); // Startzeit merken
-                     ESP_LOGW("frost", "Frostschutz AKTIVIERT bei %.1f°C", temp);
-                   }
+                  if (!id(glo_frost_active)) {
+                    id(glo_frost_active) = true;
+                    id(glo_frost_start_time) = millis(); // Startzeit merken
+                    ESP_LOGW("frost", "Frostschutz AKTIVIERT bei %.1f°C", temp);
+                  }
                 }
 
                 // Starten wenn: Timer erlaubt ODER Frostschutz aktiv
@@ -57,17 +57,42 @@ interval:
 ################################################################################
   - interval: ${checkIntervalPH}
     then:
+      # - if: 
+      #     condition:
+      #       - time.has_time
+      #       - lambda: return id(glo_ph_allowed); //falls nicht erlaubt durch Workmode, wird es nicht gestartet
+      #       - lambda: return !id(switch_relay2_ph).state;
+      #       - lambda: |-
+      #           if (id(use_flow_dn50)) {
+      #             return (id(flow_pump).state > id(glo_flow_min) && (id(inv_running).state == 1));
+      #           }else{
+      #             return (id(inv_running).state == 1);
+      #           }
       - if: 
           condition:
             - time.has_time
-            - lambda: return id(glo_ph_allowed); //falls nicht erlaubt durch Workmode, wird es nicht gestartet
-            - lambda: return !id(switch_relay2_ph).state;
+            - lambda: "return id(glo_ph_allowed);" # Check ob Modus (Auto/Manuell) es erlaubt
+            - lambda: "return !id(switch_relay2_ph).state;" # Nur starten, wenn Pumpe nicht eh schon läuft
+            
+            # Die neue, kombinierte Durchfluss-Prüfung:
             - lambda: |-
-                if (id(use_flow_dn40)) {
-                  return (id(flow_pump).state > id(glo_flow_pump_m3) && (id(inv_running).state == 1));
-                }else{
-                  return (id(inv_running).state == 1);
+                // Grundvoraussetzung: Der Inverter muss laufen (Status 1)
+                if (id(inv_running).state != 1) return false;
+
+                bool flow_ok = true;
+
+                // Falls DN50 genutzt wird -> muss über Minimum liegen
+                if (id(use_flow_dn50)) {
+                  if (id(flow_pump).state <= id(glo_flow_min)) flow_ok = false;
                 }
+
+                // Falls S201 genutzt wird -> muss über Minimum liegen
+                if (id(use_flow_s201)) {
+                  if (id(flow_meter).state <= id(glo_flow_min)) flow_ok = false;
+                }
+
+                // Wenn gar kein Sensor aktiv ist, zählt nur inv_running (was oben schon geprüft wurde)
+                return flow_ok;
           then:
             - if:
                 condition:
@@ -123,10 +148,10 @@ interval:
             - lambda: return !id(switch_chlorinator).state;
             - lambda: |-
                 bool flow_ok = true;
-                // Prüfe DN40 falls aktiviert
-                if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_m3)) flow_ok = false;
+                // Prüfe DN50 falls aktiviert
+                if (id(use_flow_dn50) && id(flow_pump).state <= id(glo_flow_min)) flow_ok = false;
                 // Prüfe S201 falls aktiviert
-                if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min)) flow_ok = false;
+                if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_min)) flow_ok = false;
                 
                 // Pumpe muss laufen UND (wenn Sensoren aktiv) muss Flow da sein
                 return (id(inv_running).state == 1) && flow_ok;
@@ -152,9 +177,9 @@ interval:
                           reason = "IntervalORP - kein Chlor Bedarf (ORP ok)";
                         } else if (id(chlorinator_max_reached)) {
                           reason = "IntervalORP - tägliche ORP-Laufzeit erreicht";
-                        } else if (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_m3)) {
-                          reason = "YF-DN40 - kein Durchfluss!";
-                        } else if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min)) {
+                        } else if (id(use_flow_dn50) && id(flow_pump).state <= id(glo_flow_min)) {
+                          reason = "YF-DN50 - kein Durchfluss!";
+                        } else if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_min)) {
                           reason = "YF-S201 - kein Durchfluss!";
                         } else {
                           reason = "IntervalORP - Unbekannte Blockade (ggf. glo_ph_allowed)";
@@ -191,10 +216,35 @@ interval:
                   }
                 }
                 // --- A. GEMEINSAME SICHERHEIT ---
-                if (id(inv_running).state != 1 || (id(use_flow_dn40) && id(flow_pump).state <= id(glo_flow_pump_m3)) || (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_meter_min))) {
-                  ESP_LOGW("safety-interval", "Pumpe aus oder kein Durchfluss YF-DN40 / S201 --> STOPP -> Alles aus.");
-                  id(script_stopp_all).execute();
-                  return;
+                // if (id(inv_running).state != 1 || (id(use_flow_dn50) && id(flow_pump).state <= id(glo_flow_min)) || (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_min))) {
+                //   ESP_LOGW("safety-interval", "Pumpe aus oder kein Durchfluss YF-DN50 / S201 --> STOPP -> Alles aus.");
+                //   id(script_stopp_all).execute();
+                //   return;
+                // }
+                
+                // Check DN50 falls aktiv
+                bool inv_ok = (id(inv_running).state == 1);
+                bool flow_ok = true;
+                
+                if (id(use_flow_dn50) && id(flow_pump).state <= id(glo_flow_min)) {
+                    flow_ok = false;
+                }
+                
+                // Check S201 falls aktiv
+                if (id(use_flow_s201) && id(flow_meter).state <= id(glo_flow_min)) {
+                    flow_ok = false;
+                }
+
+                // Wenn Inverter nicht läuft ODER Flow nicht okay ist -> Not-Aus
+                if (!inv_ok || !flow_ok) {
+                    if (!inv_ok) {
+                        ESP_LOGE("safety-interval", "SICHERHEITS-STOPP: Inverter läuft nicht!");
+                    } else {
+                        ESP_LOGE("safety-interval", "SICHERHEITS-STOPP: Durchfluss zu niedrig (DN50 oder S201)!");
+                    }
+                    
+                    id(script_stopp_all).execute();
+                    return; // Beendet das Lambda sofort
                 }
                 // --- B. CHLORINATOR LOGIK ---
                 if (id(switch_chlor_run_gpio).state) {
@@ -254,7 +304,7 @@ interval:
                         if (id(glo_chlor_fail_count) >= 2) {
                           id(glo_chlor_error_lockout) = true;
                           id(bs_chlor_lockout).publish_state(true);
-                          ESP_LOGE("chlor_watchdog", "SICHERHEITSSPERRE: Chlorinator Hardware defekt?");
+                          ESP_LOGE("chlor_watchdog", "SICHERHEITSSPERRE: Chlorinator Hardware defekt? (PZEM unter 1.5A)");
                           // WICHTIG: Sofort stoppen, damit GPIOs nicht auf "An" bleiben
                           id(script_stopp_chlor).execute();
                         }

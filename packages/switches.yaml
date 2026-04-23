@@ -414,11 +414,19 @@ switch:
       then:
         - lambda: id(glo_restart_allowed) = true;
 
+#Working CONF but Switch remains active on WebServer #https://github.com/esphome/esphome-webserver/issues/190
+#Daher die Krücke mit dem lambda für den Status des Schalters...
   - platform: template
     id: switch_maintenance
     icon: "mdi:calendar-check"
     name: "Wartungsmodus"
     optimistic: true
+    lambda: |-
+      if (id(bs_maintenance).state) {
+        return id(bs_maintenance).state;
+      }else {
+        return id(switch_maintenance).state; 
+      }
     restore_mode: ALWAYS_OFF
     disabled_by_default: true 
     web_server:
@@ -430,9 +438,47 @@ switch:
             auto call = id(select_work_mode).make_call();
             call.set_option("0% Wartung");
             call.perform();
+        - if:
+            condition:
+              lambda: 'return millis() > 15000;'
+            then:
+            - rtttl.play: 'wartung_an:d=4,o=5,b=100:8e5'
+    # turn_off_action: 
+    #   then:
+    #     - lambda: |- 
+    #           auto call = id(select_work_mode).make_call();
+    #           call.set_option(id(glo_workmode));
+    #           call.perform();
+    #     - if:
+    #         condition:
+    #           lambda: 'return millis() > 15000;'
+    #         then:
+    #           - rtttl.play: 'wartung_aus:d=4,o=5,b=140:8c5,8e5,8g5,8c6'
+
     turn_off_action: 
       then:
-      - lambda: |- 
-            auto call = id(select_work_mode).make_call();
-            call.set_option(id(glo_workmode));
-            call.perform();
+        - if:
+            # PRÜFUNG: Wenn der physische Schalter noch AN ist, darf NICHTS passieren
+            condition:
+              binary_sensor.is_on: bs_maintenance
+            then:
+              - logger.log: "Wartungsmodus: Ausschalten verweigert! Physischer Schalter ist noch AN."
+              - lambda: |-
+                  ESP_LOGW("switch_maintenance", "Wartungsmodus: Ausschalten verweigert! Physischer Schalter ist noch AN.");
+              # Optional: Ein kleiner Fehler-Ton, damit man merkt, dass der Klick ignoriert wurde
+              - rtttl.play: 'two_short:d=4,o=5,b=100:16e6,16e6'
+              # Wir zwingen den UI-Schalter wieder auf AN, da er 'optimistic' ist
+              - switch.template.publish:
+                  id: switch_maintenance
+                  state: ON
+            else:
+              # Normaler Ablauf: Schalter ist physikalisch AUS, Software darf schalten
+              - lambda: |- 
+                  auto call = id(select_work_mode).make_call();
+                  call.set_option(id(glo_workmode));
+                  call.perform();
+              - if:
+                  condition:
+                    lambda: 'return millis() > 15000;'
+                  then:
+                    - rtttl.play: 'wartung_aus:d=4,o=5,b=140:8c5,8e5,8g5,8c6'
