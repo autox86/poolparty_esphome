@@ -1,3 +1,12 @@
+**!!Discontinued!!**
+**Gründe:**
+Die H-Brücke war nach kurzer Zeit defekt
+Der ModbusController des Astra ist nicht glavanisch getrennt, als auch der PZEM --> Die Elekrolyseanalage hat Störungen übertragen
+
+Es wird ein zweites Projekt geben mit einer eigenentwickelten Platine, welche diese unzulänglichkeiten abfängt.
+
+
+
 # 🏊 Pool-Steuerung mit ESPHome (DIY)
 
 Dieses Projekt ist der Versuch, eine vollautomatische Poolsteuerung auf Basis von **ESPHome** zu erstellen.
